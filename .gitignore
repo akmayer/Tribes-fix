@@ -14,3 +14,4 @@ py/venv/
 test/
 map/
 map_elites_*
+py_api/captures/

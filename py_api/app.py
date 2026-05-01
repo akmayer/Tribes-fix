@@ -1,7 +1,13 @@
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
 from fastapi import FastAPI, Request
-from pydantic import BaseModel
 
 app = FastAPI()
+
+CAPTURE_DIR = Path("captures")
+CAPTURE_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @app.get("/hello")
@@ -9,13 +15,23 @@ async def hello():
     return {"message": "hello from python"}
 
 
-class QueryRequest(BaseModel):
-    tick: int
-    n_actions: int
-    info: dict = {}
-
-
 @app.post("/query")
-async def query(req: QueryRequest):
-    # Simple echo + dummy policy for a hello-world proof of concept
-    return {"policy": "uniform", "received": {"tick": req.tick, "n_actions": req.n_actions, "info": req.info}}
+async def query(req: Request):
+    payload = await req.json()
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
+    tick = payload.get("tick", "unknown")
+    action_count = payload.get("available_action_count", "na")
+    filename = f"capture_tick{tick}_actions{action_count}_{timestamp}.json"
+    output_path = CAPTURE_DIR / filename
+
+    with output_path.open("w", encoding="utf-8") as file_handle:
+        json.dump(payload, file_handle, indent=2, sort_keys=True)
+
+    return {
+        "status": "saved",
+        "path": str(output_path),
+        "policy": "uniform",
+        "received_tick": tick,
+        "available_action_count": action_count,
+    }

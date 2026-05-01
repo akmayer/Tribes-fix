@@ -130,4 +130,6 @@ java -cp .:src:lib/json.jar Play
 
 Notes:
 - The `RandomAgent` will attempt to POST to `http://127.0.0.1:8000/query` and will fall back to its original random behavior if the Python service is not available.
+- The FastAPI server writes each received payload to `py_api/captures/`, which is gitignored for easy inspection.
+- See an example payload at `examplePayload.json`, copied from the gitignore'd: `py_api/captures/capture_tick5_actions45_20260501T234552_607251Z.json`
 - On Windows adjust classpath separators (`;`) and activation commands accordingly.
