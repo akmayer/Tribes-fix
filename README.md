@@ -98,3 +98,36 @@ The game itself can be modified by changing its configuration (e.g. attack power
 # Acknowledgements
 
 This work is supported by UK EPSRC research grants EP/T008962/1 and [IGGI CDT](http://iggi.org.uk) EP/L015846/1
+
+## Python bridge (FastAPI) and quick run instructions
+
+This repository includes a small Python FastAPI bridge located in the `py_api/` directory. The bridge exposes a minimal HTTP API that Java agents can call at simulation time. For a quick proof-of-concept you can run the FastAPI server locally and then run the Java game which will POST a small JSON message to the service when `RandomAgent` is active.
+
+Prerequisites: Python 3.x and the `uv` tool installed.
+
+Create an environment (using `uv`) inside `py_api/`, activate it, and start the server:
+
+```bash
+cd py_api
+uv venv
+source .venv/bin/activate
+bash ./run_py_api.sh
+```
+
+If the service started correctly, open `http://127.0.0.1:8000/hello` in your browser or use `curl`:
+
+```bash
+curl http://127.0.0.1:8000/hello
+# expected: {"message":"hello from python"}
+```
+
+Compile and run the Java game from the repository root (Linux/macOS):
+
+```bash
+javac -cp .:lib/json.jar $(find src -name "*.java")
+java -cp .:src:lib/json.jar Play
+```
+
+Notes:
+- The `RandomAgent` will attempt to POST to `http://127.0.0.1:8000/query` and will fall back to its original random behavior if the Python service is not available.
+- On Windows adjust classpath separators (`;`) and activation commands accordingly.
