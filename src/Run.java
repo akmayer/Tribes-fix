@@ -21,6 +21,7 @@ import players.portfolioMCTS.PortfolioMCTSParams;
 import players.portfolioMCTS.PortfolioMCTSPlayer;
 import players.rhea.RHEAAgent;
 import players.rhea.RHEAParams;
+import java.awt.GraphicsEnvironment;
 
 import static core.Constants.*;
 import static core.Types.TRIBE.*;
@@ -37,12 +38,14 @@ class Run {
     static void runGame(Game g, KeyController ki, ActionController ac) {
         WindowInput wi = null;
         GUI frame = null;
-        if (VISUALS) {
+        if (VISUALS && !GraphicsEnvironment.isHeadless()) {
             wi = new WindowInput();
             wi.windowClosed = false;
             frame = new GUI(g, "Tribes", ki, wi, ac, false);
             frame.addWindowListener(wi);
             frame.addKeyListener(ki);
+        } else if (VISUALS) {
+            System.out.println("Running without visuals because no display is available.");
         }
 
         g.run(frame, wi);
