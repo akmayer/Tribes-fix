@@ -1,10 +1,12 @@
 import json
 import numpy as np
+import torch
 from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import FastAPI, Request
 from action_encoding import ActionSpaceEncoder
+from model import TribesModel, StateEncoder, encode_state
 
 app = FastAPI()
 
@@ -13,6 +15,22 @@ CAPTURE_DIR.mkdir(parents=True, exist_ok=True)
 
 # Load the action space encoder
 encoder = ActionSpaceEncoder()
+
+# Load the PyTorch model
+state_encoder = StateEncoder()
+model = TribesModel(state_size=state_encoder.total_state_size)
+model.eval()
+device = torch.device("cpu")
+
+# Try to load model weights if they exist
+MODEL_PATH = Path("model_weights.pth")
+if MODEL_PATH.exists():
+    model.load(str(MODEL_PATH), device=str(device))
+    print(f"Loaded model weights from {MODEL_PATH}")
+else:
+    print(f"No model weights found at {MODEL_PATH}, using untrained model")
+
+model = model.to(device)
 
 
 @app.get("/hello")
@@ -24,9 +42,11 @@ async def hello():
 async def query(req: Request):
     """
     Receive game state and available actions from Java.
-    Return a policy (action logits) over available actions.
+    Return a policy (action logits) over available actions using the trained model.
     
-    For now, returns a uniform distribution over masked legal actions as a dummy policy.
+    ⚠️ IMPORTANT: This endpoint assumes fog-of-war is correctly enforced in the payload.
+    If PythonBridge.java sends unfiltered enemy unit/city data, the model will learn
+    from perfect information instead of partial observability.
     """
     payload = await req.json()
 
@@ -48,11 +68,18 @@ async def query(req: Request):
     try:
         masks = encoder.mask_available_actions(available_actions)
         
-        # For dummy policy: uniform distribution over masked actions
-        action_type_logits = np.ones(encoder.action_type_size, dtype=np.float32)
-        source_logits = np.ones(encoder.source_actor_size, dtype=np.float32)
-        target_logits = np.ones(encoder.target_actor_size, dtype=np.float32)
-        param_logits = np.ones(encoder.param_size, dtype=np.float32)
+        # Encode the state and get model predictions
+        state_tensor = encode_state(payload, state_encoder)
+        
+        with torch.no_grad():
+            state_batch = state_tensor.unsqueeze(0).to(device)  # Add batch dimension
+            action_type_logits, source_logits, target_logits, param_logits, _ = model(state_batch)
+            
+            # Remove batch dimension and convert to numpy
+            action_type_logits = action_type_logits.squeeze(0).cpu().numpy()
+            source_logits = source_logits.squeeze(0).cpu().numpy()
+            target_logits = target_logits.squeeze(0).cpu().numpy()
+            param_logits = param_logits.squeeze(0).cpu().numpy()
         
         # Apply masks (multiply by mask to zero out illegal actions)
         action_type_logits = action_type_logits * masks["action_type_mask"]
@@ -83,7 +110,7 @@ async def query(req: Request):
         
         policy_response = {
             "status": "success",
-            "policy_type": "uniform_masked",
+            "policy_type": "neural_network",
             "action_type_logits": action_type_logits.tolist(),
             "action_type_probs": action_type_probs.tolist(),
             "source_logits": source_logits.tolist(),
@@ -104,9 +131,11 @@ async def query(req: Request):
         }
     except Exception as e:
         # If encoding fails, return error response
+        import traceback
         policy_response = {
             "status": "error",
             "error": str(e),
+            "traceback": traceback.format_exc(),
             "captured_path": str(output_path),
             "tick": tick,
         }
