@@ -1,13 +1,18 @@
 import json
+import numpy as np
 from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import FastAPI, Request
+from action_encoding import ActionSpaceEncoder
 
 app = FastAPI()
 
 CAPTURE_DIR = Path("captures")
 CAPTURE_DIR.mkdir(parents=True, exist_ok=True)
+
+# Load the action space encoder
+encoder = ActionSpaceEncoder()
 
 
 @app.get("/hello")
@@ -17,8 +22,15 @@ async def hello():
 
 @app.post("/query")
 async def query(req: Request):
+    """
+    Receive game state and available actions from Java.
+    Return a policy (action logits) over available actions.
+    
+    For now, returns a uniform distribution over masked legal actions as a dummy policy.
+    """
     payload = await req.json()
 
+    # Save the capture for analysis
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
     tick = payload.get("tick", "unknown")
     action_count = payload.get("available_action_count", "na")
@@ -28,10 +40,50 @@ async def query(req: Request):
     with output_path.open("w", encoding="utf-8") as file_handle:
         json.dump(payload, file_handle, indent=2, sort_keys=True)
 
-    return {
-        "status": "saved",
-        "path": str(output_path),
-        "policy": "uniform",
-        "received_tick": tick,
-        "available_action_count": action_count,
-    }
+    # Extract game state
+    available_actions = payload.get("available_actions", [])
+    active_tribe_id = payload.get("active_tribe_id", 0)
+
+    # Create masks for legal actions
+    try:
+        masks = encoder.mask_available_actions(available_actions)
+        
+        # For dummy policy: uniform distribution over masked actions
+        action_type_logits = np.ones(encoder.action_type_size, dtype=np.float32)
+        source_logits = np.ones(encoder.source_actor_size, dtype=np.float32)
+        target_logits = np.ones(encoder.target_actor_size, dtype=np.float32)
+        param_logits = np.ones(encoder.param_size, dtype=np.float32)
+        
+        # Apply masks (multiply by mask to zero out illegal actions)
+        action_type_logits = action_type_logits * masks["action_type_mask"]
+        source_logits = source_logits * masks["source_mask"]
+        target_logits = target_logits * masks["target_mask"]
+        param_logits = param_logits * masks["param_mask"]
+        
+        policy_response = {
+            "status": "success",
+            "policy_type": "uniform_masked",
+            "action_type_logits": action_type_logits.tolist(),
+            "source_logits": source_logits.tolist(),
+            "target_logits": target_logits.tolist(),
+            "param_logits": param_logits.tolist(),
+            "masks": {
+                "action_type_mask": masks["action_type_mask"].tolist(),
+                "source_mask": masks["source_mask"].tolist(),
+                "target_mask": masks["target_mask"].tolist(),
+                "param_mask": masks["param_mask"].tolist(),
+            },
+            "num_legal_actions": len(available_actions),
+            "captured_path": str(output_path),
+            "tick": tick,
+        }
+    except Exception as e:
+        # If encoding fails, return error response
+        policy_response = {
+            "status": "error",
+            "error": str(e),
+            "captured_path": str(output_path),
+            "tick": tick,
+        }
+
+    return policy_response

@@ -1,2 +1,4 @@
 fastapi>=0.85.0
 uvicorn[standard]>=0.18.0
+numpy>=1.21.0
+scipy>=1.7.0

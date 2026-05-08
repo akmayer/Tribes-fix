@@ -1,0 +1,329 @@
+# Tribes Action Space & Neural Network Policy Integration
+
+This directory contains the Python API for bridging the Tribes game engine (Java) with neural network policy training (Python).
+
+## Architecture Overview
+
+### Goal
+Train an AlphaZero-style self-play agent where:
+- **Java (Game Engine)**: Simulates game, handles MCTS, bookkeeping
+- **Python (Neural Network)**: Outputs policy logits over actions, receives rewards
+
+### Challenge: Action Space Representation
+Modern RL agents (e.g., Chess Transformer) use **factorized action spaces** to handle large, complex action sets efficiently:
+- Instead of a flat vector of size = number of all possible action combinations
+- Use separate logits heads for components (action_type, source, target, parameter)
+- Compose these with masking to produce valid action distributions
+
+## Files
+
+### Core
+- **`action_space_schema.json`** — Specification of the Tribes action space
+  - 32 action types
+  - 151 source actors (units + cities)
+  - 163 target actors (positions + units + cities + tribes)
+  - 80 parameters (building types, unit types, tech, stars, etc.)
+  
+- **`action_encoding.py`** — Utilities for encoding/decoding actions
+  - `ActionSpaceEncoder`: Main class
+    - Position ↔ board index conversion
+    - Action → component indices
+    - Component indices → action
+    - Masking from available actions
+  - Helper functions for position/actor conversions
+
+### FastAPI Endpoints
+
+- **`app.py`** — FastAPI server for policy queries
+  - `GET /hello` — Health check
+  - `POST /query` — Main endpoint
+    - Input: Game state + available actions (JSON from Java)
+    - Output: Policy (component logits + masks)
+    - Saves all captures to `captures/` for analysis
+
+### Testing & Utilities
+
+- **`test_action_encoding.py`** — Comprehensive test suite
+  - Basic encoder functionality
+  - Masking with mock actions
+  - Policy response format validation
+  - Real capture processing (if available)
+
+- **`run_py_api.sh`** — Shell script to start the FastAPI server
+
+## Concepts
+
+### Mixed-Radix Action Encoding
+
+Instead of a flat vector, actions are encoded as tuples of component indices:
+
+```python
+Action = (action_type_idx, source_idx, target_idx, param_idx)
+```
+
+**Example:** MOVE unit 5 to position (3, 8)
+```json
+{
+  "action_type": 1,        # MOVE
+  "source_actor": 5,       # Unit ID 5
+  "target_actor": 40,      # Position (3, 8) -> 3*11+8=41 -> 41+1=42 (with offset)
+  "param": 0               # No param for MOVE
+}
+```
+
+### Why This Works for Masking
+
+**Without masking (flat vector):** Every combination of (action_type, source, target, param) is a unique index → huge sparse vector → hard to mask.
+
+**With masking (factorized):** 
+```python
+# NN outputs separate logits for each component
+action_type_logits: [32]
+source_logits: [151]
+target_logits: [163]
+param_logits: [80]
+
+# For MOVE action: only compose source ⊗ target (not param)
+# Apply component-level masks before composition
+source_legal = source_logits * source_mask
+target_legal = target_logits * target_mask
+move_logits = outer(source_legal, target_legal)  # Only legal combos
+```
+
+## Workflow
+
+### 1. Game State Capture (Java → Python)
+
+`RandomAgent.act()` calls `PythonBridge.queryPolicy(gs, allActions)`:
+- Serializes game state to JSON
+- Sends to FastAPI `/query` endpoint
+- Java falls back to random if bridge fails
+
+### 2. Policy Generation (Python)
+
+FastAPI `/query` endpoint:
+```python
+@app.post("/query")
+async def query(req: Request):
+    payload = await req.json()
+    available_actions = payload["available_actions"]
+    
+    # Create masks from available actions
+    masks = encoder.mask_available_actions(available_actions)
+    
+    # Dummy policy: uniform logits over masked actions
+    action_type_logits = ones(...) * masks["action_type_mask"]
+    source_logits = ones(...) * masks["source_mask"]
+    target_logits = ones(...) * masks["target_mask"]
+    param_logits = ones(...) * masks["param_mask"]
+    
+    # Return structured response
+    return {
+        "status": "success",
+        "action_type_logits": [...],
+        "source_logits": [...],
+        "target_logits": [...],
+        "param_logits": [...],
+        "masks": {...},
+    }
+```
+
+### 3. Action Selection (Java)
+
+`RandomAgent` receives policy response and:
+- Extracts masks
+- Validates action legality
+- Selects action (for now: simple greedy; later: probabilistic sampling)
+
+### 4. Playback & Analysis
+
+- Each query is captured to `captures/capture_tick{T}_actions{N}_{timestamp}.json`
+- Contains full game state, available actions, policy response
+- Can be replayed and analyzed offline
+
+## Setup & Running
+
+### 1. Install Dependencies
+
+```bash
+cd py_api
+pip install -r requirements.txt
+```
+
+(Ensure `fastapi`, `uvicorn`, `numpy`, `scipy` are installed)
+
+### 2. Test the Encoder Locally
+
+```bash
+cd py_api
+python test_action_encoding.py
+```
+
+Expected output:
+```
+============================================================
+ACTION SPACE ENCODING END-TO-END TESTS
+============================================================
+
+TEST 1: Encoder Basics
+============================================================
+✓ Action types: 32
+✓ Source actors: 151
+✓ Target actors: 163
+✓ Params: 80
+...
+```
+
+### 3. Start the FastAPI Server
+
+```bash
+cd py_api
+bash run_py_api.sh
+# or manually:
+uvicorn app:app --reload --host 127.0.0.1 --port 8000
+```
+
+You should see:
+```
+Uvicorn running on http://127.0.0.1:8000
+```
+
+### 4. Run the Game
+
+In a separate terminal, run the Tribes game with RandomAgent:
+
+```bash
+cd /path/to/Tribes
+java -cp ".:lib/*:src" Run --game-mode SINGLE_PLAYER --p1 RandomAgent --p2 RandomAgent --level levels/SampleLevel.csv
+```
+
+**Expected behavior:**
+- Game runs normally
+- Each turn: RandomAgent requests policy from FastAPI
+- FastAPI returns uniform masked policy
+- RandomAgent selects first legal action
+- Game continues
+- Policy responses are captured to `py_api/captures/`
+
+### 5. Verify Captures
+
+Check that captures are being created:
+```bash
+ls -la py_api/captures/
+# Should see: capture_tick0_actions45_20260507T063649_275222Z.json, etc.
+```
+
+Inspect a capture:
+```bash
+cat py_api/captures/capture_tick0_actions45_*.json | head -50
+```
+
+Look for:
+- `"available_action_count"`: Number of legal actions
+- `"available_actions"`: List of actions with type, class, description
+- `"board"`: Game state (tiles, units, cities, etc.)
+
+## Next Steps: Actual NN Policy
+
+The dummy uniform policy is a proof-of-concept. To integrate a real NN:
+
+### 1. Modify `/query` Endpoint
+
+```python
+@app.post("/query")
+async def query(req: Request):
+    payload = await req.json()
+    available_actions = payload["available_actions"]
+    board_state = payload["board"]
+    
+    # Encode board state as tensor (depends on your encoding)
+    state_tensor = encode_board(board_state)
+    
+    # Run NN forward pass
+    action_type_logits = nn_model(state_tensor, head="action_type")
+    source_logits = nn_model(state_tensor, head="source")
+    target_logits = nn_model(state_tensor, head="target")
+    param_logits = nn_model(state_tensor, head="param")
+    
+    # Apply masks
+    masks = encoder.mask_available_actions(available_actions)
+    action_type_logits = apply_mask(action_type_logits, masks["action_type_mask"])
+    ...
+    
+    return {...}
+```
+
+### 2. Train the NN
+
+- Run many self-play games
+- Collect state → (policy, value, reward) tuples
+- Train NN with policy loss + value loss
+- Periodically save checkpoint and update `/query` endpoint
+
+### 3. Sampling Strategy
+
+Currently RandomAgent just picks the first action. For training, you'll want:
+- **Training**: Sample from masked policy (high variance)
+- **Inference**: Greedy or top-k selection
+
+The `ActionSpaceEncoder.sample_action_from_logits()` method shows how to sample.
+
+## Architecture Diagram
+
+```
+Java Game Engine
+    ↓
+    |→ RandomAgent.act()
+    |    ↓
+    |    PythonBridge.queryPolicy(gameState, actions)
+    |    ↓
+    |    HTTP POST → http://127.0.0.1:8000/query
+    ↓
+FastAPI Server (Python)
+    ↓
+    |→ Receive: GameState + AvailableActions
+    |→ encoder.mask_available_actions(actions)
+    |→ Generate: Factorized logits (action_type, source, target, param)
+    |→ Return: Policy response with masks
+    ↓
+RandomAgent
+    ↓
+    |→ Parse policy response
+    |→ Select action (greedy or sampled)
+    |→ Execute action in game
+    ↓
+Capture saved to py_api/captures/ for offline analysis
+```
+
+## Common Issues
+
+### "Connection refused" Error
+- Ensure FastAPI server is running: `uvicorn app:app --reload`
+- Check port 8000 is not in use: `lsof -i :8000`
+
+### "action_space_schema.json not found"
+- Ensure you're in `py_api/` directory when running tests/server
+- Schema should be at `py_api/action_space_schema.json`
+
+### "Unknown action type" Error
+- Check that action description in Java matches types in schema
+- May need to update `action_encoding.py` parsing logic
+
+### Captures directory filling up
+- Captures are saved for analysis but can accumulate
+- Safe to delete old captures: `rm py_api/captures/capture_*.json`
+
+## References
+
+- **Mixed-radix encoding**: Reduces action space size from $\prod |A_i|$ to $\sum |A_i|$
+- **Chess Transformer paper**: https://arxiv.org/abs/2402.04494 (policy head design)
+- **AlphaZero**: https://arxiv.org/abs/1712.01724 (self-play training framework)
+
+## Future Work
+
+- [ ] Integrate real NN model
+- [ ] Implement actual action sampling from factorized logits
+- [ ] Add value head for game outcome prediction
+- [ ] Self-play training loop
+- [ ] Support for multi-agent training
+- [ ] Visualization of policy distributions per game state
