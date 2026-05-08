@@ -59,14 +59,39 @@ async def query(req: Request):
         source_logits = source_logits * masks["source_mask"]
         target_logits = target_logits * masks["target_mask"]
         param_logits = param_logits * masks["param_mask"]
+
+        # Compute masked softmax probabilities (post-softmax masked entries will be 0)
+        def masked_softmax(logits, mask):
+            # logits and mask are numpy arrays
+            masked_logits = np.where(np.array(mask) > 0, logits, -1e9)
+            maxv = np.max(masked_logits)
+            exps = np.exp(masked_logits - maxv)
+            exps = exps * (np.array(mask) > 0)
+            s = np.sum(exps)
+            if s == 0:
+                # no allowed entries -> uniform over mask==1 (or uniform over all if none)
+                allowed = np.sum(np.array(mask) > 0)
+                if allowed == 0:
+                    return np.ones_like(exps) / len(exps)
+                return (np.array(mask) > 0).astype(float) / allowed
+            return exps / s
+
+        action_type_probs = masked_softmax(action_type_logits, masks["action_type_mask"])
+        source_probs = masked_softmax(source_logits, masks["source_mask"])
+        target_probs = masked_softmax(target_logits, masks["target_mask"])
+        param_probs = masked_softmax(param_logits, masks["param_mask"])
         
         policy_response = {
             "status": "success",
             "policy_type": "uniform_masked",
             "action_type_logits": action_type_logits.tolist(),
+            "action_type_probs": action_type_probs.tolist(),
             "source_logits": source_logits.tolist(),
+            "source_probs": source_probs.tolist(),
             "target_logits": target_logits.tolist(),
+            "target_probs": target_probs.tolist(),
             "param_logits": param_logits.tolist(),
+            "param_probs": param_probs.tolist(),
             "masks": {
                 "action_type_mask": masks["action_type_mask"].tolist(),
                 "source_mask": masks["source_mask"].tolist(),

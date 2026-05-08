@@ -135,6 +135,47 @@ def test_policy_response_format():
     print()
 
 
+def test_masked_softmax_behavior():
+    """Verify masked softmax sets zero probability for masked entries."""
+    print("=" * 60)
+    print("TEST 3b: Masked Softmax Behavior")
+    print("=" * 60)
+
+    encoder = ActionSpaceEncoder()
+
+    # Create logits with distinct values
+    logits = np.arange(encoder.action_type_size, dtype=np.float32)
+    # Create a mask that allows only a subset (e.g., every 3rd entry)
+    mask = np.zeros(encoder.action_type_size, dtype=np.float32)
+    allowed_indices = list(range(0, encoder.action_type_size, 3))
+    mask[allowed_indices] = 1.0
+
+    # Recreate server-style masked softmax
+    def masked_softmax_np(logits, mask):
+        masked_logits = np.where(mask > 0, logits, -1e9)
+        maxv = np.max(masked_logits)
+        exps = np.exp(masked_logits - maxv)
+        exps = exps * (mask > 0)
+        s = np.sum(exps)
+        if s == 0:
+            allowed = np.sum(mask > 0)
+            if allowed == 0:
+                return np.ones_like(exps) / len(exps)
+            return (mask > 0).astype(float) / allowed
+        return exps / s
+
+    probs = masked_softmax_np(logits, mask)
+
+    # Assert masked entries have zero probability
+    masked_zero = np.all(probs[mask == 0] == 0.0)
+    assert masked_zero, "Masked entries must have zero probability"
+    # Assert probabilities sum to 1
+    assert abs(np.sum(probs) - 1.0) < 1e-6, "Probabilities must sum to 1"
+
+    print("✓ Masked softmax behavior verified (masked entries zero, probs sum to 1)")
+    print()
+
+
 def test_load_real_capture():
     """Test loading and processing a real capture from py_api/captures."""
     print("=" * 60)
@@ -189,6 +230,7 @@ def main():
     test_encoder_basics()
     test_masking_with_mock_actions()
     test_policy_response_format()
+    test_masked_softmax_behavior()
     test_load_real_capture()
     
     print("=" * 60)
