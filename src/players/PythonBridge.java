@@ -64,16 +64,21 @@ public class PythonBridge {
     private static JSONObject buildPayload(GameState gs, ArrayList<Action> allActions) {
         JSONObject payload = new JSONObject();
         Board board = gs.getBoard();
+        
+        // Extract observability grid for FOW filtering
+        Tribe activeTribe = gs.getActiveTribe();
+        boolean[][] obsGrid = activeTribe != null ? activeTribe.getObsGrid() : null;
+        int activeTribeID = gs.getActiveTribeID();
 
         payload.put("schema_version", 1);
         payload.put("tick", gs.getTick());
-        payload.put("active_tribe_id", gs.getActiveTribeID());
+        payload.put("active_tribe_id", activeTribeID);
         payload.put("game_mode", gs.getGameMode().name());
         payload.put("is_game_over", gs.isGameOver());
         payload.put("available_action_count", allActions.size());
         payload.put("available_actions", serializeActions(allActions, gs));
         payload.put("board", serializeBoard(board));
-        payload.put("tribes", serializeTribes(board));
+        payload.put("tribes", serializeTribes(board, obsGrid, activeTribeID));
 
         return payload;
     }
@@ -112,7 +117,7 @@ public class PythonBridge {
         return json;
     }
 
-    private static JSONArray serializeTribes(Board board) {
+    private static JSONArray serializeTribes(Board board, boolean[][] obsGrid, int activeTribeID) {
         JSONArray tribes = new JSONArray();
         for (Tribe tribe : board.getTribes()) {
             JSONObject t = new JSONObject();
@@ -123,9 +128,9 @@ public class PythonBridge {
             t.put("score", tribe.getScore());
             t.put("winner", enumName(tribe.getWinner()));
             t.put("capital_id", tribe.getCapitalID());
-            t.put("cities", serializeCities(board, tribe));
-            t.put("units", serializeTribeUnits(board, tribe));
-            t.put("extra_units", serializeUnitIds(board, tribe.getExtraUnits()));
+            t.put("cities", serializeCities(board, tribe, obsGrid, activeTribeID));
+            t.put("units", serializeTribeUnits(board, tribe, obsGrid, activeTribeID));
+            t.put("extra_units", serializeUnitIds(board, tribe.getExtraUnits(), obsGrid, activeTribeID, tribe.getTribeId()));
             t.put("connected_cities", toIntArray(tribe.getConnectedCities()));
             t.put("tribes_met", toIntArray(tribe.getTribesMet()));
             t.put("n_kills", tribe.getnKills());
@@ -141,16 +146,30 @@ public class PythonBridge {
         return tribes;
     }
 
-    private static JSONArray serializeTribeUnits(Board board, Tribe tribe) {
+    private static JSONArray serializeTribeUnits(Board board, Tribe tribe, boolean[][] obsGrid, int activeTribeID) {
         JSONArray units = new JSONArray();
         Set<Integer> seen = new HashSet<>();
 
-        for (Integer cityId : tribe.getCitiesID()) {
-            City city = (City) board.getActor(cityId);
-            if (city == null) {
-                continue;
+        // If this is the active tribe, include all units (no FOW for self)
+        if (tribe.getTribeId() == activeTribeID) {
+            for (Integer cityId : tribe.getCitiesID()) {
+                City city = (City) board.getActor(cityId);
+                if (city == null) {
+                    continue;
+                }
+                for (Integer unitId : city.getUnitsID()) {
+                    if (unitId == null || seen.contains(unitId)) {
+                        continue;
+                    }
+                    seen.add(unitId);
+                    Unit unit = (Unit) board.getActor(unitId);
+                    if (unit != null) {
+                        units.put(serializeUnit(unit));
+                    }
+                }
             }
-            for (Integer unitId : city.getUnitsID()) {
+
+            for (Integer unitId : tribe.getExtraUnits()) {
                 if (unitId == null || seen.contains(unitId)) {
                     continue;
                 }
@@ -160,29 +179,56 @@ public class PythonBridge {
                     units.put(serializeUnit(unit));
                 }
             }
-        }
-
-        for (Integer unitId : tribe.getExtraUnits()) {
-            if (unitId == null || seen.contains(unitId)) {
-                continue;
+        } else {
+            // For enemy tribes, only include units in observability grid (FOW)
+            for (Integer cityId : tribe.getCitiesID()) {
+                City city = (City) board.getActor(cityId);
+                if (city == null) {
+                    continue;
+                }
+                for (Integer unitId : city.getUnitsID()) {
+                    if (unitId == null || seen.contains(unitId)) {
+                        continue;
+                    }
+                    seen.add(unitId);
+                    Unit unit = (Unit) board.getActor(unitId);
+                    if (unit != null && isPositionVisible(obsGrid, unit.getPosition().x, unit.getPosition().y)) {
+                        units.put(serializeUnit(unit));
+                    }
+                }
             }
-            seen.add(unitId);
-            Unit unit = (Unit) board.getActor(unitId);
-            if (unit != null) {
-                units.put(serializeUnit(unit));
+
+            for (Integer unitId : tribe.getExtraUnits()) {
+                if (unitId == null || seen.contains(unitId)) {
+                    continue;
+                }
+                seen.add(unitId);
+                Unit unit = (Unit) board.getActor(unitId);
+                if (unit != null && isPositionVisible(obsGrid, unit.getPosition().x, unit.getPosition().y)) {
+                    units.put(serializeUnit(unit));
+                }
             }
         }
 
         return units;
     }
 
-    private static JSONArray serializeCities(Board board, Tribe tribe) {
+    private static JSONArray serializeCities(Board board, Tribe tribe, boolean[][] obsGrid, int activeTribeID) {
         JSONArray cities = new JSONArray();
         for (Integer cityId : tribe.getCitiesID()) {
             City city = (City) board.getActor(cityId);
             if (city == null) {
                 continue;
             }
+            
+            // FOW CHECK: Only include city if visible (or if it's our tribe)
+            if (tribe.getTribeId() != activeTribeID) {
+                // Enemy city - check visibility
+                if (!isPositionVisible(obsGrid, city.getPosition().x, city.getPosition().y)) {
+                    continue;  // Skip this hidden city
+                }
+            }
+            
             JSONObject c = new JSONObject();
             c.put("actor_id", city.getActorId());
             c.put("tribe_id", city.getTribeId());
@@ -248,7 +294,7 @@ public class PythonBridge {
         return json;
     }
 
-    private static JSONArray serializeUnitIds(Board board, ArrayList<Integer> unitIds) {
+    private static JSONArray serializeUnitIds(Board board, ArrayList<Integer> unitIds, boolean[][] obsGrid, int activeTribeID, int tribeId) {
         JSONArray units = new JSONArray();
         Set<Integer> seen = new HashSet<>();
         for (Integer unitId : unitIds) {
@@ -258,10 +304,35 @@ public class PythonBridge {
             seen.add(unitId);
             Unit unit = (Unit) board.getActor(unitId);
             if (unit != null) {
+                // Check visibility for enemy units
+                if (tribeId != activeTribeID) {
+                    if (!isPositionVisible(obsGrid, unit.getPosition().x, unit.getPosition().y)) {
+                        continue;
+                    }
+                }
                 units.put(serializeUnit(unit));
             }
         }
         return units;
+    }
+
+    private static boolean isPositionVisible(boolean[][] obsGrid, int x, int y) {
+        /**
+         * Check if a position is visible in the observability grid.
+         * Returns true if:
+         * 1. obsGrid is null (no FOW restriction)
+         * 2. Position is within grid bounds and marked as observable
+         */
+        if (obsGrid == null) {
+            return true;
+        }
+        if (x < 0 || y < 0 || x >= obsGrid.length) {
+            return false;
+        }
+        if (y >= obsGrid[0].length) {
+            return false;
+        }
+        return obsGrid[x][y];
     }
 
     public static JSONObject encodeActionComponents(Action action, GameState gs) {
