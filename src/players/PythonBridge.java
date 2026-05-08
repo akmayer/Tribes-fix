@@ -25,6 +25,7 @@ import java.util.Set;
 public class PythonBridge {
 
     private static final String DEFAULT_URL = "http://127.0.0.1:8000/query";
+    private static JSONObject cachedSchema = null;
 
     public static String queryPolicy(GameState gs, ArrayList<Action> allActions) throws IOException {
         JSONObject payload = buildPayload(gs, allActions);
@@ -70,7 +71,7 @@ public class PythonBridge {
         payload.put("game_mode", gs.getGameMode().name());
         payload.put("is_game_over", gs.isGameOver());
         payload.put("available_action_count", allActions.size());
-        payload.put("available_actions", serializeActions(allActions));
+        payload.put("available_actions", serializeActions(allActions, gs));
         payload.put("board", serializeBoard(board));
         payload.put("tribes", serializeTribes(board));
 
@@ -263,18 +264,211 @@ public class PythonBridge {
         return units;
     }
 
+    public static JSONObject encodeActionComponents(Action action, GameState gs) {
+        JSONObject components = new JSONObject();
+        int actionTypeIndex = actionTypeIndexFromSchema(action.getActionType());
+        components.put("action_type_index", actionTypeIndex);
+        components.put("source_actor_index", sourceActorIndex(action));
+        components.put("target_actor_index", targetActorIndex(action, gs));
+        components.put("param_index", paramIndex(action));
+        return components;
+    }
+
     private static JSONArray serializeActions(ArrayList<Action> actions) {
+        return serializeActions(actions, null);
+    }
+
+    private static JSONArray serializeActions(ArrayList<Action> actions, GameState gs) {
         JSONArray serialized = new JSONArray();
         for (int i = 0; i < actions.size(); i++) {
             Action action = actions.get(i);
             JSONObject json = new JSONObject();
             json.put("index", i);
             json.put("action_type", enumName(action.getActionType()));
+            json.put("action_type_index", actionTypeIndexFromSchema(action.getActionType()));
+            json.put("encoded_components", encodeActionComponents(action, gs));
             json.put("class_name", action.getClass().getSimpleName());
             json.put("description", String.valueOf(action));
             serialized.put(json);
         }
         return serialized;
+    }
+
+    private static int sourceActorIndex(Action action) {
+        if (action instanceof core.actions.unitactions.UnitAction) {
+            return ((core.actions.unitactions.UnitAction) action).getUnitId();
+        }
+        if (action instanceof core.actions.cityactions.CityAction) {
+            return ((core.actions.cityactions.CityAction) action).getCityId() + 100;
+        }
+        return 0;
+    }
+
+    private static int targetActorIndex(Action action, GameState gs) {
+        if (action instanceof core.actions.unitactions.Move) {
+            utils.Vector2d destination = ((core.actions.unitactions.Move) action).getDestination();
+            return destination == null ? 0 : positionToTargetIndex(destination.x, destination.y);
+        }
+        if (action instanceof core.actions.unitactions.Attack) {
+            return ((core.actions.unitactions.Attack) action).getTargetId() + 121;
+        }
+        if (action instanceof core.actions.unitactions.Convert) {
+            return ((core.actions.unitactions.Convert) action).getTargetId() + 121;
+        }
+        if (action instanceof core.actions.unitactions.Capture) {
+            core.actions.unitactions.Capture capture = (core.actions.unitactions.Capture) action;
+            if (capture.getCaptureType() == core.Types.TERRAIN.CITY) {
+                return capture.getTargetCity() + 221;
+            }
+            if (capture.getCaptureType() == core.Types.TERRAIN.VILLAGE) {
+                if (gs != null) {
+                    core.actors.units.Unit unit = (core.actors.units.Unit) gs.getActor(capture.getUnitId());
+                    if (unit != null && unit.getPosition() != null) {
+                        return positionToTargetIndex(unit.getPosition().x, unit.getPosition().y);
+                    }
+                }
+            }
+            return 0;
+        }
+        if (action instanceof core.actions.tribeactions.BuildRoad) {
+            utils.Vector2d position = ((core.actions.tribeactions.BuildRoad) action).getPosition();
+            return position == null ? 0 : positionToTargetIndex(position.x, position.y);
+        }
+        if (action instanceof core.actions.tribeactions.SendStars) {
+            return ((core.actions.tribeactions.SendStars) action).getTargetID() + 271;
+        }
+        if (action instanceof core.actions.tribeactions.DeclareWar) {
+            return ((core.actions.tribeactions.DeclareWar) action).getTargetID() + 271;
+        }
+        if (action instanceof core.actions.cityactions.Build) {
+            utils.Vector2d targetPos = ((core.actions.cityactions.Build) action).getTargetPos();
+            return targetPos == null ? 0 : positionToTargetIndex(targetPos.x, targetPos.y);
+        }
+        if (action instanceof core.actions.cityactions.BurnForest) {
+            utils.Vector2d targetPos = ((core.actions.cityactions.BurnForest) action).getTargetPos();
+            return targetPos == null ? 0 : positionToTargetIndex(targetPos.x, targetPos.y);
+        }
+        if (action instanceof core.actions.cityactions.ClearForest) {
+            utils.Vector2d targetPos = ((core.actions.cityactions.ClearForest) action).getTargetPos();
+            return targetPos == null ? 0 : positionToTargetIndex(targetPos.x, targetPos.y);
+        }
+        if (action instanceof core.actions.cityactions.Destroy) {
+            utils.Vector2d targetPos = ((core.actions.cityactions.Destroy) action).getTargetPos();
+            return targetPos == null ? 0 : positionToTargetIndex(targetPos.x, targetPos.y);
+        }
+        if (action instanceof core.actions.cityactions.GrowForest) {
+            utils.Vector2d targetPos = ((core.actions.cityactions.GrowForest) action).getTargetPos();
+            return targetPos == null ? 0 : positionToTargetIndex(targetPos.x, targetPos.y);
+        }
+        if (action instanceof core.actions.cityactions.LevelUp) {
+            utils.Vector2d targetPos = ((core.actions.cityactions.LevelUp) action).getTargetPos();
+            return targetPos == null ? 0 : positionToTargetIndex(targetPos.x, targetPos.y);
+        }
+        if (action instanceof core.actions.cityactions.ResourceGathering) {
+            utils.Vector2d targetPos = ((core.actions.cityactions.ResourceGathering) action).getTargetPos();
+            return targetPos == null ? 0 : positionToTargetIndex(targetPos.x, targetPos.y);
+        }
+        if (action instanceof core.actions.unitactions.Examine) {
+            core.actions.unitactions.UnitAction unitAction = (core.actions.unitactions.UnitAction) action;
+            if (gs != null) {
+                core.actors.units.Unit unit = (core.actors.units.Unit) gs.getActor(unitAction.getUnitId());
+                if (unit != null && unit.getPosition() != null) {
+                    return positionToTargetIndex(unit.getPosition().x, unit.getPosition().y);
+                }
+            }
+            return 0;
+        }
+        return 0;
+    }
+
+    private static int paramIndex(Action action) {
+        if (action instanceof core.actions.tribeactions.SendStars) {
+            return ((core.actions.tribeactions.SendStars) action).getNumStars();
+        }
+        if (action instanceof core.actions.tribeactions.ResearchTech) {
+            Types.TECHNOLOGY tech = ((core.actions.tribeactions.ResearchTech) action).getTech();
+            return tech == null ? 0 : tech.ordinal();
+        }
+        if (action instanceof core.actions.cityactions.Build) {
+            Types.BUILDING buildingType = ((core.actions.cityactions.Build) action).getBuildingType();
+            return buildingType == null ? 0 : buildingType.ordinal();
+        }
+        if (action instanceof core.actions.cityactions.Spawn) {
+            Types.UNIT unitType = ((core.actions.cityactions.Spawn) action).getUnitType();
+            return unitType == null ? 0 : unitType.ordinal();
+        }
+        if (action instanceof core.actions.cityactions.LevelUp) {
+            Types.CITY_LEVEL_UP bonus = ((core.actions.cityactions.LevelUp) action).getBonus();
+            return bonus == null ? 0 : bonus.ordinal();
+        }
+        if (action instanceof core.actions.cityactions.ResourceGathering) {
+            Types.RESOURCE resource = ((core.actions.cityactions.ResourceGathering) action).getResource();
+            return resource == null ? 0 : resource.ordinal();
+        }
+        if (action instanceof core.actions.unitactions.Examine) {
+            Types.EXAMINE_BONUS bonus = ((core.actions.unitactions.Examine) action).getBonus();
+            return bonus == null ? 0 : bonus.ordinal();
+        }
+        return 0;
+    }
+
+    private static int positionToTargetIndex(int x, int y) {
+        int boardSize = 11;
+        JSONObject schema = loadSchema();
+        if (schema != null) {
+            boardSize = schema.optInt("board_size", boardSize);
+        }
+        return x * boardSize + y + 1;
+    }
+
+    private static JSONObject loadSchema() {
+        if (cachedSchema != null) {
+            return cachedSchema;
+        }
+
+        java.io.File schemaFile = new java.io.File("py_api/action_space_schema.json");
+        if (!schemaFile.exists()) {
+            return null;
+        }
+
+        try (java.io.FileReader reader = new java.io.FileReader(schemaFile)) {
+            StringBuilder sb = new StringBuilder();
+            char[] buffer = new char[4096];
+            int read;
+            while ((read = reader.read(buffer)) != -1) {
+                sb.append(buffer, 0, read);
+            }
+            cachedSchema = new JSONObject(sb.toString());
+            return cachedSchema;
+        } catch (IOException e) {
+            System.out.println("[PythonBridge] error loading schema: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private static Integer actionTypeIndexFromSchema(Types.ACTION actionType) {
+        if (actionType == null) {
+            return null;
+        }
+
+        JSONObject schema = loadSchema();
+        if (schema == null) {
+            return null;
+        }
+
+        try {
+            JSONObject components = schema.getJSONObject("components");
+            JSONObject actionTypeComponent = components.getJSONObject("action_type");
+            JSONObject indexMap = actionTypeComponent.getJSONObject("index_map");
+            String key = actionType.name();
+            if (indexMap.has(key)) {
+                return indexMap.getInt(key);
+            }
+        } catch (Exception e) {
+            System.out.println("[PythonBridge] error reading action type index: " + e.getMessage());
+        }
+
+        return null;
     }
 
     private static JSONObject serializeTechnologyTree(TechnologyTree techTree) {

@@ -162,29 +162,26 @@ class ActionSpaceEncoder:
         
         for action in available_actions:
             action_type_str = action.get("action_type")
-            # For now, we extract encoded components from the action if available
-            # Otherwise, we infer them from the action_type and description.
-            
-            # Attempt to extract encoded components if they exist in the action
+
+            # Prefer structured encoded components from Java when present.
             if "encoded_components" in action:
                 components = action["encoded_components"]
             else:
-                # Fallback: create basic encoding from action_type only
-                # (This requires Java to provide more structured action info.)
                 components = self.encode_action(action_type_str)
-            
-            action_type_idx = components.get("action_type", 0)
-            source_idx = components.get("source_actor", 0)
-            target_idx = components.get("target_actor", 0)
-            param_idx = components.get("param", 0)
-            
-            # Mark these indices as legal
-            action_type_mask[action_type_idx] = 1.0
-            if source_idx > 0:
+
+            action_type_idx = components.get("action_type_index", components.get("action_type", 0))
+            source_idx = components.get("source_actor_index", components.get("source_actor", 0))
+            target_idx = components.get("target_actor_index", components.get("target_actor", 0))
+            param_idx = components.get("param_index", components.get("param", 0))
+
+            # Mark these indices as legal; zero is a valid index for "none".
+            if 0 <= action_type_idx < self.action_type_size:
+                action_type_mask[action_type_idx] = 1.0
+            if 0 <= source_idx < self.source_actor_size:
                 source_mask[source_idx] = 1.0
-            if target_idx > 0:
+            if 0 <= target_idx < self.target_actor_size:
                 target_mask[target_idx] = 1.0
-            if param_idx > 0:
+            if 0 <= param_idx < self.param_size:
                 param_mask[param_idx] = 1.0
         
         return action_type_mask, source_mask, target_mask, param_mask

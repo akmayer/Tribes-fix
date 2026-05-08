@@ -53,9 +53,9 @@ public class PolicySamplingTest {
         policy.put("status", "success");
 
         // Call private selectActionFromPolicy via reflection
-        Method m = RandomAgent.class.getDeclaredMethod("selectActionFromPolicy", ArrayList.class, JSONObject.class);
+        Method m = RandomAgent.class.getDeclaredMethod("selectActionFromPolicy", ArrayList.class, GameState.class, JSONObject.class);
         m.setAccessible(true);
-        int selected = (int) m.invoke(agent, actions, policy);
+        int selected = (int) m.invoke(agent, actions, null, policy);
 
         System.out.println("Selected index: " + selected);
         if (selected < 0 || selected >= actions.size()) {

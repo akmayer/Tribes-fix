@@ -12,6 +12,7 @@ import json
 import numpy as np
 from pathlib import Path
 from action_encoding import ActionSpaceEncoder
+from generate_action_space_schema import build_schema
 
 
 def test_encoder_basics():
@@ -221,6 +222,32 @@ def test_load_real_capture():
     print()
 
 
+def test_schema_generator_matches_checked_in_schema():
+    """Verify the schema generator reproduces the checked-in schema structure."""
+    print("=" * 60)
+    print("TEST 5: Schema Generator")
+    print("=" * 60)
+
+    encoder = ActionSpaceEncoder()
+    generated = build_schema(board_size=encoder.board_size)
+
+    assert generated["board_size"] == encoder.board_size
+    assert generated["max_units"] == encoder.max_units
+    assert generated["max_cities"] == encoder.max_cities
+    assert generated["max_tribes"] == encoder.max_tribes
+
+    generated_action_type = generated["components"]["action_type"]
+    checked_in_action_type = encoder.schema["components"]["action_type"]
+
+    assert generated_action_type["size"] == checked_in_action_type["size"]
+    assert generated_action_type["values"] == checked_in_action_type["values"]
+    assert generated_action_type["index_map"] == checked_in_action_type["index_map"]
+
+    print("✓ Generated schema matches checked-in action type layout")
+    print(f"✓ Generated {len(generated_action_type['values'])} action_type entries")
+    print()
+
+
 def main():
     """Run all tests."""
     print("\n" + "=" * 60)
@@ -232,6 +259,7 @@ def main():
     test_policy_response_format()
     test_masked_softmax_behavior()
     test_load_real_capture()
+    test_schema_generator_matches_checked_in_schema()
     
     print("=" * 60)
     print("ALL TESTS COMPLETED")

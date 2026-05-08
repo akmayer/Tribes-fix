@@ -38,13 +38,10 @@ public class RandomAgent extends Agent {
             String status = policyResponse.optString("status", "error");
             
             if ("success".equals(status)) {
-                // Extract logits and masks from response
-                JSONArray actionTypeLogits = policyResponse.optJSONArray("action_type_logits");
                 JSONObject masks = policyResponse.optJSONObject("masks");
-                JSONObject maskActionType = masks == null ? null : masks.optJSONObject("action_type_mask") != null ? null : null;
 
-                // Sample using action_type logits + mask. If unavailable, fall back to simple masks handling.
-                int actionIdx = selectActionFromPolicy(allActions, policyResponse);
+                // Sample using action_type probs if the server provides them, otherwise fall back to logits.
+                int actionIdx = selectActionFromPolicy(allActions, gs, policyResponse);
                 if (actionIdx >= 0 && actionIdx < allActions.size()) {
                     toExecute = allActions.get(actionIdx);
                     System.out.println("[PolicyAgent] Selected action index: " + actionIdx);
@@ -89,17 +86,47 @@ public class RandomAgent extends Agent {
      * Currently uses only the `action_type` logits + mask to pick an action type,
      * then selects uniformly among available actions of that type.
      */
-    private int selectActionFromPolicy(ArrayList<Action> allActions, JSONObject policyResponse) {
+    private int selectActionFromPolicy(ArrayList<Action> allActions, GameState gs, JSONObject policyResponse) {
         try {
+            JSONArray actionTypeProbs = policyResponse.optJSONArray("action_type_probs");
+            JSONArray sourceProbs = policyResponse.optJSONArray("source_probs");
+            JSONArray targetProbs = policyResponse.optJSONArray("target_probs");
+            JSONArray paramProbs = policyResponse.optJSONArray("param_probs");
+
+            if (actionTypeProbs != null && sourceProbs != null && targetProbs != null && paramProbs != null) {
+                double[] jointScores = new double[allActions.size()];
+                double jointSum = 0.0;
+
+                for (int i = 0; i < allActions.size(); i++) {
+                    Action action = allActions.get(i);
+                    JSONObject components = PythonBridge.encodeActionComponents(action, gs);
+                    double score = jointProbability(action, components, actionTypeProbs, sourceProbs, targetProbs, paramProbs);
+                    jointScores[i] = score;
+                    jointSum += score;
+                }
+
+                if (jointSum > 0.0) {
+                    for (int i = 0; i < jointScores.length; i++) {
+                        jointScores[i] = jointScores[i] / jointSum;
+                    }
+                    return sampleFromDistribution(jointScores);
+                }
+            }
+
             JSONArray logits = policyResponse.optJSONArray("action_type_logits");
             JSONObject masks = policyResponse.optJSONObject("masks");
             JSONArray actionMask = masks == null ? null : masks.optJSONArray("action_type_mask");
 
-            if (logits == null || actionMask == null) {
+            if (actionMask == null) {
                 return selectActionFromMasks(allActions, masks);
             }
 
-            double[] probs = softmaxMasked(logits, actionMask);
+            double[] probs;
+            if (actionTypeProbs != null) {
+                probs = maskedProbabilities(actionTypeProbs, actionMask);
+            } else {
+                probs = softmaxMasked(logits, actionMask);
+            }
             int sampledType = sampleFromDistribution(probs);
 
             String actionTypeName = actionTypeNameFromSchema(sampledType);
@@ -122,6 +149,118 @@ public class RandomAgent extends Agent {
         // Fallback: uniform random among all actions
         if (allActions.size() > 0) return rnd.nextInt(allActions.size());
         return -1;
+    }
+
+    private double jointProbability(Action action, JSONObject components, JSONArray actionTypeProbs, JSONArray sourceProbs, JSONArray targetProbs, JSONArray paramProbs) {
+        double probability = probAt(actionTypeProbs, components.optInt("action_type_index", 0));
+
+        switch (action.getActionType()) {
+            case END_TURN:
+                return probability;
+
+            case MOVE:
+            case ATTACK:
+            case CAPTURE:
+            case CONVERT:
+                probability *= probAt(sourceProbs, components.optInt("source_actor_index", 0));
+                probability *= probAt(targetProbs, components.optInt("target_actor_index", 0));
+                return probability;
+
+            case BUILD_ROAD:
+            case DECLARE_WAR:
+                probability *= probAt(targetProbs, components.optInt("target_actor_index", 0));
+                return probability;
+
+            case SEND_STARS:
+                probability *= probAt(targetProbs, components.optInt("target_actor_index", 0));
+                probability *= probAt(paramProbs, components.optInt("param_index", 0));
+                return probability;
+
+            case RESEARCH_TECH:
+                probability *= probAt(paramProbs, components.optInt("param_index", 0));
+                return probability;
+
+            case BUILD:
+                probability *= probAt(sourceProbs, components.optInt("source_actor_index", 0));
+                probability *= probAt(targetProbs, components.optInt("target_actor_index", 0));
+                probability *= probAt(paramProbs, components.optInt("param_index", 0));
+                return probability;
+
+            case SPAWN:
+                probability *= probAt(sourceProbs, components.optInt("source_actor_index", 0));
+                probability *= probAt(paramProbs, components.optInt("param_index", 0));
+                return probability;
+
+            case BURN_FOREST:
+            case CLEAR_FOREST:
+            case DESTROY:
+            case GROW_FOREST:
+                probability *= probAt(sourceProbs, components.optInt("source_actor_index", 0));
+                probability *= probAt(targetProbs, components.optInt("target_actor_index", 0));
+                return probability;
+
+            case LEVEL_UP:
+                probability *= probAt(sourceProbs, components.optInt("source_actor_index", 0));
+                probability *= probAt(paramProbs, components.optInt("param_index", 0));
+                return probability;
+
+            case RESOURCE_GATHERING:
+                probability *= probAt(sourceProbs, components.optInt("source_actor_index", 0));
+                return probability;
+
+            case DISBAND:
+            case EXAMINE:
+            case HEAL_OTHERS:
+            case MAKE_VETERAN:
+            case RECOVER:
+            case CLIMB_MOUNTAIN:
+            case UPGRADE_BOAT:
+            case UPGRADE_SHIP:
+                probability *= probAt(sourceProbs, components.optInt("source_actor_index", 0));
+                return probability;
+
+            default:
+                return probability;
+        }
+    }
+
+    private double probAt(JSONArray probs, int index) {
+        if (probs == null || index < 0 || index >= probs.length()) {
+            return 0.0;
+        }
+        return probs.optDouble(index, 0.0);
+    }
+
+    private double[] maskedProbabilities(JSONArray probs, JSONArray mask) {
+        int n = Math.min(probs.length(), mask.length());
+        double[] out = new double[n];
+        double sum = 0.0;
+        for (int i = 0; i < n; i++) {
+            double m = mask.optDouble(i, 0.0);
+            double p = probs.optDouble(i, 0.0);
+            if (m > 0.0 && p > 0.0) {
+                out[i] = p;
+                sum += p;
+            } else {
+                out[i] = 0.0;
+            }
+        }
+        if (sum <= 0.0) {
+            int allowed = 0;
+            for (int i = 0; i < n; i++) if (mask.optDouble(i, 0.0) > 0.0) allowed++;
+            if (allowed == 0) {
+                return out;
+            }
+            double uniform = 1.0 / allowed;
+            for (int i = 0; i < n; i++) {
+                out[i] = mask.optDouble(i, 0.0) > 0.0 ? uniform : 0.0;
+            }
+            return out;
+        }
+        for (int i = 0; i < n; i++) {
+            out[i] = out[i] / sum;
+        }
+        return out;
     }
 
     private int sampleFromDistribution(double[] probs) {
