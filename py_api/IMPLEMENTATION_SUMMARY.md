@@ -20,7 +20,7 @@
   - Output heads (4 for policy, 1 for value):
     - `action_type_logits`: (batch_size, 32)
     - `source_logits`: (batch_size, 151)
-    - `target_logits`: (batch_size, 163)
+    - `target_logits`: (batch_size, 284)
     - `param_logits`: (batch_size, 80)
     - `value`: (batch_size, 1)
   - Methods: `forward()`, `save()`, `load()`, `create_or_load()`
@@ -28,7 +28,7 @@
 - Functions: `encode_state()`, `load_model()`
 - Test code included that validates model with real examplePayload
 
-**Output Shapes:** ✅ Correctly match factorized action space (32×151×163×80)
+**Output Shapes:** ✅ Correctly match factorized action space (32×151×284×80)
 
 ---
 
@@ -202,7 +202,7 @@ Restart FastAPI server - it will auto-load `model_weights.pth`
 ### Output ✅
 - action_type: (batch, 32)
 - source: (batch, 151)
-- target: (batch, 163)
+- target: (batch, 284)
 - param: (batch, 80)
 - value: (batch, 1)
 

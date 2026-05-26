@@ -12,6 +12,8 @@ app = FastAPI()
 
 CAPTURE_DIR = Path("captures")
 CAPTURE_DIR.mkdir(parents=True, exist_ok=True)
+RESULTS_DIR = Path("results")
+RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 # Load the action space encoder
 encoder = ActionSpaceEncoder()
@@ -25,8 +27,12 @@ device = torch.device("cpu")
 # Try to load model weights if they exist
 MODEL_PATH = Path("model_weights.pth")
 if MODEL_PATH.exists():
-    model.load(str(MODEL_PATH), device=str(device))
-    print(f"Loaded model weights from {MODEL_PATH}")
+    try:
+        model.load(str(MODEL_PATH), device=str(device))
+        print(f"Loaded model weights from {MODEL_PATH}")
+    except Exception as exc:
+        print(f"Failed to load model weights from {MODEL_PATH}: {exc}")
+        print("Using untrained model with current action space sizes")
 else:
     print(f"No model weights found at {MODEL_PATH}, using untrained model")
 
@@ -36,6 +42,49 @@ model = model.to(device)
 @app.get("/hello")
 async def hello():
     return {"message": "hello from python"}
+
+
+@app.post("/capture")
+async def capture(req: Request):
+    payload = await req.json()
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
+    tick = payload.get("tick", "unknown")
+    action_count = payload.get("available_action_count", "na")
+    policy_type = payload.get("policy_type", "capture")
+    filename = f"{policy_type}_tick{tick}_actions{action_count}_{timestamp}.json"
+    output_path = CAPTURE_DIR / filename
+
+    with output_path.open("w", encoding="utf-8") as file_handle:
+        json.dump(payload, file_handle, indent=2, sort_keys=True)
+
+    return {
+        "status": "captured",
+        "captured_path": str(output_path),
+        "tick": tick,
+        "policy_type": policy_type,
+    }
+
+
+@app.post("/result")
+async def result(req: Request):
+    payload = await req.json()
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
+    game_seed = payload.get("game_seed", "unknown")
+    player_id = payload.get("player_id", "na")
+    filename = f"result_game{game_seed}_player{player_id}_{timestamp}.json"
+    output_path = RESULTS_DIR / filename
+
+    with output_path.open("w", encoding="utf-8") as file_handle:
+        json.dump(payload, file_handle, indent=2, sort_keys=True)
+
+    return {
+        "status": "saved",
+        "result_path": str(output_path),
+        "game_seed": game_seed,
+        "player_id": player_id,
+    }
 
 
 @app.post("/query")

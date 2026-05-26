@@ -7,7 +7,7 @@ This directory contains the PyTorch-based policy and value prediction model for 
 1. **Action logits** (4 factorized heads):
    - `action_type_logits` (32 dimensions): probability distribution over action types
    - `source_logits` (151 dimensions): probability distribution over source actors
-   - `target_logits` (163 dimensions): probability distribution over target actors
+  - `target_logits` (284 dimensions): probability distribution over target actors
    - `param_logits` (80 dimensions): probability distribution over action parameters
 
 2. **Value estimate** (1 dimension): state value for training
@@ -21,7 +21,7 @@ This directory contains the PyTorch-based policy and value prediction model for 
 **Output:**
 - action_type_logits: `(batch_size, 32)`
 - source_logits: `(batch_size, 151)`
-- target_logits: `(batch_size, 163)`
+- target_logits: `(batch_size, 284)`
 - param_logits: `(batch_size, 80)`
 - value: `(batch_size, 1)`
 

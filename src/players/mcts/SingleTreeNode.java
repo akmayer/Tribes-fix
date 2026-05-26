@@ -379,4 +379,21 @@ class SingleTreeNode
         return (input + epsilon) * (1.0 + epsilon * (random - 0.5));
     }
 
+    int[] getVisitCounts() {
+        int[] visits = new int[children.length];
+        for (int i = 0; i < children.length; i++) {
+            if (children[i] != null) {
+                visits[i] = children[i].nVisits;
+            }
+        }
+        return visits;
+    }
+
+    double getRootValue() {
+        if (nVisits <= 0) {
+            return 0.0;
+        }
+        return totValue / (nVisits + params.epsilon);
+    }
+
 }

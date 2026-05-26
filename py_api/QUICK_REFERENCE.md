@@ -29,7 +29,7 @@ Shared trunk: 3 hidden layers (512 neurons)
 4 Policy heads:
   - action_type: 32 outputs
   - source: 151 outputs
-  - target: 163 outputs
+  - target: 284 outputs
   - param: 80 outputs
   ↓
 Value head: 1 output
@@ -46,7 +46,7 @@ Value head: 1 output
 ```
 action_type_logits shape: torch.Size([batch, 32])
 source_logits shape: torch.Size([batch, 151])
-target_logits shape: torch.Size([batch, 163])
+target_logits shape: torch.Size([batch, 284])
 param_logits shape: torch.Size([batch, 80])
 value shape: torch.Size([batch, 1])
 ```

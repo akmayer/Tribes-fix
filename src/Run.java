@@ -70,6 +70,7 @@ class Run {
         MC,
         SIMPLE,
         MCTS,
+        AZ_MCTS,
         RHEA,
         OEP,
         EMCTS,
@@ -101,6 +102,7 @@ class Run {
             case "OSLA": return Run.PlayerType.OSLA;
             case "MC": return Run.PlayerType.MC;
             case "MCTS": return Run.PlayerType.MCTS;
+            case "AZ_MCTS": return Run.PlayerType.AZ_MCTS;
             case "RHEA": return Run.PlayerType.RHEA;
             case "OEP": return Run.PlayerType.OEP;
             case "pMCTS": return Run.PlayerType.PORTFOLIO_MCTS;
@@ -168,6 +170,16 @@ class Run {
                 mctsParams.FORCE_TURN_END = FORCE_TURN_END ? 5 : mctsParams.ROLLOUT_LENGTH + 1;
                 mctsParams.ROLOUTS_ENABLED = MCTS_ROLLOUTS;
                 return new MCTSPlayer(agentSeed, mctsParams);
+            case AZ_MCTS:
+                MCTSParams azParams = new MCTSParams();
+                azParams.stop_type = azParams.STOP_FMCALLS;
+                azParams.heuristic_method = azParams.DIFF_HEURISTIC;
+                azParams.PRIORITIZE_ROOT = false;
+                azParams.ROLLOUT_LENGTH = MAX_LENGTH;
+                azParams.FORCE_TURN_END = FORCE_TURN_END ? 5 : azParams.ROLLOUT_LENGTH + 1;
+                azParams.ROLOUTS_ENABLED = MCTS_ROLLOUTS;
+                azParams.CAPTURE_MCTS = true;
+                return new MCTSPlayer(agentSeed, azParams);
             case PORTFOLIO_MCTS:
                 PortfolioMCTSParams portfolioMCTSParams = new PortfolioMCTSParams();
                 portfolioMCTSParams.stop_type = portfolioMCTSParams.STOP_FMCALLS;

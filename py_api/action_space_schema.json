@@ -77,20 +77,38 @@
       "description": "Source actor (unit or city). Index 0 = None. Units: 1-100. Cities: 101-150.",
       "ranges": {
         "none": 0,
-        "units": [1, 100],
-        "cities": [101, 150]
+        "units": [
+          1,
+          100
+        ],
+        "cities": [
+          101,
+          150
+        ]
       },
       "encoding": "none=0, unit_id in [1..100], city_id + 100 in [101..150]"
     },
     "target_actor": {
-      "size": 163,
+      "size": 284,
       "description": "Target actor or position. Indices: 0=None, 1-121=board positions (x*11+y), 122-221=unit IDs, 222-271=city IDs, 272-283=tribe IDs.",
       "ranges": {
         "none": 0,
-        "board_positions": [1, 121],
-        "unit_ids": [122, 221],
-        "city_ids": [222, 271],
-        "tribe_ids": [272, 283]
+        "board_positions": [
+          1,
+          121
+        ],
+        "unit_ids": [
+          122,
+          221
+        ],
+        "city_ids": [
+          222,
+          271
+        ],
+        "tribe_ids": [
+          272,
+          283
+        ]
       },
       "encoding": "none=0, pos as (x*board_size+y)+1 in [1..121], unit_id+121 in [122..221], city_id+221 in [222..271], tribe_id+271 in [272..283]"
     },
@@ -98,18 +116,20 @@
       "size": 80,
       "description": "Numeric/enum parameter. Content depends on action type. Indices 0-79 are shared; meaning determined by action context.",
       "sub_encodings": {
-        "building_type": "0-18 (19 buildings: PORT, MINE, FORGE, ...)",
-        "unit_type": "0-11 (12 units: WARRIOR, RIDER, ..., SUPERUNIT)",
-        "technology": "0-23 (24 techs: CLIMBING, FISHING, ..., PHILOSOPHY)",
+        "building_type": "0-46 (47 buildings: PORT, MINE, FORGE, FARM, ...)",
+        "unit_type": "0-11 (12 units: WARRIOR, RIDER, DEFENDER, SWORDMAN, ...)",
+        "technology": "0-23 (24 techs: CLIMBING, FISHING, HUNTING, ORGANIZATION, ...)",
         "num_stars": "0-100 (send 0 to 100 stars, or pick 0 if not applicable)",
         "city_level_up_choice": "0-7 (WORKSHOP, EXPLORER, CITY_WALL, RESOURCES, POP_GROWTH, BORDER_GROWTH, PARK, SUPERUNIT)",
-        "tribe_id": "0-11 (tribes for DECLARE_WAR, SEND_STARS)"
+        "tribe_id": "0-11 (12 tribes for DECLARE_WAR, SEND_STARS)"
       }
     }
   },
   "action_signatures": {
     "END_TURN": {
-      "components": ["action_type"],
+      "components": [
+        "action_type"
+      ],
       "description": "End current tribe's turn. No parameters.",
       "example_encoding": {
         "action_type": 0,
@@ -119,7 +139,11 @@
       }
     },
     "MOVE": {
-      "components": ["action_type", "source_actor", "target_actor"],
+      "components": [
+        "action_type",
+        "source_actor",
+        "target_actor"
+      ],
       "source_type": "unit",
       "target_type": "board_position",
       "description": "Move unit from current position to target position.",
@@ -131,7 +155,11 @@
       }
     },
     "ATTACK": {
-      "components": ["action_type", "source_actor", "target_actor"],
+      "components": [
+        "action_type",
+        "source_actor",
+        "target_actor"
+      ],
       "source_type": "unit",
       "target_type": "board_position_or_unit",
       "description": "Attack target position/unit from source unit.",
@@ -143,7 +171,10 @@
       }
     },
     "BUILD_ROAD": {
-      "components": ["action_type", "target_actor"],
+      "components": [
+        "action_type",
+        "target_actor"
+      ],
       "source_type": "implicit_tribe",
       "target_type": "board_position",
       "description": "Build road at target position (tribe-wide action).",
@@ -155,7 +186,11 @@
       }
     },
     "SEND_STARS": {
-      "components": ["action_type", "target_actor", "param"],
+      "components": [
+        "action_type",
+        "target_actor",
+        "param"
+      ],
       "source_type": "implicit_tribe",
       "target_type": "tribe",
       "param_type": "num_stars",
@@ -168,7 +203,10 @@
       }
     },
     "RESEARCH_TECH": {
-      "components": ["action_type", "param"],
+      "components": [
+        "action_type",
+        "param"
+      ],
       "source_type": "implicit_tribe",
       "param_type": "technology",
       "description": "Research technology (tech index in param).",
@@ -180,7 +218,10 @@
       }
     },
     "DECLARE_WAR": {
-      "components": ["action_type", "target_actor"],
+      "components": [
+        "action_type",
+        "target_actor"
+      ],
       "source_type": "implicit_tribe",
       "target_type": "tribe",
       "description": "Declare war on target tribe.",
@@ -192,7 +233,12 @@
       }
     },
     "BUILD": {
-      "components": ["action_type", "source_actor", "target_actor", "param"],
+      "components": [
+        "action_type",
+        "source_actor",
+        "target_actor",
+        "param"
+      ],
       "source_type": "city",
       "target_type": "board_position",
       "param_type": "building_type",
@@ -205,7 +251,11 @@
       }
     },
     "SPAWN": {
-      "components": ["action_type", "source_actor", "param"],
+      "components": [
+        "action_type",
+        "source_actor",
+        "param"
+      ],
       "source_type": "city",
       "param_type": "unit_type",
       "description": "Spawn unit type from source city.",
@@ -217,7 +267,11 @@
       }
     },
     "BURN_FOREST": {
-      "components": ["action_type", "source_actor", "target_actor"],
+      "components": [
+        "action_type",
+        "source_actor",
+        "target_actor"
+      ],
       "source_type": "city",
       "target_type": "board_position",
       "description": "Burn forest at target position (city action).",
@@ -229,7 +283,11 @@
       }
     },
     "CLEAR_FOREST": {
-      "components": ["action_type", "source_actor", "target_actor"],
+      "components": [
+        "action_type",
+        "source_actor",
+        "target_actor"
+      ],
       "source_type": "city",
       "target_type": "board_position",
       "description": "Clear forest at target position.",
@@ -241,7 +299,11 @@
       }
     },
     "DESTROY": {
-      "components": ["action_type", "source_actor", "target_actor"],
+      "components": [
+        "action_type",
+        "source_actor",
+        "target_actor"
+      ],
       "source_type": "city",
       "target_type": "board_position",
       "description": "Destroy at target position.",
@@ -253,7 +315,11 @@
       }
     },
     "GROW_FOREST": {
-      "components": ["action_type", "source_actor", "target_actor"],
+      "components": [
+        "action_type",
+        "source_actor",
+        "target_actor"
+      ],
       "source_type": "city",
       "target_type": "board_position",
       "description": "Grow forest at target position.",
@@ -265,7 +331,11 @@
       }
     },
     "LEVEL_UP": {
-      "components": ["action_type", "source_actor", "param"],
+      "components": [
+        "action_type",
+        "source_actor",
+        "param"
+      ],
       "source_type": "city",
       "param_type": "city_level_up_choice",
       "description": "Level up city (choice in param).",
@@ -277,7 +347,10 @@
       }
     },
     "RESOURCE_GATHERING": {
-      "components": ["action_type", "source_actor"],
+      "components": [
+        "action_type",
+        "source_actor"
+      ],
       "source_type": "city",
       "description": "Gather resources from city location.",
       "example_encoding": {

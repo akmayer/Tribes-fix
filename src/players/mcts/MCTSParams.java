@@ -13,6 +13,7 @@ public class MCTSParams extends AlgParams {
     public double K = Math.sqrt(2);
     public int ROLLOUT_LENGTH = 10;//10;
     public boolean ROLOUTS_ENABLED = true;
+    public boolean CAPTURE_MCTS = false;
 
     public void setParameterValue(String param, Object value) {
         switch(param) {

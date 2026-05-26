@@ -95,12 +95,15 @@ def build_schema(board_size: int = 11) -> Dict[str, Any]:
     action_type_values = _build_action_type_values(CANONICAL_ACTION_ORDER, total_size=32)
     action_type_index_map = {name: idx for idx, name in enumerate(CANONICAL_ACTION_ORDER)}
     tribe_count = 12
+    max_units = 100
+    max_cities = 50
+    target_actor_size = 1 + board_size * board_size + max_units + max_cities + tribe_count
 
     schema = {
         "name": "Tribes Factorized Action Space",
         "board_size": board_size,
-        "max_units": 100,
-        "max_cities": 50,
+        "max_units": max_units,
+        "max_cities": max_cities,
         "max_tribes": tribe_count,
         "version": "1.0",
         "description": (
@@ -126,7 +129,7 @@ def build_schema(board_size: int = 11) -> Dict[str, Any]:
                 "encoding": "none=0, unit_id in [1..100], city_id + 100 in [101..150]",
             },
             "target_actor": {
-                "size": 163,
+                "size": target_actor_size,
                 "description": "Target actor or position. Indices: 0=None, 1-121=board positions (x*11+y), 122-221=unit IDs, 222-271=city IDs, 272-283=tribe IDs.",
                 "ranges": {
                     "none": 0,

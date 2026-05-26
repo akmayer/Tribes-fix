@@ -26,6 +26,9 @@ public class GameState {
     // Random generator for the game state.
     private Random rnd;
 
+    // Seed for identifying a game across captures/results.
+    private long gameSeed;
+
     // Current tick of the game.
     private int tick = 0;
 
@@ -151,6 +154,14 @@ public class GameState {
      */
     public int getTick() {
         return tick;
+    }
+
+    public long getGameSeed() {
+        return gameSeed;
+    }
+
+    public void setGameSeed(long gameSeed) {
+        this.gameSeed = gameSeed;
     }
 
     /**
@@ -527,6 +538,7 @@ public class GameState {
         GameState copy = new GameState(new Random(), this.gameMode); //copies of the game state can't have the same random generator.
         copy.board = board.copy(playerIdx!=-1, playerIdx);
         copy.tick = this.tick;
+        copy.gameSeed = this.gameSeed;
         copy.turnMustEnd = turnMustEnd;
         copy.gameIsOver = gameIsOver;
 

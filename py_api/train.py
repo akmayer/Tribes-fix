@@ -37,10 +37,13 @@ class GameCaptureDataset(Dataset):
         self.state_encoder = StateEncoder()
         self.action_encoder = ActionSpaceEncoder()
         self.samples = []
+        self.results = self._load_results(Path("results"))
+        self.mcts_samples = 0
         
         # Load all capture files
         if self.capture_dir.exists():
             capture_files = sorted(self.capture_dir.glob("capture_*.json"))
+            capture_files += sorted(self.capture_dir.glob("mcts_*.json"))
             for capture_file in capture_files[:max_samples] if max_samples else capture_files:
                 try:
                     with open(capture_file, "r") as f:
@@ -50,6 +53,7 @@ class GameCaptureDataset(Dataset):
                     print(f"Failed to load {capture_file}: {e}")
         
         print(f"Loaded {len(self.samples)} captures from {self.capture_dir}")
+        self.mcts_samples = sum(1 for sample in self.samples if sample.get("mcts", {}).get("visit_counts"))
     
     def __len__(self):
         return len(self.samples)
@@ -64,28 +68,20 @@ class GameCaptureDataset(Dataset):
         available_actions = payload.get("available_actions", [])
         masks = self.action_encoder.mask_available_actions(available_actions)
         
-        # For now, use uniform policy over masked actions as training target
-        # In the future, you can replace this with:
-        # - MCTS-improved policy targets
-        # - Self-play outcomes
-        # - Human expert demonstrations
-        def uniform_masked_policy(mask):
-            """Create uniform distribution over legal actions."""
-            mask_array = np.array(mask, dtype=np.float32)
-            allowed = np.sum(mask_array > 0)
-            if allowed == 0:
-                return np.ones_like(mask_array, dtype=np.float32) / len(mask_array)
-            policy = mask_array.astype(np.float32) / allowed
-            return policy
-        
-        target_action_type_policy = uniform_masked_policy(masks["action_type_mask"])
-        target_source_policy = uniform_masked_policy(masks["source_mask"])
-        target_target_policy = uniform_masked_policy(masks["target_mask"])
-        target_param_policy = uniform_masked_policy(masks["param_mask"])
-        
-        # Dummy value target (for now, just random between -1 and 1)
-        # In training, you'd use actual game outcomes
-        value_target = np.random.uniform(-1, 1)
+        mcts_policy = payload.get("mcts", {})
+        visit_counts = mcts_policy.get("visit_counts")
+
+        if visit_counts:
+            target_action_type_policy, target_source_policy, target_target_policy, target_param_policy = (
+                self._policy_from_visit_counts(visit_counts, available_actions, masks)
+            )
+        else:
+            target_action_type_policy = self._uniform_masked_policy(masks["action_type_mask"])
+            target_source_policy = self._uniform_masked_policy(masks["source_mask"])
+            target_target_policy = self._uniform_masked_policy(masks["target_mask"])
+            target_param_policy = self._uniform_masked_policy(masks["param_mask"])
+
+        value_target = self._value_target(payload)
         
         return {
             "state": state,
@@ -96,6 +92,115 @@ class GameCaptureDataset(Dataset):
             "value": torch.tensor(value_target, dtype=torch.float32),
             "masks": masks,
         }
+
+    def _uniform_masked_policy(self, mask):
+        """Create uniform distribution over legal actions."""
+        mask_array = np.array(mask, dtype=np.float32)
+        allowed = np.sum(mask_array > 0)
+        if allowed == 0:
+            return np.ones_like(mask_array, dtype=np.float32) / len(mask_array)
+        policy = mask_array.astype(np.float32) / allowed
+        return policy
+
+    def _policy_from_visit_counts(self, visit_counts, available_actions, masks):
+        action_type_counts = np.zeros(self.action_encoder.action_type_size, dtype=np.float32)
+        source_counts = np.zeros(self.action_encoder.source_actor_size, dtype=np.float32)
+        target_counts = np.zeros(self.action_encoder.target_actor_size, dtype=np.float32)
+        param_counts = np.zeros(self.action_encoder.param_size, dtype=np.float32)
+
+        limit = min(len(visit_counts), len(available_actions))
+        for idx in range(limit):
+            count = visit_counts[idx]
+            if count is None or count <= 0:
+                continue
+            components = available_actions[idx].get("encoded_components", {})
+            action_type_idx = components.get("action_type_index", components.get("action_type", 0))
+            source_idx = components.get("source_actor_index", components.get("source_actor", 0))
+            target_idx = components.get("target_actor_index", components.get("target_actor", 0))
+            param_idx = components.get("param_index", components.get("param", 0))
+
+            if 0 <= action_type_idx < action_type_counts.shape[0]:
+                action_type_counts[action_type_idx] += count
+            if 0 <= source_idx < source_counts.shape[0]:
+                source_counts[source_idx] += count
+            if 0 <= target_idx < target_counts.shape[0]:
+                target_counts[target_idx] += count
+            if 0 <= param_idx < param_counts.shape[0]:
+                param_counts[param_idx] += count
+
+        action_type_policy = self._normalize_counts(action_type_counts, masks["action_type_mask"])
+        source_policy = self._normalize_counts(source_counts, masks["source_mask"])
+        target_policy = self._normalize_counts(target_counts, masks["target_mask"])
+        param_policy = self._normalize_counts(param_counts, masks["param_mask"])
+
+        return action_type_policy, source_policy, target_policy, param_policy
+
+    def _normalize_counts(self, counts, mask):
+        masked = counts * np.array(mask, dtype=np.float32)
+        total = float(np.sum(masked))
+        if total <= 0.0:
+            return self._uniform_masked_policy(mask)
+        return masked / total
+
+    def _value_target(self, payload):
+        game_seed = payload.get("game_seed")
+        player_id = payload.get("player_id")
+        if game_seed is not None and player_id is not None:
+            key = self._result_key(game_seed, player_id)
+            if key is not None and key in self.results:
+                return self.results[key]
+
+        if "value_target" in payload:
+            try:
+                return float(payload["value_target"])
+            except (TypeError, ValueError):
+                pass
+
+        return 0.0
+
+    def _load_results(self, results_dir: Path) -> Dict[Tuple[int, int], float]:
+        results: Dict[Tuple[int, int], float] = {}
+        if not results_dir.exists():
+            return results
+        for result_file in sorted(results_dir.glob("result_*.json")):
+            try:
+                with open(result_file, "r") as handle:
+                    data = json.load(handle)
+                key = self._result_key(data.get("game_seed"), data.get("player_id"))
+                if key is None:
+                    continue
+                results[key] = self._value_from_result(data)
+            except Exception as e:
+                print(f"Failed to load {result_file}: {e}")
+        return results
+
+    def _result_key(self, game_seed, player_id):
+        try:
+            return (int(game_seed), int(player_id))
+        except (TypeError, ValueError):
+            return None
+
+    def _value_from_result(self, result: Dict) -> float:
+        if "value" in result:
+            try:
+                return float(result["value"])
+            except (TypeError, ValueError):
+                pass
+
+        winner = result.get("winner")
+        if winner == "WIN":
+            return 1.0
+        if winner == "LOSS":
+            return -1.0
+        if winner == "DRAW":
+            return 0.0
+
+        score = result.get("reward")
+        try:
+            score_val = float(score)
+            return float(np.tanh(score_val / 1000.0))
+        except (TypeError, ValueError):
+            return 0.0
 
 
 class PolicyValueTrainer:
@@ -274,6 +379,7 @@ def main():
     # Training loop
     print(f"\nStarting training for {args.epochs} epochs")
     print(f"Dataset size: {len(dataset)}")
+    print(f"MCTS-labeled samples: {dataset.mcts_samples}")
     print(f"Batches per epoch: {len(train_loader)}")
     
     for epoch in range(start_epoch, args.epochs):
@@ -300,12 +406,12 @@ def main():
     print(f"Model weights: {args.model_path}")
     
     # Note about training data quality
-    print("\n⚠️  IMPORTANT: This training used uniform policies over masked actions as targets.")
-    print("For better results, integrate:")
-    print("  - MCTS-based policy improvement")
-    print("  - Self-play with outcome labels")
-    print("  - Human expert demonstrations")
-    print("  - Proper fog-of-war enforcement in PythonBridge.java")
+    if dataset.mcts_samples == 0:
+        print("\n⚠️  IMPORTANT: No MCTS visit counts were found; using uniform masked targets.")
+        print("Generate captures via AZ_MCTS to use AlphaZero-style policy targets.")
+    else:
+        print("\nUsing MCTS visit counts for policy targets when available.")
+    print("Ensure fog-of-war is enforced in PythonBridge.java for valid data.")
 
 
 if __name__ == "__main__":

@@ -25,6 +25,8 @@ import java.util.Set;
 public class PythonBridge {
 
     private static final String DEFAULT_URL = "http://127.0.0.1:8000/query";
+    private static final String CAPTURE_URL = "http://127.0.0.1:8000/capture";
+    private static final String RESULT_URL = "http://127.0.0.1:8000/result";
     private static JSONObject cachedSchema = null;
 
     public static String queryPolicy(GameState gs, ArrayList<Action> allActions) throws IOException {
@@ -32,8 +34,44 @@ public class PythonBridge {
         return postJson(payload.toString());
     }
 
+    public static void captureMctsSample(GameState gs, ArrayList<Action> allActions, int[] visitCounts, double rootValue, int playerId) {
+        try {
+            JSONObject payload = buildPayload(gs, allActions);
+            payload.put("policy_type", "mcts");
+            payload.put("game_seed", gs.getGameSeed());
+            payload.put("player_id", playerId);
+
+            JSONObject mcts = new JSONObject();
+            mcts.put("visit_counts", toIntArray(visitCounts));
+            mcts.put("root_value", rootValue);
+            payload.put("mcts", mcts);
+
+            postJson(payload.toString(), CAPTURE_URL);
+        } catch (Exception e) {
+            System.out.println("[PythonBridge] capture error: " + e.getMessage());
+        }
+    }
+
+    public static void reportGameResult(GameState gs, int playerId, double reward, Types.RESULT winner) {
+        try {
+            JSONObject payload = new JSONObject();
+            payload.put("game_seed", gs.getGameSeed());
+            payload.put("player_id", playerId);
+            payload.put("reward", reward);
+            payload.put("winner", winner == null ? null : winner.name());
+            payload.put("tick", gs.getTick());
+            postJson(payload.toString(), RESULT_URL);
+        } catch (Exception e) {
+            System.out.println("[PythonBridge] result error: " + e.getMessage());
+        }
+    }
+
     private static String postJson(String jsonPayload) throws IOException {
-        URL url = new URL(DEFAULT_URL);
+        return postJson(jsonPayload, DEFAULT_URL);
+    }
+
+    private static String postJson(String jsonPayload, String urlString) throws IOException {
+        URL url = new URL(urlString);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "application/json; utf-8");

@@ -22,6 +22,35 @@ from typing import Dict, Tuple, Optional
 from pathlib import Path
 
 
+DEFAULT_ACTION_SIZES = {
+    "action_type": 32,
+    "source_actor": 151,
+    "target_actor": 284,
+    "param": 80,
+}
+
+
+def load_action_space_sizes(schema_path: Optional[Path] = None) -> Dict[str, int]:
+    """Load action head sizes from the action space schema."""
+    if schema_path is None:
+        schema_path = Path(__file__).parent / "action_space_schema.json"
+    if not schema_path.exists():
+        return DEFAULT_ACTION_SIZES.copy()
+
+    try:
+        with schema_path.open("r", encoding="utf-8") as handle:
+            schema = json.load(handle)
+        components = schema.get("components", {})
+        return {
+            "action_type": int(components.get("action_type", {}).get("size", DEFAULT_ACTION_SIZES["action_type"])),
+            "source_actor": int(components.get("source_actor", {}).get("size", DEFAULT_ACTION_SIZES["source_actor"])),
+            "target_actor": int(components.get("target_actor", {}).get("size", DEFAULT_ACTION_SIZES["target_actor"])),
+            "param": int(components.get("param", {}).get("size", DEFAULT_ACTION_SIZES["param"])),
+        }
+    except Exception:
+        return DEFAULT_ACTION_SIZES.copy()
+
+
 class StateEncoder:
     """Encodes game state JSON payload to tensors suitable for NN input."""
     
@@ -235,10 +264,10 @@ class TribesModel(nn.Module):
     Policy and value head model for Tribes game.
     
     Outputs:
-    - action_type_logits: (batch_size, 32)
-    - source_logits: (batch_size, 151)
-    - target_logits: (batch_size, 163)
-    - param_logits: (batch_size, 80)
+    - action_type_logits: (batch_size, action_type_size)
+    - source_logits: (batch_size, source_actor_size)
+    - target_logits: (batch_size, target_actor_size)
+    - param_logits: (batch_size, param_size)
     - value: (batch_size, 1)
     """
     
@@ -253,6 +282,12 @@ class TribesModel(nn.Module):
         self.state_size = state_size
         self.hidden_size = 512
         
+        action_sizes = load_action_space_sizes()
+        self.action_type_size = action_sizes["action_type"]
+        self.source_actor_size = action_sizes["source_actor"]
+        self.target_actor_size = action_sizes["target_actor"]
+        self.param_size = action_sizes["param"]
+
         # Shared trunk: process state to hidden representation
         self.trunk = nn.Sequential(
             nn.Linear(state_size, self.hidden_size),
@@ -264,10 +299,10 @@ class TribesModel(nn.Module):
         )
         
         # Policy heads: one for each action component
-        self.action_type_head = nn.Linear(self.hidden_size, 32)
-        self.source_head = nn.Linear(self.hidden_size, 151)
-        self.target_head = nn.Linear(self.hidden_size, 163)
-        self.param_head = nn.Linear(self.hidden_size, 80)
+        self.action_type_head = nn.Linear(self.hidden_size, self.action_type_size)
+        self.source_head = nn.Linear(self.hidden_size, self.source_actor_size)
+        self.target_head = nn.Linear(self.hidden_size, self.target_actor_size)
+        self.param_head = nn.Linear(self.hidden_size, self.param_size)
         
         # Value head for training
         self.value_head = nn.Sequential(
@@ -343,7 +378,7 @@ if __name__ == "__main__":
     
     print(f"action_type_logits shape: {action_type_logits.shape}")  # (2, 32)
     print(f"source_logits shape: {source_logits.shape}")            # (2, 151)
-    print(f"target_logits shape: {target_logits.shape}")            # (2, 163)
+    print(f"target_logits shape: {target_logits.shape}")            # (2, 284)
     print(f"param_logits shape: {param_logits.shape}")              # (2, 80)
     print(f"value shape: {value.shape}")                            # (2, 1)
     
