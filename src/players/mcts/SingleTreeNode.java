@@ -39,6 +39,9 @@ class SingleTreeNode
     private GameState rootState;
     private StateHeuristic rootStateHeuristic;
 
+    private boolean rootNoiseApplied = false;
+    private double[] rootNoisyPriors;
+
     //From MCTSPlayer
     SingleTreeNode(MCTSParams p, Random rnd, int num_actions, ArrayList<Action> actions, int playerID) {
         this(p, null, rnd, num_actions, actions, null, playerID, null, null);
@@ -147,6 +150,7 @@ class SingleTreeNode
         //This should not happen, but EndTurn is not available here.
         return -1;
     }
+    
 
     private SingleTreeNode expand() {
 
@@ -329,6 +333,7 @@ class SingleTreeNode
         if (nnEvaluated) {
             return;
         }
+
         if ((!params.NEURAL_PRIORS) && (!params.NEURAL_VALUE)) {
             nnEvaluated = true;
             return;
@@ -346,6 +351,13 @@ class SingleTreeNode
 
             if (params.NEURAL_PRIORS) {
                 nnPriors = PythonBridge.actionPriorsFromPolicy(availableActions, state, resp);
+
+                nnPriors = applyPriorSchedule(nnPriors);
+
+                if (m_depth == 0 && !rootNoiseApplied) {
+                    nnPriors = applyRootDirichlet(nnPriors);
+                    rootNoiseApplied = true;
+                }
             }
 
             if (params.NEURAL_VALUE) {
@@ -363,6 +375,22 @@ class SingleTreeNode
             nnValue = 0.0;
             nnEvaluated = true;
         }
+    }
+    private double[] applyPriorSchedule(double[] priors) {
+
+        if (priors == null) return null;
+
+        if (params.USE_UNIFORM_PRIORS) {
+            double[] out = new double[priors.length];
+            double uniform = 1.0 / priors.length;
+
+            for (int i = 0; i < priors.length; i++) {
+                out[i] = params.UNIFORM_PRIOR_WEIGHT * uniform;
+            }
+            return out;
+        }
+
+        return priors;
     }
 
     private boolean finishRollout(GameState rollerState, int depth)
@@ -496,6 +524,64 @@ class SingleTreeNode
             return 0.0;
         }
         return totValue / (nVisits + params.epsilon);
+    }
+
+    private double[] dirichletNoise(int size, double alpha) {
+        double[] noise = new double[size];
+        double sum = 0.0;
+
+        for (int i = 0; i < size; i++) {
+            noise[i] = sampleGamma(alpha, 1.0);
+            sum += noise[i];
+        }
+
+        for (int i = 0; i < size; i++) {
+            noise[i] /= sum;
+        }
+
+        return noise;
+    }
+    private double sampleGamma(double shape, double scale) {
+        // Marsaglia & Tsang approximation (good enough for MCTS noise)
+        if (shape < 1.0) {
+            return sampleGamma(1.0 + shape, scale) * Math.pow(Math.random(), 1.0 / shape);
+        }
+
+        double d = shape - 1.0 / 3.0;
+        double c = 1.0 / Math.sqrt(9.0 * d);
+
+        while (true) {
+            double x = gaussian();
+            double v = 1.0 + c * x;
+            if (v <= 0) continue;
+
+            v = v * v * v;
+            double u = Math.random();
+
+            if (u < 1.0 - 0.0331 * x * x * x * x) return d * v * scale;
+            if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v * scale;
+        }
+    }
+
+    private double gaussian() {
+        return Math.random() * 2 - 1; // or replace with Box-Muller if you want cleaner
+    }
+
+    private double[] applyRootDirichlet(double[] priors) {
+        if (priors == null) return null;
+
+        double eps = params.DIRICHLET_EPSILON;  // e.g. 0.25
+        double alpha = params.DIRICHLET_ALPHA;   // e.g. 0.3
+
+        double[] noise = dirichletNoise(priors.length, alpha);
+
+        double[] out = new double[priors.length];
+
+        for (int i = 0; i < priors.length; i++) {
+            out[i] = (1 - eps) * priors[i] + eps * noise[i];
+        }
+
+        return out;
     }
 
 }

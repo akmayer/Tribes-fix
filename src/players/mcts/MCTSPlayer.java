@@ -53,8 +53,35 @@ public class MCTSPlayer extends Agent {
             int[] visitCounts = alignVisitCounts(allActions, rootActions, rootVisits);
             PythonBridge.captureMctsSample(gs, allActions, visitCounts, m_root.getRootValue(), playerID);
         }
+        Action chosen = rootActions.get(m_root.mostVisitedAction());
 
-        return rootActions.get(m_root.mostVisitedAction());
+        System.out.println("\n===== MCTS DECISION =====");
+        System.out.println("Player: " + playerID);
+        System.out.println("Available actions: " + rootActions.size());
+        System.out.println("Chosen action: " + chosen);
+
+        int[] rootVisits = m_root.getVisitCounts();
+        int[] visitCounts = alignVisitCounts(allActions, rootActions, rootVisits);
+
+        System.out.println("---- Visit counts ----");
+        for (int i = 0; i < allActions.size(); i++) {
+            Action a = allActions.get(i);
+            int v = visitCounts[i];
+
+            // highlight chosen action
+            boolean isChosen = a == chosen;
+
+            System.out.println(
+                (isChosen ? ">> " : "   ") +
+                "[" + i + "] " + a +
+                " | visits=" + v
+            );
+        }
+
+        System.out.println("========================\n");
+
+        return chosen;
+
 
     }
 

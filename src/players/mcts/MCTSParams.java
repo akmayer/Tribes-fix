@@ -20,6 +20,13 @@ public class MCTSParams extends AlgParams {
     public boolean NEURAL_VALUE = false;
     public double CPUCT = 1.5;
 
+    public boolean USE_UNIFORM_PRIORS = true;
+    public double UNIFORM_PRIOR_WEIGHT = 1.0;
+
+    public boolean DIRICHLET_ROOT_NOISE = true;
+    public double DIRICHLET_ALPHA = 0.3;
+    public double DIRICHLET_EPSILON = 0.25;
+
     public void setParameterValue(String param, Object value) {
         switch(param) {
             case "K": K = (double) value; break;
