@@ -25,7 +25,6 @@ import java.awt.GraphicsEnvironment;
 
 import static core.Constants.*;
 import static core.Types.TRIBE.*;
-import static core.Types.TRIBE.OUMAJI;
 
 class Run {
 
@@ -146,7 +145,7 @@ class Run {
         switch (playerType)
         {
             case DONOTHING: return new DoNothingAgent(agentSeed);
-            case RANDOM: return new RandomAgent(agentSeed);
+            case RANDOM: return new BridgeAgentAttempt(agentSeed);
             case SIMPLE: return new SimpleAgent(agentSeed);
             case OSLA:
                 OSLAParams oslaParams = new OSLAParams();
@@ -172,7 +171,7 @@ class Run {
                 return new MCTSPlayer(agentSeed, mctsParams);
             case AZ_MCTS:
                 MCTSParams azParams = new MCTSParams();
-                azParams.stop_type = azParams.STOP_FMCALLS;
+                azParams.stop_type = azParams.STOP_ITERATIONS;
                 azParams.heuristic_method = azParams.DIFF_HEURISTIC;
                 azParams.PRIORITIZE_ROOT = false;
                 azParams.ROLLOUT_LENGTH = MAX_LENGTH;

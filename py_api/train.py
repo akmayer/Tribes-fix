@@ -22,7 +22,7 @@ import numpy as np
 from datetime import datetime
 import argparse
 
-from model import TribesModel, StateEncoder, encode_state
+from model import TribesModel, StateEncoder, encode_state, TribesTransformerModel
 from action_encoding import ActionSpaceEncoder
 
 
@@ -245,7 +245,7 @@ class PolicyValueTrainer:
     
     def __init__(
         self,
-        model: TribesModel,
+        model: TribesTransformerModel,
         device: str = "cpu",
         learning_rate: float = 1e-3,
         policy_loss_weight: float = 1.0,
@@ -405,7 +405,7 @@ def main():
     
     # Create model
     state_encoder = StateEncoder()
-    model = TribesModel(state_size=state_encoder.total_state_size)
+    model = TribesTransformerModel(state_size=state_encoder.total_state_size)
     
     # Initialize trainer
     trainer = PolicyValueTrainer(

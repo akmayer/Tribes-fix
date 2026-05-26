@@ -20,8 +20,8 @@ public class AlgParams
     public double epsilon = 1e-6;
 
     // Budget settings
-    public int stop_type = STOP_TIME;
-    public int num_iterations = 200;
+    public int stop_type = STOP_ITERATIONS;
+    public int num_iterations = 40;
     public int num_fmcalls = 2000;
     public int num_time = 40;
     public int FORCE_TURN_END = 5;

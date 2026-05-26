@@ -347,6 +347,201 @@ class TribesModel(nn.Module):
             model.load(model_path, device=device)
         return model.to(device)
 
+class TribesTransformerModel(nn.Module):
+    """
+    Minimal but correct Transformer policy/value model.
+    Keeps identical input/output interface.
+    """
+
+    def __init__(self, state_size: int = None, d_model: int = 128, n_heads: int = 4, n_layers: int = 3):
+        super().__init__()
+
+        if state_size is None:
+            state_size = StateEncoder().total_state_size
+
+        self.state_size = state_size
+        self.d_model = d_model
+
+        action_sizes = load_action_space_sizes()
+        self.action_type_size = action_sizes["action_type"]
+        self.source_size = action_sizes["source_actor"]
+        self.target_size = action_sizes["target_actor"]
+        self.param_size = action_sizes["param"]
+
+        # -------------------------
+        # TOKEN SIZES (fixed layout from encoder)
+        # -------------------------
+        self.num_tiles = 11 * 11
+        self.tile_dim = 8
+
+        self.num_units = 100
+        self.unit_dim = 16
+
+        self.num_cities = 50
+        self.city_dim = 10
+
+        self.tech_dim = 50
+        self.tribe_dim = 10
+
+        # -------------------------
+        # EMBEDDINGS
+        # -------------------------
+        self.tile_embed = nn.Linear(self.tile_dim, d_model)
+        self.unit_embed = nn.Linear(self.unit_dim, d_model)
+        self.city_embed = nn.Linear(self.city_dim, d_model)
+        self.tech_embed = nn.Linear(self.tech_dim, d_model)
+        self.tribe_embed = nn.Linear(self.tribe_dim, d_model)
+
+        # learned index embeddings (better than 2D grid pos encoding)
+        self.tile_index_embed = nn.Embedding(self.num_tiles, d_model)
+        self.unit_index_embed = nn.Embedding(self.num_units, d_model)
+        self.city_index_embed = nn.Embedding(self.num_cities, d_model)
+
+        # global token
+        self.global_token = nn.Parameter(torch.zeros(1, 1, d_model))
+
+        # -------------------------
+        # TRANSFORMER BACKBONE
+        # -------------------------
+        layer = nn.TransformerEncoderLayer(
+            d_model=d_model,
+            nhead=n_heads,
+            dim_feedforward=d_model * 4,
+            batch_first=True,
+            activation="gelu",
+            norm_first=True
+        )
+
+        self.encoder = nn.TransformerEncoder(layer, num_layers=n_layers)
+
+        # -------------------------
+        # MOVE HEADS (CROSS ATTENTION STYLE)
+        # -------------------------
+        self.q_tile = nn.Linear(d_model, d_model)
+        self.k_tile = nn.Linear(d_model, d_model)
+
+        self.q_unit = nn.Linear(d_model, d_model)
+        self.k_unit = nn.Linear(d_model, d_model)
+
+        # action heads
+        self.action_type_head = nn.Linear(d_model, self.action_type_size)
+        self.source_head = nn.Linear(d_model, self.source_size)
+        self.target_head = nn.Linear(d_model, self.target_size)
+        self.param_head = nn.Linear(d_model, self.param_size)
+
+        # value head
+        self.value_head = nn.Sequential(
+            nn.Linear(d_model, 128),
+            nn.ReLU(),
+            nn.Linear(128, 1)
+        )
+
+    def forward(self, state, masks=None):
+        """
+        state: (B, state_size)
+        masks: optional dict of action masks (for logits masking)
+        """
+
+        B = state.size(0)
+        offset = 0
+
+        # -------------------------
+        # TILE TOKENS
+        # -------------------------
+        tiles = state[:, offset:offset + self.num_tiles * self.tile_dim]
+        tiles = tiles.view(B, self.num_tiles, self.tile_dim)
+        offset += self.num_tiles * self.tile_dim
+
+        tile_idx = torch.arange(self.num_tiles, device=state.device)
+        tile_idx = tile_idx.unsqueeze(0).expand(B, -1)
+
+        tile_tokens = self.tile_embed(tiles) + self.tile_index_embed(tile_idx)
+
+        # -------------------------
+        # UNIT TOKENS
+        # -------------------------
+        units = state[:, offset:offset + self.num_units * self.unit_dim]
+        units = units.view(B, self.num_units, self.unit_dim)
+        offset += self.num_units * self.unit_dim
+
+        unit_idx = torch.arange(self.num_units, device=state.device)
+        unit_idx = unit_idx.unsqueeze(0).expand(B, -1)
+
+        unit_tokens = self.unit_embed(units) + self.unit_index_embed(unit_idx)
+
+        # -------------------------
+        # CITY TOKENS
+        # -------------------------
+        cities = state[:, offset:offset + self.num_cities * self.city_dim]
+        cities = cities.view(B, self.num_cities, self.city_dim)
+        offset += self.num_cities * self.city_dim
+
+        city_idx = torch.arange(self.num_cities, device=state.device)
+        city_idx = city_idx.unsqueeze(0).expand(B, -1)
+
+        city_tokens = self.city_embed(cities) + self.city_index_embed(city_idx)
+
+        # -------------------------
+        # GLOBAL FEATURES
+        # -------------------------
+        tech = state[:, offset:offset + self.tech_dim]
+        offset += self.tech_dim
+
+        tribe = state[:, offset:offset + self.tribe_dim]
+
+        tech_tok = self.tech_embed(tech).unsqueeze(1)
+        tribe_tok = self.tribe_embed(tribe).unsqueeze(1)
+
+        # -------------------------
+        # CONCAT TOKENS
+        # -------------------------
+        global_tok = self.global_token.expand(B, 1, self.d_model)
+
+        tokens = torch.cat([
+            global_tok,
+            tile_tokens,
+            unit_tokens,
+            city_tokens,
+            tech_tok,
+            tribe_tok
+        ], dim=1)
+
+        # -------------------------
+        # TRANSFORMER ENCODING
+        # -------------------------
+        tokens = self.encoder(tokens)
+
+        global_vec = tokens[:, 0]
+
+        # =========================================================
+        # POLICY HEADS
+        # =========================================================
+
+        action_type_logits = self.action_type_head(global_vec)
+        source_logits = self.source_head(global_vec)
+        target_logits = self.target_head(global_vec)
+        param_logits = self.param_head(global_vec)
+
+        # =========================================================
+        # CROSS-ATTENTION MOVE HEAD (tile-to-tile)
+        # =========================================================
+        tile_repr = tokens[:, 1:1 + self.num_tiles]
+
+        q = self.q_tile(tile_repr)          # (B, T, D)
+        k = self.k_tile(tile_repr)          # (B, T, D)
+
+        move_logits = torch.einsum("btd,bsd->bts", q, k) / (self.d_model ** 0.5)
+
+        # you can later reshape this into your source/target factorization
+        # or inject into source/target heads if you want
+
+        # =========================================================
+        # VALUE HEAD
+        # =========================================================
+        value = self.value_head(global_vec)
+
+        return action_type_logits, source_logits, target_logits, param_logits, value
+
 
 def encode_state(payload: Dict, encoder: Optional[StateEncoder] = None) -> torch.Tensor:
     """Convenience function to encode a state payload."""
@@ -367,7 +562,7 @@ if __name__ == "__main__":
     state_size = encoder.total_state_size
     
     # Example: Create model and do a forward pass
-    model = TribesModel(state_size=state_size)
+    model = TribesTransformerModel(state_size=encoder.total_state_size)
     model.eval()
     
     # Dummy state tensor (batch_size=2)

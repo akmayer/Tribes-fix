@@ -112,7 +112,7 @@ MODEL_PATH = Path("model_weights.pth")
 
 state_encoder = StateEncoder()
 
-model = TribesModel(
+model = TribesTransformerModel(
     state_size=state_encoder.total_state_size
 )
 

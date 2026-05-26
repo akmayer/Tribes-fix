@@ -7,7 +7,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from action_encoding import ActionSpaceEncoder
-from model import TribesModel, StateEncoder, encode_state
+from model import TribesModel, StateEncoder, encode_state, TribesTransformerModel
 
 app = FastAPI()
 
@@ -29,7 +29,7 @@ encoder = ActionSpaceEncoder()
 
 # Load the PyTorch model
 state_encoder = StateEncoder()
-model = TribesModel(state_size=state_encoder.total_state_size)
+model = TribesTransformerModel(state_size=state_encoder.total_state_size)
 model.eval()
 device = torch.device("cpu")
 
