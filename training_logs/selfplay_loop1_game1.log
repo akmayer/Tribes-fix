@@ -1,512 +1,3755 @@
-Game seed: 1779820166540
-Agents random seed: 1781494263840
-Level seed: 1779140743289
-Running without visuals because no display is available.
-Game seed: 1779820503250
-Agents random seed: 1781376438799
-Level seed: 1778437886586
+Game seed: 1779825892203
+Agents random seed: 1778215751461
+Level seed: 1781405997899
 Running without visuals because no display is available.
 
 ===== MCTS DECISION =====
 Player: 0
-Available actions: 14
-Chosen action: END_TURN by tribe 0
+Available actions: 16
+Chosen action: DECLARE_WAR by tribe 0 on tribe 1
 ---- Visit counts ----
-   [0] RESEARCH_TECH by tribe 0 : FISHING | visits=32
-   [1] RESEARCH_TECH by tribe 0 : HUNTING | visits=34
-   [2] RESEARCH_TECH by tribe 0 : ORGANIZATION | visits=20
-   [3] RESEARCH_TECH by tribe 0 : RIDING | visits=17
-   [4] DECLARE_WAR by tribe 0 on tribe 1 | visits=46
-   [5] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=9
-   [6] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=10
-   [7] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=6
+   [0] RESEARCH_TECH by tribe 0 : CLIMBING | visits=3
+   [1] RESEARCH_TECH by tribe 0 : FISHING | visits=2
+   [2] RESEARCH_TECH by tribe 0 : HUNTING | visits=2
+   [3] RESEARCH_TECH by tribe 0 : RIDING | visits=2
+>> [4] DECLARE_WAR by tribe 0 on tribe 1 | visits=5
+   [5] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=2
+   [6] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=2
+   [7] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=2
    [8] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=4
->> [9] END_TURN by tribe 0 | visits=338
-   [10] MOVE by unit 2 to 2 : 4 | visits=1
-   [11] MOVE by unit 2 to 4 : 3 | visits=1
-   [12] MOVE by unit 2 to 3 : 5 | visits=1
-   [13] MOVE by unit 2 to 2 : 5 | visits=1
+   [9] END_TURN by tribe 0 | visits=1
+   [10] RESOURCE_GATHERED by city 1 : FRUIT | visits=3
+   [11] RESOURCE_GATHERED by city 1 : FRUIT | visits=2
+   [12] MOVE by unit 2 to 2 : 1 | visits=2
+   [13] MOVE by unit 2 to 4 : 2 | visits=2
+   [14] MOVE by unit 2 to 3 : 1 | visits=2
+   [15] MOVE by unit 2 to 2 : 3 | visits=4
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 15
+Chosen action: SEND_STARS by tribe 0 to: 1 : 4 stars
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : CLIMBING | visits=3
+   [1] RESEARCH_TECH by tribe 0 : FISHING | visits=2
+   [2] RESEARCH_TECH by tribe 0 : HUNTING | visits=2
+   [3] RESEARCH_TECH by tribe 0 : RIDING | visits=3
+   [4] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=2
+   [5] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=2
+   [6] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=2
+>> [7] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=6
+   [8] END_TURN by tribe 0 | visits=1
+   [9] RESOURCE_GATHERED by city 1 : FRUIT | visits=3
+   [10] RESOURCE_GATHERED by city 1 : FRUIT | visits=2
+   [11] MOVE by unit 2 to 2 : 1 | visits=5
+   [12] MOVE by unit 2 to 4 : 2 | visits=2
+   [13] MOVE by unit 2 to 3 : 1 | visits=3
+   [14] MOVE by unit 2 to 2 : 3 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 5
+Chosen action: MOVE by unit 2 to 3 : 1
+---- Visit counts ----
+   [0] END_TURN by tribe 0 | visits=6
+   [1] MOVE by unit 2 to 2 : 1 | visits=7
+   [2] MOVE by unit 2 to 4 : 2 | visits=6
+>> [3] MOVE by unit 2 to 3 : 1 | visits=15
+   [4] MOVE by unit 2 to 2 : 3 | visits=6
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 18
+Chosen action: MOVE by unit 4 to 4 : 7
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : FISHING | visits=2
+   [1] RESEARCH_TECH by tribe 1 : HUNTING | visits=2
+   [2] RESEARCH_TECH by tribe 1 : ORGANIZATION | visits=1
+   [3] RESEARCH_TECH by tribe 1 : RIDING | visits=2
+   [4] DECLARE_WAR by tribe 1 on tribe 0 | visits=1
+   [5] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
+   [6] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=2
+   [7] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=2
+   [8] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=2
+   [9] END_TURN by tribe 1 | visits=1
+   [10] MOVE by unit 4 to 4 : 6 | visits=2
+   [11] MOVE by unit 4 to 6 : 8 | visits=2
+   [12] MOVE by unit 4 to 6 : 7 | visits=2
+   [13] MOVE by unit 4 to 6 : 6 | visits=2
+   [14] MOVE by unit 4 to 5 : 8 | visits=4
+   [15] MOVE by unit 4 to 5 : 6 | visits=2
+   [16] MOVE by unit 4 to 4 : 8 | visits=2
+>> [17] MOVE by unit 4 to 4 : 7 | visits=7
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 11
+Chosen action: SEND_STARS by tribe 1 to: 0 : 1 stars
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : FISHING | visits=3
+   [1] RESEARCH_TECH by tribe 1 : HUNTING | visits=4
+   [2] RESEARCH_TECH by tribe 1 : ORGANIZATION | visits=3
+   [3] RESEARCH_TECH by tribe 1 : RIDING | visits=3
+   [4] DECLARE_WAR by tribe 1 on tribe 0 | visits=4
+>> [5] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=6
+   [6] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=5
+   [7] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=3
+   [8] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=4
+   [9] END_TURN by tribe 1 | visits=1
+   [10] SPAWN by city 3 : WARRIOR | visits=4
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 6
+Chosen action: SPAWN by city 3 : WARRIOR
+---- Visit counts ----
+   [0] DECLARE_WAR by tribe 1 on tribe 0 | visits=6
+   [1] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=6
+   [2] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=6
+   [3] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=5
+   [4] END_TURN by tribe 1 | visits=6
+>> [5] SPAWN by city 3 : WARRIOR | visits=11
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 3
+Chosen action: END_TURN by tribe 1
+---- Visit counts ----
+   [0] DECLARE_WAR by tribe 1 on tribe 0 | visits=10
+   [1] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=11
+>> [2] END_TURN by tribe 1 | visits=19
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 13
+Chosen action: DECLARE_WAR by tribe 0 on tribe 1
+---- Visit counts ----
+>> [0] DECLARE_WAR by tribe 0 on tribe 1 | visits=7
+   [1] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=3
+   [2] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=3
+   [3] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=3
+   [4] END_TURN by tribe 0 | visits=2
+   [5] RESOURCE_GATHERED by city 1 : FRUIT | visits=4
+   [6] RESOURCE_GATHERED by city 1 : FRUIT | visits=3
+   [7] SPAWN by city 1 : WARRIOR | visits=2
+   [8] MOVE by unit 2 to 2 : 1 | visits=2
+   [9] MOVE by unit 2 to 4 : 2 | visits=3
+   [10] MOVE by unit 2 to 4 : 0 | visits=2
+   [11] MOVE by unit 2 to 3 : 2 | visits=3
+   [12] MOVE by unit 2 to 3 : 0 | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 12
+Chosen action: SEND_STARS by tribe 0 to: 1 : 2 stars
+---- Visit counts ----
+   [0] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=3
+>> [1] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=9
+   [2] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=3
+   [3] END_TURN by tribe 0 | visits=1
+   [4] RESOURCE_GATHERED by city 1 : FRUIT | visits=3
+   [5] RESOURCE_GATHERED by city 1 : FRUIT | visits=3
+   [6] SPAWN by city 1 : WARRIOR | visits=3
+   [7] MOVE by unit 2 to 2 : 1 | visits=3
+   [8] MOVE by unit 2 to 4 : 2 | visits=3
+   [9] MOVE by unit 2 to 4 : 0 | visits=3
+   [10] MOVE by unit 2 to 3 : 2 | visits=3
+   [11] MOVE by unit 2 to 3 : 0 | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 10
+Chosen action: RESOURCE_GATHERED by city 1 : FRUIT
+---- Visit counts ----
+   [0] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=3
+   [1] END_TURN by tribe 0 | visits=1
+   [2] RESOURCE_GATHERED by city 1 : FRUIT | visits=3
+>> [3] RESOURCE_GATHERED by city 1 : FRUIT | visits=9
+   [4] SPAWN by city 1 : WARRIOR | visits=2
+   [5] MOVE by unit 2 to 2 : 1 | visits=4
+   [6] MOVE by unit 2 to 4 : 2 | visits=4
+   [7] MOVE by unit 2 to 4 : 0 | visits=3
+   [8] MOVE by unit 2 to 3 : 2 | visits=4
+   [9] MOVE by unit 2 to 3 : 0 | visits=7
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 6
+Chosen action: MOVE by unit 2 to 3 : 2
+---- Visit counts ----
+   [0] END_TURN by tribe 0 | visits=8
+   [1] MOVE by unit 2 to 2 : 1 | visits=4
+   [2] MOVE by unit 2 to 4 : 2 | visits=5
+   [3] MOVE by unit 2 to 4 : 0 | visits=5
+>> [4] MOVE by unit 2 to 3 : 2 | visits=9
+   [5] MOVE by unit 2 to 3 : 0 | visits=9
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 24
+Chosen action: RESEARCH_TECH by tribe 1 : FISHING
+---- Visit counts ----
+>> [0] RESEARCH_TECH by tribe 1 : FISHING | visits=4
+   [1] RESEARCH_TECH by tribe 1 : HUNTING | visits=2
+   [2] RESEARCH_TECH by tribe 1 : ORGANIZATION | visits=2
+   [3] RESEARCH_TECH by tribe 1 : RIDING | visits=1
+   [4] RESEARCH_TECH by tribe 1 : MEDITATION | visits=2
+   [5] RESEARCH_TECH by tribe 1 : MINING | visits=2
+   [6] DECLARE_WAR by tribe 1 on tribe 0 | visits=1
+   [7] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [8] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [9] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=3
+   [10] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=1
+   [11] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=2
+   [12] END_TURN by tribe 1 | visits=1
+   [13] MOVE by unit 4 to 4 : 6 | visits=1
+   [14] MOVE by unit 4 to 5 : 8 | visits=1
+   [15] MOVE by unit 4 to 5 : 6 | visits=1
+   [16] MOVE by unit 4 to 4 : 8 | visits=1
+   [17] MOVE by unit 5 to 4 : 6 | visits=2
+   [18] MOVE by unit 5 to 6 : 8 | visits=2
+   [19] MOVE by unit 5 to 6 : 7 | visits=1
+   [20] MOVE by unit 5 to 6 : 6 | visits=2
+   [21] MOVE by unit 5 to 5 : 8 | visits=2
+   [22] MOVE by unit 5 to 5 : 6 | visits=3
+   [23] MOVE by unit 5 to 4 : 8 | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 13
+Chosen action: MOVE by unit 5 to 6 : 8
+---- Visit counts ----
+   [0] DECLARE_WAR by tribe 1 on tribe 0 | visits=2
+   [1] END_TURN by tribe 1 | visits=1
+   [2] MOVE by unit 4 to 4 : 6 | visits=3
+   [3] MOVE by unit 4 to 5 : 8 | visits=2
+   [4] MOVE by unit 4 to 5 : 6 | visits=3
+   [5] MOVE by unit 4 to 4 : 8 | visits=3
+   [6] MOVE by unit 5 to 4 : 6 | visits=3
+>> [7] MOVE by unit 5 to 6 : 8 | visits=7
+   [8] MOVE by unit 5 to 6 : 7 | visits=3
+   [9] MOVE by unit 5 to 6 : 6 | visits=2
+   [10] MOVE by unit 5 to 5 : 8 | visits=2
+   [11] MOVE by unit 5 to 5 : 6 | visits=3
+   [12] MOVE by unit 5 to 4 : 8 | visits=6
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 7
+Chosen action: DECLARE_WAR by tribe 1 on tribe 0
+---- Visit counts ----
+>> [0] DECLARE_WAR by tribe 1 on tribe 0 | visits=10
+   [1] END_TURN by tribe 1 | visits=4
+   [2] MOVE by unit 4 to 4 : 6 | visits=5
+   [3] MOVE by unit 4 to 5 : 8 | visits=4
+   [4] MOVE by unit 4 to 5 : 7 | visits=5
+   [5] MOVE by unit 4 to 5 : 6 | visits=7
+   [6] MOVE by unit 4 to 4 : 8 | visits=5
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 6
+Chosen action: MOVE by unit 4 to 5 : 6
+---- Visit counts ----
+   [0] END_TURN by tribe 1 | visits=5
+   [1] MOVE by unit 4 to 4 : 6 | visits=5
+   [2] MOVE by unit 4 to 5 : 8 | visits=7
+   [3] MOVE by unit 4 to 5 : 7 | visits=6
+>> [4] MOVE by unit 4 to 5 : 6 | visits=10
+   [5] MOVE by unit 4 to 4 : 8 | visits=7
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 7
+Chosen action: RESOURCE_GATHERED by city 1 : FRUIT
+---- Visit counts ----
+   [0] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=7
+   [1] END_TURN by tribe 0 | visits=4
+>> [2] RESOURCE_GATHERED by city 1 : FRUIT | visits=8
+   [3] MOVE by unit 2 to 2 : 1 | visits=4
+   [4] MOVE by unit 2 to 4 : 2 | visits=6
+   [5] MOVE by unit 2 to 3 : 1 | visits=6
+   [6] MOVE by unit 2 to 2 : 3 | visits=5
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 2
+Chosen action: LEVEL_UP by city 1 with bonus WORKSHOP
+---- Visit counts ----
+>> [0] LEVEL_UP by city 1 with bonus WORKSHOP | visits=23
+   [1] LEVEL_UP by city 1 with bonus EXPLORER | visits=17
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 5
+Chosen action: MOVE by unit 2 to 3 : 1
+---- Visit counts ----
+   [0] END_TURN by tribe 0 | visits=6
+   [1] MOVE by unit 2 to 2 : 1 | visits=5
+   [2] MOVE by unit 2 to 4 : 2 | visits=10
+>> [3] MOVE by unit 2 to 3 : 1 | visits=11
+   [4] MOVE by unit 2 to 2 : 3 | visits=8
 ========================
 
 
 ===== MCTS DECISION =====
 Player: 1
 Available actions: 17
-Chosen action: END_TURN by tribe 1
+Chosen action: MOVE by unit 5 to 5 : 8
 ---- Visit counts ----
-   [0] RESEARCH_TECH by tribe 1 : CLIMBING | visits=64
-   [1] RESEARCH_TECH by tribe 1 : FISHING | visits=23
-   [2] RESEARCH_TECH by tribe 1 : HUNTING | visits=27
-   [3] RESEARCH_TECH by tribe 1 : RIDING | visits=16
-   [4] DECLARE_WAR by tribe 1 on tribe 0 | visits=51
-   [5] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=10
-   [6] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=11
-   [7] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=7
-   [8] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=4
->> [9] END_TURN by tribe 1 | visits=311
-   [10] RESOURCE_GATHERED by city 3 : FRUIT | visits=15
-   [11] RESOURCE_GATHERED by city 3 : FRUIT | visits=15
-   [12] MOVE by unit 4 to 7 : 7 | visits=1
-   [13] MOVE by unit 4 to 9 : 8 | visits=1
-   [14] MOVE by unit 4 to 9 : 7 | visits=1
-   [15] MOVE by unit 4 to 9 : 6 | visits=1
-   [16] MOVE by unit 4 to 8 : 6 | visits=1
-========================
-
-
-===== MCTS DECISION =====
-Player: 0
-Available actions: 18
-Chosen action: END_TURN by tribe 0
----- Visit counts ----
-   [0] RESEARCH_TECH by tribe 0 : FISHING | visits=17
-   [1] RESEARCH_TECH by tribe 0 : HUNTING | visits=19
-   [2] RESEARCH_TECH by tribe 0 : ORGANIZATION | visits=12
-   [3] RESEARCH_TECH by tribe 0 : RIDING | visits=10
-   [4] RESEARCH_TECH by tribe 0 : MEDITATION | visits=7
-   [5] RESEARCH_TECH by tribe 0 : MINING | visits=9
-   [6] DECLARE_WAR by tribe 0 on tribe 1 | visits=39
-   [7] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=2
-   [8] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=2
-   [9] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=2
-   [10] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=2
-   [11] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=2
-   [12] SEND_STARS by tribe 0 to: 1 : 6 stars | visits=2
->> [13] END_TURN by tribe 0 | visits=285
-   [14] MOVE by unit 2 to 2 : 4 | visits=1
-   [15] MOVE by unit 2 to 4 : 3 | visits=1
-   [16] MOVE by unit 2 to 3 : 5 | visits=1
-   [17] MOVE by unit 2 to 2 : 5 | visits=1
+   [0] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=3
+   [1] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=2
+   [2] END_TURN by tribe 1 | visits=1
+   [3] MOVE by unit 4 to 4 : 5 | visits=2
+   [4] MOVE by unit 4 to 6 : 7 | visits=2
+   [5] MOVE by unit 4 to 6 : 6 | visits=2
+   [6] MOVE by unit 4 to 5 : 7 | visits=2
+   [7] MOVE by unit 4 to 5 : 5 | visits=2
+   [8] MOVE by unit 4 to 4 : 7 | visits=2
+   [9] MOVE by unit 4 to 4 : 6 | visits=2
+   [10] MOVE by unit 5 to 5 : 7 | visits=2
+   [11] MOVE by unit 5 to 7 : 9 | visits=2
+   [12] MOVE by unit 5 to 7 : 8 | visits=3
+   [13] MOVE by unit 5 to 6 : 9 | visits=2
+   [14] MOVE by unit 5 to 6 : 7 | visits=2
+   [15] MOVE by unit 5 to 5 : 9 | visits=2
+>> [16] MOVE by unit 5 to 5 : 8 | visits=7
 ========================
 
 
 ===== MCTS DECISION =====
 Player: 1
-Available actions: 21
+Available actions: 10
 Chosen action: END_TURN by tribe 1
 ---- Visit counts ----
-   [0] RESEARCH_TECH by tribe 1 : CLIMBING | visits=38
-   [1] RESEARCH_TECH by tribe 1 : FISHING | visits=18
-   [2] RESEARCH_TECH by tribe 1 : HUNTING | visits=19
-   [3] RESEARCH_TECH by tribe 1 : RIDING | visits=13
-   [4] RESEARCH_TECH by tribe 1 : FARMING | visits=14
-   [5] RESEARCH_TECH by tribe 1 : SHIELDS | visits=11
-   [6] DECLARE_WAR by tribe 1 on tribe 0 | visits=46
-   [7] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
-   [8] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=2
-   [9] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=2
-   [10] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=2
-   [11] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=2
-   [12] SEND_STARS by tribe 1 to: 0 : 6 stars | visits=2
->> [13] END_TURN by tribe 1 | visits=279
-   [14] RESOURCE_GATHERED by city 3 : FRUIT | visits=11
-   [15] RESOURCE_GATHERED by city 3 : FRUIT | visits=10
-   [16] MOVE by unit 4 to 7 : 7 | visits=1
-   [17] MOVE by unit 4 to 9 : 8 | visits=1
-   [18] MOVE by unit 4 to 9 : 7 | visits=1
-   [19] MOVE by unit 4 to 9 : 6 | visits=1
-   [20] MOVE by unit 4 to 8 : 6 | visits=1
+   [0] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=5
+   [1] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=4
+>> [2] END_TURN by tribe 1 | visits=8
+   [3] MOVE by unit 4 to 4 : 5 | visits=7
+   [4] MOVE by unit 4 to 6 : 7 | visits=2
+   [5] MOVE by unit 4 to 6 : 6 | visits=3
+   [6] MOVE by unit 4 to 5 : 7 | visits=3
+   [7] MOVE by unit 4 to 5 : 5 | visits=2
+   [8] MOVE by unit 4 to 4 : 7 | visits=2
+   [9] MOVE by unit 4 to 4 : 6 | visits=4
 ========================
 
 
 ===== MCTS DECISION =====
 Player: 0
-Available actions: 20
+Available actions: 10
+Chosen action: MOVE by unit 2 to 3 : 2
+---- Visit counts ----
+   [0] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=3
+   [1] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=4
+   [2] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=3
+   [3] END_TURN by tribe 0 | visits=1
+   [4] SPAWN by city 1 : WARRIOR | visits=4
+   [5] MOVE by unit 2 to 2 : 1 | visits=4
+   [6] MOVE by unit 2 to 4 : 2 | visits=6
+   [7] MOVE by unit 2 to 4 : 0 | visits=2
+>> [8] MOVE by unit 2 to 3 : 2 | visits=9
+   [9] MOVE by unit 2 to 3 : 0 | visits=4
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 4
+Chosen action: SEND_STARS by tribe 0 to: 1 : 2 stars
+---- Visit counts ----
+   [0] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=12
+>> [1] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=13
+   [2] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=6
+   [3] END_TURN by tribe 0 | visits=9
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 3
 Chosen action: END_TURN by tribe 0
 ---- Visit counts ----
-   [0] RESEARCH_TECH by tribe 0 : FISHING | visits=16
-   [1] RESEARCH_TECH by tribe 0 : HUNTING | visits=17
-   [2] RESEARCH_TECH by tribe 0 : ORGANIZATION | visits=13
-   [3] RESEARCH_TECH by tribe 0 : RIDING | visits=11
-   [4] RESEARCH_TECH by tribe 0 : MEDITATION | visits=6
-   [5] RESEARCH_TECH by tribe 0 : MINING | visits=10
-   [6] DECLARE_WAR by tribe 0 on tribe 1 | visits=40
-   [7] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=2
-   [8] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=2
-   [9] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=2
-   [10] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=2
-   [11] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=2
-   [12] SEND_STARS by tribe 0 to: 1 : 6 stars | visits=2
-   [13] SEND_STARS by tribe 0 to: 1 : 7 stars | visits=1
-   [14] SEND_STARS by tribe 0 to: 1 : 8 stars | visits=1
->> [15] END_TURN by tribe 0 | visits=294
-   [16] MOVE by unit 2 to 2 : 4 | visits=1
-   [17] MOVE by unit 2 to 4 : 3 | visits=1
-   [18] MOVE by unit 2 to 3 : 5 | visits=1
-   [19] MOVE by unit 2 to 2 : 5 | visits=1
+   [0] DECLARE_WAR by tribe 0 on tribe 1 | visits=10
+   [1] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=9
+>> [2] END_TURN by tribe 0 | visits=21
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 30
+Chosen action: MOVE by unit 4 to 6 : 6
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : HUNTING | visits=2
+   [1] RESEARCH_TECH by tribe 1 : ORGANIZATION | visits=1
+   [2] RESEARCH_TECH by tribe 1 : RIDING | visits=1
+   [3] RESEARCH_TECH by tribe 1 : MEDITATION | visits=1
+   [4] RESEARCH_TECH by tribe 1 : MINING | visits=1
+   [5] RESEARCH_TECH by tribe 1 : SAILING | visits=2
+   [6] RESEARCH_TECH by tribe 1 : WHALING | visits=2
+   [7] DECLARE_WAR by tribe 1 on tribe 0 | visits=1
+   [8] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [9] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=2
+   [10] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=1
+   [11] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=1
+   [12] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=1
+   [13] SEND_STARS by tribe 1 to: 0 : 6 stars | visits=1
+   [14] END_TURN by tribe 1 | visits=1
+   [15] MOVE by unit 4 to 4 : 5 | visits=1
+   [16] MOVE by unit 4 to 6 : 7 | visits=1
+>> [17] MOVE by unit 4 to 6 : 6 | visits=3
+   [18] MOVE by unit 4 to 5 : 7 | visits=2
+   [19] MOVE by unit 4 to 5 : 5 | visits=2
+   [20] MOVE by unit 4 to 4 : 7 | visits=1
+   [21] MOVE by unit 4 to 4 : 6 | visits=1
+   [22] MOVE by unit 5 to 4 : 7 | visits=1
+   [23] MOVE by unit 5 to 6 : 9 | visits=1
+   [24] MOVE by unit 5 to 6 : 8 | visits=2
+   [25] MOVE by unit 5 to 6 : 7 | visits=1
+   [26] MOVE by unit 5 to 5 : 9 | visits=1
+   [27] MOVE by unit 5 to 5 : 7 | visits=1
+   [28] MOVE by unit 5 to 4 : 9 | visits=2
+   [29] MOVE by unit 5 to 4 : 8 | visits=1
 ========================
 
 
 ===== MCTS DECISION =====
 Player: 1
 Available actions: 23
+Chosen action: RESEARCH_TECH by tribe 1 : ORGANIZATION
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : HUNTING | visits=1
+>> [1] RESEARCH_TECH by tribe 1 : ORGANIZATION | visits=8
+   [2] RESEARCH_TECH by tribe 1 : RIDING | visits=3
+   [3] RESEARCH_TECH by tribe 1 : MEDITATION | visits=2
+   [4] RESEARCH_TECH by tribe 1 : MINING | visits=1
+   [5] RESEARCH_TECH by tribe 1 : SAILING | visits=1
+   [6] RESEARCH_TECH by tribe 1 : WHALING | visits=1
+   [7] DECLARE_WAR by tribe 1 on tribe 0 | visits=2
+   [8] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [9] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=2
+   [10] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=2
+   [11] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=1
+   [12] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=1
+   [13] SEND_STARS by tribe 1 to: 0 : 6 stars | visits=1
+   [14] END_TURN by tribe 1 | visits=1
+   [15] MOVE by unit 5 to 4 : 7 | visits=2
+   [16] MOVE by unit 5 to 6 : 9 | visits=1
+   [17] MOVE by unit 5 to 6 : 8 | visits=1
+   [18] MOVE by unit 5 to 6 : 7 | visits=1
+   [19] MOVE by unit 5 to 5 : 9 | visits=2
+   [20] MOVE by unit 5 to 5 : 7 | visits=2
+   [21] MOVE by unit 5 to 4 : 9 | visits=1
+   [22] MOVE by unit 5 to 4 : 8 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 11
+Chosen action: SEND_STARS by tribe 1 to: 0 : 1 stars
+---- Visit counts ----
+   [0] DECLARE_WAR by tribe 1 on tribe 0 | visits=4
+>> [1] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=10
+   [2] END_TURN by tribe 1 | visits=2
+   [3] MOVE by unit 5 to 4 : 7 | visits=2
+   [4] MOVE by unit 5 to 6 : 9 | visits=7
+   [5] MOVE by unit 5 to 6 : 8 | visits=2
+   [6] MOVE by unit 5 to 6 : 7 | visits=2
+   [7] MOVE by unit 5 to 5 : 9 | visits=3
+   [8] MOVE by unit 5 to 5 : 7 | visits=3
+   [9] MOVE by unit 5 to 4 : 9 | visits=2
+   [10] MOVE by unit 5 to 4 : 8 | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 10
+Chosen action: MOVE by unit 5 to 6 : 9
+---- Visit counts ----
+   [0] DECLARE_WAR by tribe 1 on tribe 0 | visits=4
+   [1] END_TURN by tribe 1 | visits=2
+   [2] MOVE by unit 5 to 4 : 7 | visits=3
+>> [3] MOVE by unit 5 to 6 : 9 | visits=7
+   [4] MOVE by unit 5 to 6 : 8 | visits=3
+   [5] MOVE by unit 5 to 6 : 7 | visits=4
+   [6] MOVE by unit 5 to 5 : 9 | visits=4
+   [7] MOVE by unit 5 to 5 : 7 | visits=4
+   [8] MOVE by unit 5 to 4 : 9 | visits=3
+   [9] MOVE by unit 5 to 4 : 8 | visits=6
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 2
 Chosen action: END_TURN by tribe 1
 ---- Visit counts ----
-   [0] RESEARCH_TECH by tribe 1 : CLIMBING | visits=37
-   [1] RESEARCH_TECH by tribe 1 : FISHING | visits=16
-   [2] RESEARCH_TECH by tribe 1 : HUNTING | visits=18
-   [3] RESEARCH_TECH by tribe 1 : RIDING | visits=12
-   [4] RESEARCH_TECH by tribe 1 : FARMING | visits=15
-   [5] RESEARCH_TECH by tribe 1 : SHIELDS | visits=12
-   [6] DECLARE_WAR by tribe 1 on tribe 0 | visits=46
-   [7] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
-   [8] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=2
-   [9] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=2
-   [10] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=2
-   [11] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=2
-   [12] SEND_STARS by tribe 1 to: 0 : 6 stars | visits=2
-   [13] SEND_STARS by tribe 1 to: 0 : 7 stars | visits=1
-   [14] SEND_STARS by tribe 1 to: 0 : 8 stars | visits=1
->> [15] END_TURN by tribe 1 | visits=286
-   [16] RESOURCE_GATHERED by city 3 : FRUIT | visits=11
-   [17] RESOURCE_GATHERED by city 3 : FRUIT | visits=11
-   [18] MOVE by unit 4 to 7 : 7 | visits=1
-   [19] MOVE by unit 4 to 9 : 8 | visits=1
-   [20] MOVE by unit 4 to 9 : 7 | visits=1
-   [21] MOVE by unit 4 to 9 : 6 | visits=1
-   [22] MOVE by unit 4 to 8 : 6 | visits=1
+   [0] DECLARE_WAR by tribe 1 on tribe 0 | visits=18
+>> [1] END_TURN by tribe 1 | visits=22
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 18
+Chosen action: DECLARE_WAR by tribe 0 on tribe 1
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : CLIMBING | visits=2
+   [1] RESEARCH_TECH by tribe 0 : FISHING | visits=2
+   [2] RESEARCH_TECH by tribe 0 : HUNTING | visits=2
+   [3] RESEARCH_TECH by tribe 0 : RIDING | visits=2
+   [4] RESEARCH_TECH by tribe 0 : FARMING | visits=2
+   [5] RESEARCH_TECH by tribe 0 : SHIELDS | visits=2
+>> [6] DECLARE_WAR by tribe 0 on tribe 1 | visits=4
+   [7] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=1
+   [8] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=2
+   [9] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=3
+   [10] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=2
+   [11] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=2
+   [12] SEND_STARS by tribe 0 to: 1 : 6 stars | visits=3
+   [13] END_TURN by tribe 0 | visits=1
+   [14] MOVE by unit 2 to 2 : 1 | visits=3
+   [15] MOVE by unit 2 to 4 : 2 | visits=3
+   [16] MOVE by unit 2 to 3 : 1 | visits=2
+   [17] MOVE by unit 2 to 2 : 3 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 17
+Chosen action: MOVE by unit 2 to 2 : 3
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : CLIMBING | visits=2
+   [1] RESEARCH_TECH by tribe 0 : FISHING | visits=4
+   [2] RESEARCH_TECH by tribe 0 : HUNTING | visits=3
+   [3] RESEARCH_TECH by tribe 0 : RIDING | visits=2
+   [4] RESEARCH_TECH by tribe 0 : FARMING | visits=3
+   [5] RESEARCH_TECH by tribe 0 : SHIELDS | visits=2
+   [6] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=3
+   [7] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=2
+   [8] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=2
+   [9] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=2
+   [10] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=2
+   [11] SEND_STARS by tribe 0 to: 1 : 6 stars | visits=2
+   [12] END_TURN by tribe 0 | visits=1
+   [13] MOVE by unit 2 to 2 : 1 | visits=2
+   [14] MOVE by unit 2 to 4 : 2 | visits=2
+   [15] MOVE by unit 2 to 3 : 1 | visits=2
+>> [16] MOVE by unit 2 to 2 : 3 | visits=4
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 14
+Chosen action: SEND_STARS by tribe 0 to: 1 : 2 stars
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : CLIMBING | visits=3
+   [1] RESEARCH_TECH by tribe 0 : FISHING | visits=3
+   [2] RESEARCH_TECH by tribe 0 : HUNTING | visits=3
+   [3] RESEARCH_TECH by tribe 0 : RIDING | visits=5
+   [4] RESEARCH_TECH by tribe 0 : FARMING | visits=2
+   [5] RESEARCH_TECH by tribe 0 : SHIELDS | visits=2
+   [6] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=4
+>> [7] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=5
+   [8] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=2
+   [9] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=2
+   [10] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=3
+   [11] SEND_STARS by tribe 0 to: 1 : 6 stars | visits=2
+   [12] END_TURN by tribe 0 | visits=1
+   [13] SPAWN by city 1 : WARRIOR | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 10
+Chosen action: SEND_STARS by tribe 0 to: 1 : 2 stars
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : CLIMBING | visits=3
+   [1] RESEARCH_TECH by tribe 0 : FISHING | visits=3
+   [2] RESEARCH_TECH by tribe 0 : HUNTING | visits=7
+   [3] RESEARCH_TECH by tribe 0 : RIDING | visits=3
+   [4] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=4
+>> [5] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=9
+   [6] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=3
+   [7] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=3
+   [8] END_TURN by tribe 0 | visits=2
+   [9] SPAWN by city 1 : WARRIOR | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 4
+Chosen action: SPAWN by city 1 : WARRIOR
+---- Visit counts ----
+   [0] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=8
+   [1] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=6
+   [2] END_TURN by tribe 0 | visits=11
+>> [3] SPAWN by city 1 : WARRIOR | visits=15
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 28
+Chosen action: MOVE by unit 5 to 7 : 9
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : HUNTING | visits=1
+   [1] RESEARCH_TECH by tribe 1 : RIDING | visits=1
+   [2] RESEARCH_TECH by tribe 1 : FARMING | visits=1
+   [3] RESEARCH_TECH by tribe 1 : MEDITATION | visits=1
+   [4] RESEARCH_TECH by tribe 1 : MINING | visits=2
+   [5] RESEARCH_TECH by tribe 1 : SAILING | visits=2
+   [6] RESEARCH_TECH by tribe 1 : SHIELDS | visits=2
+   [7] RESEARCH_TECH by tribe 1 : WHALING | visits=2
+   [8] DECLARE_WAR by tribe 1 on tribe 0 | visits=1
+   [9] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [10] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=2
+   [11] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=1
+   [12] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=2
+   [13] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=2
+   [14] SEND_STARS by tribe 1 to: 0 : 6 stars | visits=2
+   [15] END_TURN by tribe 1 | visits=1
+   [16] MOVE by unit 4 to 5 : 5 | visits=2
+   [17] MOVE by unit 4 to 6 : 7 | visits=1
+   [18] MOVE by unit 4 to 5 : 7 | visits=1
+   [19] MOVE by unit 4 to 5 : 6 | visits=2
+   [20] MOVE by unit 5 to 5 : 8 | visits=1
+   [21] MOVE by unit 5 to 7 : 10 | visits=1
+>> [22] MOVE by unit 5 to 7 : 9 | visits=2
+   [23] MOVE by unit 5 to 7 : 8 | visits=1
+   [24] MOVE by unit 5 to 6 : 10 | visits=1
+   [25] MOVE by unit 5 to 6 : 8 | visits=1
+   [26] MOVE by unit 5 to 5 : 10 | visits=2
+   [27] MOVE by unit 5 to 5 : 9 | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 20
+Chosen action: RESEARCH_TECH by tribe 1 : WHALING
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : HUNTING | visits=1
+   [1] RESEARCH_TECH by tribe 1 : RIDING | visits=2
+   [2] RESEARCH_TECH by tribe 1 : FARMING | visits=1
+   [3] RESEARCH_TECH by tribe 1 : MEDITATION | visits=3
+   [4] RESEARCH_TECH by tribe 1 : MINING | visits=3
+   [5] RESEARCH_TECH by tribe 1 : SAILING | visits=1
+   [6] RESEARCH_TECH by tribe 1 : SHIELDS | visits=2
+>> [7] RESEARCH_TECH by tribe 1 : WHALING | visits=4
+   [8] DECLARE_WAR by tribe 1 on tribe 0 | visits=3
+   [9] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
+   [10] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=2
+   [11] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=4
+   [12] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=2
+   [13] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=2
+   [14] SEND_STARS by tribe 1 to: 0 : 6 stars | visits=1
+   [15] END_TURN by tribe 1 | visits=1
+   [16] MOVE by unit 4 to 5 : 5 | visits=2
+   [17] MOVE by unit 4 to 6 : 7 | visits=1
+   [18] MOVE by unit 4 to 5 : 7 | visits=2
+   [19] MOVE by unit 4 to 5 : 6 | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 6
+Chosen action: MOVE by unit 4 to 5 : 6
+---- Visit counts ----
+   [0] DECLARE_WAR by tribe 1 on tribe 0 | visits=6
+   [1] END_TURN by tribe 1 | visits=4
+   [2] MOVE by unit 4 to 5 : 5 | visits=6
+   [3] MOVE by unit 4 to 6 : 7 | visits=4
+   [4] MOVE by unit 4 to 5 : 7 | visits=7
+>> [5] MOVE by unit 4 to 5 : 6 | visits=13
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 2
+Chosen action: DECLARE_WAR by tribe 1 on tribe 0
+---- Visit counts ----
+>> [0] DECLARE_WAR by tribe 1 on tribe 0 | visits=22
+   [1] END_TURN by tribe 1 | visits=18
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 12
+Chosen action: MOVE by unit 6 to 4 : 2
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : CLIMBING | visits=3
+   [1] RESEARCH_TECH by tribe 0 : FISHING | visits=2
+   [2] RESEARCH_TECH by tribe 0 : HUNTING | visits=3
+   [3] RESEARCH_TECH by tribe 0 : RIDING | visits=4
+   [4] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=3
+   [5] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=2
+   [6] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=3
+   [7] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=3
+   [8] END_TURN by tribe 0 | visits=4
+   [9] MOVE by unit 6 to 2 : 1 | visits=3
+>> [10] MOVE by unit 6 to 4 : 2 | visits=7
+   [11] MOVE by unit 6 to 3 : 1 | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 11
+Chosen action: SEND_STARS by tribe 0 to: 1 : 2 stars
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : CLIMBING | visits=4
+   [1] RESEARCH_TECH by tribe 0 : FISHING | visits=3
+   [2] RESEARCH_TECH by tribe 0 : HUNTING | visits=3
+   [3] RESEARCH_TECH by tribe 0 : RIDING | visits=3
+   [4] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=4
+>> [5] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=7
+   [6] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=4
+   [7] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=2
+   [8] END_TURN by tribe 0 | visits=3
+   [9] SPAWN by city 1 : WARRIOR | visits=3
+   [10] MOVE by unit 2 to 3 : 2 | visits=4
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 6
+Chosen action: SEND_STARS by tribe 0 to: 1 : 2 stars
+---- Visit counts ----
+   [0] DECLARE_WAR by tribe 0 on tribe 1 | visits=8
+   [1] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=7
+>> [2] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=8
+   [3] END_TURN by tribe 0 | visits=5
+   [4] SPAWN by city 1 : WARRIOR | visits=4
+   [5] MOVE by unit 2 to 3 : 2 | visits=8
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 3
+Chosen action: MOVE by unit 2 to 3 : 2
+---- Visit counts ----
+   [0] DECLARE_WAR by tribe 0 on tribe 1 | visits=10
+   [1] END_TURN by tribe 0 | visits=13
+>> [2] MOVE by unit 2 to 3 : 2 | visits=17
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 2
+Chosen action: DECLARE_WAR by tribe 0 on tribe 1
+---- Visit counts ----
+>> [0] DECLARE_WAR by tribe 0 on tribe 1 | visits=25
+   [1] END_TURN by tribe 0 | visits=15
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 29
+Chosen action: MOVE by unit 4 to 5 : 5
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : HUNTING | visits=1
+   [1] RESEARCH_TECH by tribe 1 : RIDING | visits=2
+   [2] RESEARCH_TECH by tribe 1 : FARMING | visits=2
+   [3] RESEARCH_TECH by tribe 1 : MEDITATION | visits=1
+   [4] RESEARCH_TECH by tribe 1 : MINING | visits=1
+   [5] RESEARCH_TECH by tribe 1 : SAILING | visits=2
+   [6] RESEARCH_TECH by tribe 1 : SHIELDS | visits=1
+   [7] RESEARCH_TECH by tribe 1 : AQUATISM | visits=1
+   [8] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [9] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [10] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=1
+   [11] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=1
+   [12] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=1
+   [13] SEND_STARS by tribe 1 to: 0 : 6 stars | visits=1
+   [14] END_TURN by tribe 1 | visits=1
+   [15] MOVE by unit 4 to 4 : 5 | visits=1
+   [16] MOVE by unit 4 to 6 : 7 | visits=2
+   [17] MOVE by unit 4 to 6 : 6 | visits=2
+   [18] MOVE by unit 4 to 5 : 7 | visits=2
+>> [19] MOVE by unit 4 to 5 : 5 | visits=3
+   [20] MOVE by unit 4 to 4 : 7 | visits=1
+   [21] MOVE by unit 4 to 4 : 6 | visits=2
+   [22] MOVE by unit 5 to 6 : 8 | visits=1
+   [23] MOVE by unit 5 to 8 : 10 | visits=1
+   [24] MOVE by unit 5 to 8 : 9 | visits=1
+   [25] MOVE by unit 5 to 7 : 10 | visits=1
+   [26] MOVE by unit 5 to 7 : 8 | visits=2
+   [27] MOVE by unit 5 to 6 : 10 | visits=1
+   [28] MOVE by unit 5 to 6 : 9 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 22
+Chosen action: MOVE by unit 5 to 6 : 10
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : HUNTING | visits=2
+   [1] RESEARCH_TECH by tribe 1 : RIDING | visits=1
+   [2] RESEARCH_TECH by tribe 1 : FARMING | visits=2
+   [3] RESEARCH_TECH by tribe 1 : MEDITATION | visits=2
+   [4] RESEARCH_TECH by tribe 1 : MINING | visits=2
+   [5] RESEARCH_TECH by tribe 1 : SAILING | visits=2
+   [6] RESEARCH_TECH by tribe 1 : SHIELDS | visits=1
+   [7] RESEARCH_TECH by tribe 1 : AQUATISM | visits=2
+   [8] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [9] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [10] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=2
+   [11] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=2
+   [12] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=5
+   [13] SEND_STARS by tribe 1 to: 0 : 6 stars | visits=1
+   [14] END_TURN by tribe 1 | visits=1
+   [15] MOVE by unit 5 to 6 : 8 | visits=1
+   [16] MOVE by unit 5 to 8 : 10 | visits=2
+   [17] MOVE by unit 5 to 8 : 9 | visits=1
+   [18] MOVE by unit 5 to 7 : 10 | visits=2
+   [19] MOVE by unit 5 to 7 : 8 | visits=1
+>> [20] MOVE by unit 5 to 6 : 10 | visits=5
+   [21] MOVE by unit 5 to 6 : 9 | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 15
+Chosen action: RESEARCH_TECH by tribe 1 : MEDITATION
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : HUNTING | visits=3
+   [1] RESEARCH_TECH by tribe 1 : RIDING | visits=3
+   [2] RESEARCH_TECH by tribe 1 : FARMING | visits=2
+>> [3] RESEARCH_TECH by tribe 1 : MEDITATION | visits=4
+   [4] RESEARCH_TECH by tribe 1 : MINING | visits=2
+   [5] RESEARCH_TECH by tribe 1 : SAILING | visits=2
+   [6] RESEARCH_TECH by tribe 1 : SHIELDS | visits=2
+   [7] RESEARCH_TECH by tribe 1 : AQUATISM | visits=2
+   [8] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=4
+   [9] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=3
+   [10] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=2
+   [11] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=3
+   [12] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=3
+   [13] SEND_STARS by tribe 1 to: 0 : 6 stars | visits=2
+   [14] END_TURN by tribe 1 | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 15
+Chosen action: MOVE by unit 6 to 5 : 1
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : CLIMBING | visits=2
+   [1] RESEARCH_TECH by tribe 0 : FISHING | visits=3
+   [2] RESEARCH_TECH by tribe 0 : HUNTING | visits=3
+   [3] RESEARCH_TECH by tribe 0 : RIDING | visits=4
+   [4] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=4
+   [5] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=2
+   [6] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=2
+   [7] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=2
+   [8] END_TURN by tribe 0 | visits=1
+   [9] MOVE by unit 2 to 2 : 1 | visits=2
+   [10] MOVE by unit 2 to 3 : 1 | visits=2
+   [11] MOVE by unit 2 to 2 : 3 | visits=2
+   [12] MOVE by unit 6 to 3 : 1 | visits=4
+   [13] MOVE by unit 6 to 5 : 2 | visits=2
+>> [14] MOVE by unit 6 to 5 : 1 | visits=5
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 13
+Chosen action: MOVE by unit 2 to 2 : 3
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : CLIMBING | visits=3
+   [1] RESEARCH_TECH by tribe 0 : FISHING | visits=2
+   [2] RESEARCH_TECH by tribe 0 : HUNTING | visits=4
+   [3] RESEARCH_TECH by tribe 0 : RIDING | visits=3
+   [4] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=4
+   [5] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=3
+   [6] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=3
+   [7] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=3
+   [8] END_TURN by tribe 0 | visits=1
+   [9] MOVE by unit 2 to 2 : 1 | visits=4
+   [10] MOVE by unit 2 to 4 : 2 | visits=2
+   [11] MOVE by unit 2 to 3 : 1 | visits=3
+>> [12] MOVE by unit 2 to 2 : 3 | visits=5
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 10
+Chosen action: RESEARCH_TECH by tribe 0 : HUNTING
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : CLIMBING | visits=2
+   [1] RESEARCH_TECH by tribe 0 : FISHING | visits=2
+>> [2] RESEARCH_TECH by tribe 0 : HUNTING | visits=12
+   [3] RESEARCH_TECH by tribe 0 : RIDING | visits=2
+   [4] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=4
+   [5] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=4
+   [6] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=4
+   [7] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=4
+   [8] END_TURN by tribe 0 | visits=2
+   [9] SPAWN by city 1 : WARRIOR | visits=4
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 14
+Chosen action: MOVE by unit 4 to 4 : 5
+---- Visit counts ----
+   [0] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
+   [1] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=2
+   [2] END_TURN by tribe 1 | visits=1
+>> [3] MOVE by unit 4 to 4 : 5 | visits=6
+   [4] MOVE by unit 4 to 6 : 6 | visits=3
+   [5] MOVE by unit 4 to 6 : 4 | visits=3
+   [6] MOVE by unit 4 to 5 : 6 | visits=3
+   [7] MOVE by unit 4 to 5 : 4 | visits=2
+   [8] MOVE by unit 4 to 4 : 6 | visits=3
+   [9] MOVE by unit 5 to 5 : 9 | visits=3
+   [10] MOVE by unit 5 to 7 : 10 | visits=2
+   [11] MOVE by unit 5 to 7 : 9 | visits=6
+   [12] MOVE by unit 5 to 6 : 9 | visits=2
+   [13] MOVE by unit 5 to 5 : 10 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 13
+Chosen action: MOVE by unit 5 to 5 : 9
+---- Visit counts ----
+   [0] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
+   [1] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=3
+   [2] END_TURN by tribe 1 | visits=1
+   [3] RESOURCE_GATHERED by city 3 : ANIMAL | visits=4
+   [4] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [5] RESOURCE_GATHERED by city 3 : ANIMAL | visits=3
+   [6] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [7] RESOURCE_GATHERED by city 3 : ANIMAL | visits=3
+>> [8] MOVE by unit 5 to 5 : 9 | visits=6
+   [9] MOVE by unit 5 to 7 : 10 | visits=2
+   [10] MOVE by unit 5 to 7 : 9 | visits=4
+   [11] MOVE by unit 5 to 6 : 9 | visits=4
+   [12] MOVE by unit 5 to 5 : 10 | visits=4
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 8
+Chosen action: SEND_STARS by tribe 1 to: 0 : 2 stars
+---- Visit counts ----
+   [0] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=8
+>> [1] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=8
+   [2] END_TURN by tribe 1 | visits=3
+   [3] RESOURCE_GATHERED by city 3 : ANIMAL | visits=4
+   [4] RESOURCE_GATHERED by city 3 : ANIMAL | visits=5
+   [5] RESOURCE_GATHERED by city 3 : ANIMAL | visits=5
+   [6] RESOURCE_GATHERED by city 3 : ANIMAL | visits=4
+   [7] RESOURCE_GATHERED by city 3 : ANIMAL | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 2
+Chosen action: DECLARE_WAR by tribe 1 on tribe 0
+---- Visit counts ----
+>> [0] DECLARE_WAR by tribe 1 on tribe 0 | visits=24
+   [1] END_TURN by tribe 1 | visits=16
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 23
+Chosen action: RESOURCE_GATHERED by city 1 : ANIMAL
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : CLIMBING | visits=1
+   [1] RESEARCH_TECH by tribe 0 : FISHING | visits=2
+   [2] RESEARCH_TECH by tribe 0 : RIDING | visits=1
+   [3] RESEARCH_TECH by tribe 0 : ARCHERY | visits=2
+   [4] RESEARCH_TECH by tribe 0 : FARMING | visits=2
+   [5] RESEARCH_TECH by tribe 0 : FORESTRY | visits=2
+   [6] RESEARCH_TECH by tribe 0 : SHIELDS | visits=1
+   [7] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=3
+   [8] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=3
+   [9] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=1
+   [10] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=1
+   [11] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=2
+   [12] END_TURN by tribe 0 | visits=1
+>> [13] RESOURCE_GATHERED by city 1 : ANIMAL | visits=4
+   [14] SPAWN by city 1 : WARRIOR | visits=2
+   [15] MOVE by unit 2 to 3 : 2 | visits=1
+   [16] MOVE by unit 6 to 4 : 0 | visits=1
+   [17] MOVE by unit 6 to 6 : 2 | visits=2
+   [18] MOVE by unit 6 to 6 : 1 | visits=2
+   [19] MOVE by unit 6 to 6 : 0 | visits=1
+   [20] MOVE by unit 6 to 5 : 2 | visits=2
+   [21] MOVE by unit 6 to 5 : 0 | visits=1
+   [22] MOVE by unit 6 to 4 : 2 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 13
+Chosen action: MOVE by unit 2 to 3 : 2
+---- Visit counts ----
+   [0] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=4
+   [1] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=3
+   [2] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=2
+   [3] END_TURN by tribe 0 | visits=1
+   [4] SPAWN by city 1 : WARRIOR | visits=3
+>> [5] MOVE by unit 2 to 3 : 2 | visits=5
+   [6] MOVE by unit 6 to 4 : 0 | visits=2
+   [7] MOVE by unit 6 to 6 : 2 | visits=3
+   [8] MOVE by unit 6 to 6 : 1 | visits=5
+   [9] MOVE by unit 6 to 6 : 0 | visits=4
+   [10] MOVE by unit 6 to 5 : 2 | visits=2
+   [11] MOVE by unit 6 to 5 : 0 | visits=4
+   [12] MOVE by unit 6 to 4 : 2 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 11
+Chosen action: SEND_STARS by tribe 0 to: 1 : 2 stars
+---- Visit counts ----
+   [0] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=3
+>> [1] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=6
+   [2] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=3
+   [3] END_TURN by tribe 0 | visits=2
+   [4] MOVE by unit 6 to 4 : 0 | visits=5
+   [5] MOVE by unit 6 to 6 : 2 | visits=4
+   [6] MOVE by unit 6 to 6 : 1 | visits=2
+   [7] MOVE by unit 6 to 6 : 0 | visits=2
+   [8] MOVE by unit 6 to 5 : 2 | visits=5
+   [9] MOVE by unit 6 to 5 : 0 | visits=3
+   [10] MOVE by unit 6 to 4 : 2 | visits=5
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 10
+Chosen action: MOVE by unit 6 to 6 : 2
+---- Visit counts ----
+   [0] DECLARE_WAR by tribe 0 on tribe 1 | visits=4
+   [1] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=4
+   [2] END_TURN by tribe 0 | visits=3
+   [3] MOVE by unit 6 to 4 : 0 | visits=4
+>> [4] MOVE by unit 6 to 6 : 2 | visits=7
+   [5] MOVE by unit 6 to 6 : 1 | visits=2
+   [6] MOVE by unit 6 to 6 : 0 | visits=4
+   [7] MOVE by unit 6 to 5 : 2 | visits=4
+   [8] MOVE by unit 6 to 5 : 0 | visits=4
+   [9] MOVE by unit 6 to 4 : 2 | visits=4
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 3
+Chosen action: END_TURN by tribe 0
+---- Visit counts ----
+   [0] DECLARE_WAR by tribe 0 on tribe 1 | visits=11
+   [1] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=10
+>> [2] END_TURN by tribe 0 | visits=19
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 24
+Chosen action: MOVE by unit 4 to 5 : 4
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : RIDING | visits=1
+   [1] DECLARE_WAR by tribe 1 on tribe 0 | visits=2
+   [2] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [3] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [4] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=2
+   [5] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=1
+   [6] END_TURN by tribe 1 | visits=1
+   [7] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [8] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [9] RESOURCE_GATHERED by city 3 : ANIMAL | visits=3
+   [10] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [11] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [12] MOVE by unit 4 to 4 : 6 | visits=1
+   [13] MOVE by unit 4 to 5 : 6 | visits=4
+   [14] MOVE by unit 4 to 5 : 5 | visits=1
+>> [15] MOVE by unit 4 to 5 : 4 | visits=7
+   [16] MOVE by unit 5 to 4 : 8 | visits=2
+   [17] MOVE by unit 5 to 6 : 10 | visits=1
+   [18] MOVE by unit 5 to 6 : 9 | visits=3
+   [19] MOVE by unit 5 to 6 : 8 | visits=1
+   [20] MOVE by unit 5 to 5 : 10 | visits=1
+   [21] MOVE by unit 5 to 5 : 8 | visits=1
+   [22] MOVE by unit 5 to 4 : 10 | visits=1
+   [23] MOVE by unit 5 to 4 : 9 | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 20
+Chosen action: SEND_STARS by tribe 1 to: 0 : 2 stars
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : RIDING | visits=1
+   [1] DECLARE_WAR by tribe 1 on tribe 0 | visits=1
+   [2] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
+>> [3] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=3
+   [4] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=1
+   [5] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=1
+   [6] END_TURN by tribe 1 | visits=1
+   [7] RESOURCE_GATHERED by city 3 : ANIMAL | visits=3
+   [8] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [9] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [10] RESOURCE_GATHERED by city 3 : ANIMAL | visits=3
+   [11] RESOURCE_GATHERED by city 3 : ANIMAL | visits=3
+   [12] MOVE by unit 5 to 4 : 8 | visits=3
+   [13] MOVE by unit 5 to 6 : 10 | visits=2
+   [14] MOVE by unit 5 to 6 : 9 | visits=1
+   [15] MOVE by unit 5 to 6 : 8 | visits=1
+   [16] MOVE by unit 5 to 5 : 10 | visits=3
+   [17] MOVE by unit 5 to 5 : 8 | visits=2
+   [18] MOVE by unit 5 to 4 : 10 | visits=2
+   [19] MOVE by unit 5 to 4 : 9 | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 17
+Chosen action: RESOURCE_GATHERED by city 3 : ANIMAL
+---- Visit counts ----
+   [0] DECLARE_WAR by tribe 1 on tribe 0 | visits=2
+   [1] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
+   [2] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=2
+   [3] END_TURN by tribe 1 | visits=3
+>> [4] RESOURCE_GATHERED by city 3 : ANIMAL | visits=5
+   [5] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [6] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [7] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [8] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [9] MOVE by unit 5 to 4 : 8 | visits=2
+   [10] MOVE by unit 5 to 6 : 10 | visits=2
+   [11] MOVE by unit 5 to 6 : 9 | visits=2
+   [12] MOVE by unit 5 to 6 : 8 | visits=2
+   [13] MOVE by unit 5 to 5 : 10 | visits=2
+   [14] MOVE by unit 5 to 5 : 8 | visits=2
+   [15] MOVE by unit 5 to 4 : 10 | visits=3
+   [16] MOVE by unit 5 to 4 : 9 | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 10
+Chosen action: DECLARE_WAR by tribe 1 on tribe 0
+---- Visit counts ----
+>> [0] DECLARE_WAR by tribe 1 on tribe 0 | visits=10
+   [1] END_TURN by tribe 1 | visits=3
+   [2] MOVE by unit 5 to 4 : 8 | visits=3
+   [3] MOVE by unit 5 to 6 : 10 | visits=3
+   [4] MOVE by unit 5 to 6 : 9 | visits=4
+   [5] MOVE by unit 5 to 6 : 8 | visits=4
+   [6] MOVE by unit 5 to 5 : 10 | visits=3
+   [7] MOVE by unit 5 to 5 : 8 | visits=4
+   [8] MOVE by unit 5 to 4 : 10 | visits=3
+   [9] MOVE by unit 5 to 4 : 9 | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 9
+Chosen action: MOVE by unit 5 to 5 : 10
+---- Visit counts ----
+   [0] END_TURN by tribe 1 | visits=3
+   [1] MOVE by unit 5 to 4 : 8 | visits=3
+   [2] MOVE by unit 5 to 6 : 10 | visits=4
+   [3] MOVE by unit 5 to 6 : 9 | visits=4
+   [4] MOVE by unit 5 to 6 : 8 | visits=3
+>> [5] MOVE by unit 5 to 5 : 10 | visits=9
+   [6] MOVE by unit 5 to 5 : 8 | visits=4
+   [7] MOVE by unit 5 to 4 : 10 | visits=6
+   [8] MOVE by unit 5 to 4 : 9 | visits=4
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 25
+Chosen action: MOVE by unit 2 to 2 : 1
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : CLIMBING | visits=2
+   [1] RESEARCH_TECH by tribe 0 : FISHING | visits=2
+   [2] RESEARCH_TECH by tribe 0 : RIDING | visits=3
+   [3] RESEARCH_TECH by tribe 0 : ARCHERY | visits=1
+   [4] RESEARCH_TECH by tribe 0 : FARMING | visits=1
+   [5] RESEARCH_TECH by tribe 0 : FORESTRY | visits=1
+   [6] RESEARCH_TECH by tribe 0 : SHIELDS | visits=2
+   [7] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=1
+   [8] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=2
+   [9] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=1
+   [10] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=1
+   [11] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=1
+   [12] SEND_STARS by tribe 0 to: 1 : 6 stars | visits=2
+   [13] SEND_STARS by tribe 0 to: 1 : 7 stars | visits=1
+   [14] END_TURN by tribe 0 | visits=1
+>> [15] MOVE by unit 2 to 2 : 1 | visits=4
+   [16] MOVE by unit 2 to 4 : 2 | visits=1
+   [17] MOVE by unit 2 to 3 : 1 | visits=1
+   [18] MOVE by unit 2 to 2 : 3 | visits=1
+   [19] MOVE by unit 6 to 5 : 1 | visits=2
+   [20] MOVE by unit 6 to 7 : 2 | visits=3
+   [21] MOVE by unit 6 to 7 : 1 | visits=1
+   [22] MOVE by unit 6 to 6 : 3 | visits=2
+   [23] MOVE by unit 6 to 6 : 1 | visits=1
+   [24] MOVE by unit 6 to 5 : 2 | visits=2
 ========================
 
 
 ===== MCTS DECISION =====
 Player: 0
 Available actions: 22
-Chosen action: END_TURN by tribe 0
+Chosen action: MOVE by unit 6 to 6 : 3
 ---- Visit counts ----
-   [0] RESEARCH_TECH by tribe 0 : FISHING | visits=19
-   [1] RESEARCH_TECH by tribe 0 : HUNTING | visits=20
-   [2] RESEARCH_TECH by tribe 0 : ORGANIZATION | visits=15
-   [3] RESEARCH_TECH by tribe 0 : RIDING | visits=11
-   [4] RESEARCH_TECH by tribe 0 : MEDITATION | visits=6
-   [5] RESEARCH_TECH by tribe 0 : MINING | visits=10
-   [6] DECLARE_WAR by tribe 0 on tribe 1 | visits=39
+   [0] RESEARCH_TECH by tribe 0 : CLIMBING | visits=1
+   [1] RESEARCH_TECH by tribe 0 : FISHING | visits=3
+   [2] RESEARCH_TECH by tribe 0 : RIDING | visits=1
+   [3] RESEARCH_TECH by tribe 0 : ARCHERY | visits=2
+   [4] RESEARCH_TECH by tribe 0 : FARMING | visits=1
+   [5] RESEARCH_TECH by tribe 0 : FORESTRY | visits=3
+   [6] RESEARCH_TECH by tribe 0 : SHIELDS | visits=2
+   [7] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=2
+   [8] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=2
+   [9] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=1
+   [10] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=2
+   [11] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=3
+   [12] SEND_STARS by tribe 0 to: 1 : 6 stars | visits=1
+   [13] SEND_STARS by tribe 0 to: 1 : 7 stars | visits=1
+   [14] END_TURN by tribe 0 | visits=2
+   [15] SPAWN by city 1 : WARRIOR | visits=2
+   [16] MOVE by unit 6 to 5 : 1 | visits=1
+   [17] MOVE by unit 6 to 7 : 2 | visits=2
+   [18] MOVE by unit 6 to 7 : 1 | visits=2
+>> [19] MOVE by unit 6 to 6 : 3 | visits=3
+   [20] MOVE by unit 6 to 6 : 1 | visits=1
+   [21] MOVE by unit 6 to 5 : 2 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 17
+Chosen action: RESEARCH_TECH by tribe 0 : FORESTRY
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : CLIMBING | visits=4
+   [1] RESEARCH_TECH by tribe 0 : FISHING | visits=2
+   [2] RESEARCH_TECH by tribe 0 : RIDING | visits=2
+   [3] RESEARCH_TECH by tribe 0 : ARCHERY | visits=2
+   [4] RESEARCH_TECH by tribe 0 : FARMING | visits=2
+>> [5] RESEARCH_TECH by tribe 0 : FORESTRY | visits=4
+   [6] RESEARCH_TECH by tribe 0 : SHIELDS | visits=2
    [7] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=2
    [8] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=2
    [9] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=2
    [10] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=2
    [11] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=2
    [12] SEND_STARS by tribe 0 to: 1 : 6 stars | visits=2
-   [13] SEND_STARS by tribe 0 to: 1 : 7 stars | visits=1
-   [14] SEND_STARS by tribe 0 to: 1 : 8 stars | visits=1
-   [15] SEND_STARS by tribe 0 to: 1 : 9 stars | visits=1
-   [16] SEND_STARS by tribe 0 to: 1 : 10 stars | visits=2
->> [17] END_TURN by tribe 0 | visits=296
-   [18] MOVE by unit 2 to 2 : 4 | visits=1
-   [19] MOVE by unit 2 to 4 : 3 | visits=1
-   [20] MOVE by unit 2 to 3 : 5 | visits=1
-   [21] MOVE by unit 2 to 2 : 5 | visits=1
+   [13] SEND_STARS by tribe 0 to: 1 : 7 stars | visits=4
+   [14] END_TURN by tribe 0 | visits=2
+   [15] SPAWN by city 1 : WARRIOR | visits=2
+   [16] ATTACK by unit 6 to unit 4 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 6
+Chosen action: ATTACK by unit 6 to unit 4
+---- Visit counts ----
+   [0] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=7
+   [1] END_TURN by tribe 0 | visits=5
+   [2] BUILD by city 1 at 4 : 2 : LUMBER_HUT | visits=5
+   [3] CLEAR_FOREST by city 1 at 4 : 2 | visits=8
+   [4] SPAWN by city 1 : WARRIOR | visits=7
+>> [5] ATTACK by unit 6 to unit 4 | visits=8
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 5
+Chosen action: BUILD by city 1 at 4 : 2 : LUMBER_HUT
+---- Visit counts ----
+   [0] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=6
+   [1] END_TURN by tribe 0 | visits=6
+>> [2] BUILD by city 1 at 4 : 2 : LUMBER_HUT | visits=11
+   [3] CLEAR_FOREST by city 1 at 4 : 2 | visits=9
+   [4] SPAWN by city 1 : WARRIOR | visits=8
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 18
+Chosen action: SEND_STARS by tribe 1 to: 0 : 2 stars
+---- Visit counts ----
+   [0] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
+>> [1] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=4
+   [2] END_TURN by tribe 1 | visits=2
+   [3] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [4] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [5] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [6] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [7] ATTACK by unit 4 to unit 6 | visits=2
+   [8] MOVE by unit 4 to 4 : 5 | visits=2
+   [9] MOVE by unit 4 to 6 : 4 | visits=2
+   [10] MOVE by unit 4 to 5 : 5 | visits=3
+   [11] MOVE by unit 4 to 5 : 3 | visits=1
+   [12] RECOVER by unit 4 | visits=4
+   [13] MOVE by unit 5 to 4 : 9 | visits=2
+   [14] MOVE by unit 5 to 6 : 10 | visits=2
+   [15] MOVE by unit 5 to 6 : 9 | visits=3
+   [16] MOVE by unit 5 to 5 : 9 | visits=2
+   [17] MOVE by unit 5 to 4 : 10 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 12
+Chosen action: MOVE by unit 5 to 6 : 10
+---- Visit counts ----
+   [0] END_TURN by tribe 1 | visits=3
+   [1] ATTACK by unit 4 to unit 6 | visits=4
+   [2] MOVE by unit 4 to 4 : 5 | visits=3
+   [3] MOVE by unit 4 to 6 : 4 | visits=2
+   [4] MOVE by unit 4 to 5 : 5 | visits=3
+   [5] MOVE by unit 4 to 5 : 3 | visits=4
+   [6] RECOVER by unit 4 | visits=2
+   [7] MOVE by unit 5 to 4 : 9 | visits=4
+>> [8] MOVE by unit 5 to 6 : 10 | visits=5
+   [9] MOVE by unit 5 to 6 : 9 | visits=4
+   [10] MOVE by unit 5 to 5 : 9 | visits=3
+   [11] MOVE by unit 5 to 4 : 10 | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 7
+Chosen action: MOVE by unit 4 to 5 : 5
+---- Visit counts ----
+   [0] END_TURN by tribe 1 | visits=4
+   [1] ATTACK by unit 4 to unit 6 | visits=7
+   [2] MOVE by unit 4 to 4 : 5 | visits=6
+   [3] MOVE by unit 4 to 6 : 4 | visits=5
+>> [4] MOVE by unit 4 to 5 : 5 | visits=9
+   [5] MOVE by unit 4 to 5 : 3 | visits=5
+   [6] RECOVER by unit 4 | visits=4
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 22
+Chosen action: RESEARCH_TECH by tribe 0 : ARCHERY
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : CLIMBING | visits=2
+   [1] RESEARCH_TECH by tribe 0 : FISHING | visits=1
+   [2] RESEARCH_TECH by tribe 0 : RIDING | visits=2
+>> [3] RESEARCH_TECH by tribe 0 : ARCHERY | visits=4
+   [4] RESEARCH_TECH by tribe 0 : FARMING | visits=3
+   [5] RESEARCH_TECH by tribe 0 : SHIELDS | visits=1
+   [6] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=1
+   [7] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=1
+   [8] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=1
+   [9] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=2
+   [10] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=2
+   [11] END_TURN by tribe 0 | visits=4
+   [12] SPAWN by city 1 : WARRIOR | visits=2
+   [13] MOVE by unit 2 to 3 : 0 | visits=2
+   [14] MOVE by unit 2 to 3 : 2 | visits=1
+   [15] MOVE by unit 2 to 3 : 1 | visits=2
+   [16] MOVE by unit 6 to 5 : 2 | visits=3
+   [17] MOVE by unit 6 to 7 : 2 | visits=1
+   [18] MOVE by unit 6 to 6 : 4 | visits=1
+   [19] MOVE by unit 6 to 6 : 2 | visits=1
+   [20] MOVE by unit 6 to 5 : 4 | visits=1
+   [21] RECOVER by unit 6 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 10
+Chosen action: MOVE by unit 2 to 3 : 0
+---- Visit counts ----
+   [0] END_TURN by tribe 0 | visits=1
+>> [1] MOVE by unit 2 to 3 : 0 | visits=7
+   [2] MOVE by unit 2 to 3 : 2 | visits=5
+   [3] MOVE by unit 2 to 3 : 1 | visits=2
+   [4] MOVE by unit 6 to 5 : 2 | visits=4
+   [5] MOVE by unit 6 to 7 : 2 | visits=2
+   [6] MOVE by unit 6 to 6 : 4 | visits=4
+   [7] MOVE by unit 6 to 6 : 2 | visits=6
+   [8] MOVE by unit 6 to 5 : 4 | visits=5
+   [9] RECOVER by unit 6 | visits=4
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 7
+Chosen action: END_TURN by tribe 0
+---- Visit counts ----
+>> [0] END_TURN by tribe 0 | visits=10
+   [1] MOVE by unit 6 to 5 : 2 | visits=4
+   [2] MOVE by unit 6 to 7 : 2 | visits=4
+   [3] MOVE by unit 6 to 6 : 4 | visits=4
+   [4] MOVE by unit 6 to 6 : 2 | visits=6
+   [5] MOVE by unit 6 to 5 : 4 | visits=4
+   [6] RECOVER by unit 6 | visits=8
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 19
+Chosen action: MOVE by unit 5 to 5 : 9
+---- Visit counts ----
+   [0] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
+   [1] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [2] END_TURN by tribe 1 | visits=2
+   [3] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [4] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [5] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [6] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [7] MOVE by unit 4 to 4 : 5 | visits=2
+   [8] MOVE by unit 4 to 6 : 6 | visits=2
+   [9] MOVE by unit 4 to 6 : 4 | visits=2
+   [10] MOVE by unit 4 to 5 : 6 | visits=2
+   [11] MOVE by unit 4 to 5 : 4 | visits=2
+   [12] MOVE by unit 4 to 4 : 6 | visits=2
+   [13] RECOVER by unit 4 | visits=2
+>> [14] MOVE by unit 5 to 5 : 9 | visits=7
+   [15] MOVE by unit 5 to 7 : 10 | visits=2
+   [16] MOVE by unit 5 to 7 : 9 | visits=2
+   [17] MOVE by unit 5 to 6 : 9 | visits=2
+   [18] MOVE by unit 5 to 5 : 10 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 14
+Chosen action: RESOURCE_GATHERED by city 3 : ANIMAL
+---- Visit counts ----
+   [0] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
+   [1] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=3
+   [2] END_TURN by tribe 1 | visits=1
+>> [3] RESOURCE_GATHERED by city 3 : ANIMAL | visits=5
+   [4] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [5] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [6] RESOURCE_GATHERED by city 3 : ANIMAL | visits=4
+   [7] MOVE by unit 4 to 4 : 5 | visits=4
+   [8] MOVE by unit 4 to 6 : 6 | visits=4
+   [9] MOVE by unit 4 to 6 : 4 | visits=4
+   [10] MOVE by unit 4 to 5 : 6 | visits=2
+   [11] MOVE by unit 4 to 5 : 4 | visits=2
+   [12] MOVE by unit 4 to 4 : 6 | visits=3
+   [13] RECOVER by unit 4 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 2
+Chosen action: LEVEL_UP by city 3 with bonus EXPLORER
+---- Visit counts ----
+   [0] LEVEL_UP by city 3 with bonus WORKSHOP | visits=16
+>> [1] LEVEL_UP by city 3 with bonus EXPLORER | visits=24
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 8
+Chosen action: MOVE by unit 4 to 5 : 4
+---- Visit counts ----
+   [0] END_TURN by tribe 1 | visits=3
+   [1] MOVE by unit 4 to 4 : 5 | visits=6
+   [2] MOVE by unit 4 to 6 : 6 | visits=4
+   [3] MOVE by unit 4 to 6 : 4 | visits=5
+   [4] MOVE by unit 4 to 5 : 6 | visits=6
+>> [5] MOVE by unit 4 to 5 : 4 | visits=7
+   [6] MOVE by unit 4 to 4 : 6 | visits=5
+   [7] RECOVER by unit 4 | visits=4
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 2
+Chosen action: END_TURN by tribe 1
+---- Visit counts ----
+>> [0] END_TURN by tribe 1 | visits=28
+   [1] ATTACK by unit 4 to unit 6 | visits=12
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 15
+Chosen action: MOVE by unit 2 to 3 : 1
+---- Visit counts ----
+   [0] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=2
+   [1] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=2
+   [2] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=3
+   [3] END_TURN by tribe 0 | visits=1
+   [4] SPAWN by city 1 : WARRIOR | visits=2
+   [5] SPAWN by city 1 : ARCHER | visits=2
+   [6] MOVE by unit 2 to 2 : 1 | visits=3
+   [7] MOVE by unit 2 to 4 : 0 | visits=4
+>> [8] MOVE by unit 2 to 3 : 1 | visits=5
+   [9] ATTACK by unit 6 to unit 4 | visits=4
+   [10] MOVE by unit 6 to 5 : 2 | visits=4
+   [11] MOVE by unit 6 to 7 : 2 | visits=2
+   [12] MOVE by unit 6 to 6 : 4 | visits=2
+   [13] MOVE by unit 6 to 6 : 2 | visits=2
+   [14] RECOVER by unit 6 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 12
+Chosen action: SEND_STARS by tribe 0 to: 1 : 2 stars
+---- Visit counts ----
+   [0] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=5
+>> [1] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=8
+   [2] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=3
+   [3] END_TURN by tribe 0 | visits=1
+   [4] SPAWN by city 1 : WARRIOR | visits=3
+   [5] SPAWN by city 1 : ARCHER | visits=2
+   [6] ATTACK by unit 6 to unit 4 | visits=3
+   [7] MOVE by unit 6 to 5 : 2 | visits=3
+   [8] MOVE by unit 6 to 7 : 2 | visits=2
+   [9] MOVE by unit 6 to 6 : 4 | visits=3
+   [10] MOVE by unit 6 to 6 : 2 | visits=3
+   [11] RECOVER by unit 6 | visits=4
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 9
+Chosen action: MOVE by unit 6 to 6 : 4
+---- Visit counts ----
+   [0] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=4
+   [1] END_TURN by tribe 0 | visits=3
+   [2] SPAWN by city 1 : WARRIOR | visits=5
+   [3] ATTACK by unit 6 to unit 4 | visits=5
+   [4] MOVE by unit 6 to 5 : 2 | visits=4
+   [5] MOVE by unit 6 to 7 : 2 | visits=4
+>> [6] MOVE by unit 6 to 6 : 4 | visits=8
+   [7] MOVE by unit 6 to 6 : 2 | visits=3
+   [8] RECOVER by unit 6 | visits=4
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 4
+Chosen action: SEND_STARS by tribe 0 to: 1 : 1 stars
+---- Visit counts ----
+>> [0] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=15
+   [1] END_TURN by tribe 0 | visits=5
+   [2] SPAWN by city 1 : WARRIOR | visits=9
+   [3] ATTACK by unit 6 to unit 4 | visits=11
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 2
+Chosen action: ATTACK by unit 6 to unit 4
+---- Visit counts ----
+   [0] END_TURN by tribe 0 | visits=17
+>> [1] ATTACK by unit 6 to unit 4 | visits=23
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 30
+Chosen action: RESEARCH_TECH by tribe 1 : PHILOSOPHY
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : RIDING | visits=1
+   [1] RESEARCH_TECH by tribe 1 : ARCHERY | visits=1
+   [2] RESEARCH_TECH by tribe 1 : FARMING | visits=1
+   [3] RESEARCH_TECH by tribe 1 : FORESTRY | visits=1
+   [4] RESEARCH_TECH by tribe 1 : MINING | visits=1
+   [5] RESEARCH_TECH by tribe 1 : SAILING | visits=1
+   [6] RESEARCH_TECH by tribe 1 : SHIELDS | visits=1
+   [7] RESEARCH_TECH by tribe 1 : AQUATISM | visits=1
+>> [8] RESEARCH_TECH by tribe 1 : PHILOSOPHY | visits=3
+   [9] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=3
+   [10] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [11] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=2
+   [12] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=2
+   [13] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=3
+   [14] SEND_STARS by tribe 1 to: 0 : 6 stars | visits=1
+   [15] END_TURN by tribe 1 | visits=1
+   [16] BUILD by city 3 at 6 : 6 : ALTAR_OF_PEACE | visits=1
+   [17] BUILD by city 3 at 6 : 8 : ALTAR_OF_PEACE | visits=1
+   [18] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [19] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [20] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [21] SPAWN by city 3 : WARRIOR | visits=1
+   [22] MOVE by unit 5 to 4 : 8 | visits=1
+   [23] MOVE by unit 5 to 6 : 10 | visits=1
+   [24] MOVE by unit 5 to 6 : 9 | visits=1
+   [25] MOVE by unit 5 to 6 : 8 | visits=1
+   [26] MOVE by unit 5 to 5 : 10 | visits=2
+   [27] MOVE by unit 5 to 5 : 8 | visits=1
+   [28] MOVE by unit 5 to 4 : 10 | visits=2
+   [29] MOVE by unit 5 to 4 : 9 | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 11
+Chosen action: MOVE by unit 5 to 4 : 9
+---- Visit counts ----
+   [0] END_TURN by tribe 1 | visits=2
+   [1] BUILD by city 3 at 6 : 6 : ALTAR_OF_PEACE | visits=3
+   [2] BUILD by city 3 at 6 : 8 : ALTAR_OF_PEACE | visits=3
+   [3] MOVE by unit 5 to 4 : 8 | visits=2
+   [4] MOVE by unit 5 to 6 : 10 | visits=2
+   [5] MOVE by unit 5 to 6 : 9 | visits=6
+   [6] MOVE by unit 5 to 6 : 8 | visits=4
+   [7] MOVE by unit 5 to 5 : 10 | visits=3
+   [8] MOVE by unit 5 to 5 : 8 | visits=3
+   [9] MOVE by unit 5 to 4 : 10 | visits=5
+>> [10] MOVE by unit 5 to 4 : 9 | visits=7
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 3
+Chosen action: BUILD by city 3 at 6 : 6 : ALTAR_OF_PEACE
+---- Visit counts ----
+   [0] END_TURN by tribe 1 | visits=8
+>> [1] BUILD by city 3 at 6 : 6 : ALTAR_OF_PEACE | visits=19
+   [2] BUILD by city 3 at 6 : 8 : ALTAR_OF_PEACE | visits=13
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 2
+Chosen action: LEVEL_UP by city 3 with bonus RESOURCES
+---- Visit counts ----
+   [0] LEVEL_UP by city 3 with bonus CITY_WALL | visits=12
+>> [1] LEVEL_UP by city 3 with bonus RESOURCES | visits=28
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 18
+Chosen action: RESEARCH_TECH by tribe 1 : ARCHERY
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : RIDING | visits=2
+>> [1] RESEARCH_TECH by tribe 1 : ARCHERY | visits=6
+   [2] RESEARCH_TECH by tribe 1 : FARMING | visits=2
+   [3] RESEARCH_TECH by tribe 1 : FORESTRY | visits=2
+   [4] RESEARCH_TECH by tribe 1 : MINING | visits=3
+   [5] RESEARCH_TECH by tribe 1 : SAILING | visits=2
+   [6] RESEARCH_TECH by tribe 1 : SHIELDS | visits=2
+   [7] RESEARCH_TECH by tribe 1 : AQUATISM | visits=2
+   [8] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
+   [9] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=3
+   [10] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=2
+   [11] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=2
+   [12] END_TURN by tribe 1 | visits=1
+   [13] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [14] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [15] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [16] SPAWN by city 3 : WARRIOR | visits=2
+   [17] SPAWN by city 3 : MIND_BENDER | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 17
+Chosen action: SEND_STARS by tribe 1 to: 0 : 2 stars
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : RIDING | visits=2
+   [1] RESEARCH_TECH by tribe 1 : FARMING | visits=2
+   [2] RESEARCH_TECH by tribe 1 : FORESTRY | visits=2
+   [3] RESEARCH_TECH by tribe 1 : MINING | visits=3
+   [4] RESEARCH_TECH by tribe 1 : SAILING | visits=2
+   [5] RESEARCH_TECH by tribe 1 : SHIELDS | visits=2
+   [6] RESEARCH_TECH by tribe 1 : AQUATISM | visits=3
+   [7] RESEARCH_TECH by tribe 1 : SPIRITUALISM | visits=3
+   [8] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
+>> [9] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=5
+   [10] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=2
+   [11] END_TURN by tribe 1 | visits=2
+   [12] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [13] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [14] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [15] SPAWN by city 3 : WARRIOR | visits=2
+   [16] SPAWN by city 3 : ARCHER | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 14
+Chosen action: SEND_STARS by tribe 1 to: 0 : 1 stars
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : RIDING | visits=2
+   [1] RESEARCH_TECH by tribe 1 : FARMING | visits=3
+   [2] RESEARCH_TECH by tribe 1 : FORESTRY | visits=2
+   [3] RESEARCH_TECH by tribe 1 : MINING | visits=2
+   [4] RESEARCH_TECH by tribe 1 : SAILING | visits=3
+   [5] RESEARCH_TECH by tribe 1 : SHIELDS | visits=3
+   [6] RESEARCH_TECH by tribe 1 : AQUATISM | visits=5
+   [7] RESEARCH_TECH by tribe 1 : SPIRITUALISM | visits=5
+>> [8] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=6
+   [9] END_TURN by tribe 1 | visits=1
+   [10] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [11] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [12] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [13] SPAWN by city 3 : WARRIOR | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 9
+Chosen action: RESEARCH_TECH by tribe 1 : FORESTRY
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : RIDING | visits=6
+   [1] RESEARCH_TECH by tribe 1 : FARMING | visits=4
+>> [2] RESEARCH_TECH by tribe 1 : FORESTRY | visits=8
+   [3] RESEARCH_TECH by tribe 1 : MINING | visits=3
+   [4] RESEARCH_TECH by tribe 1 : SAILING | visits=3
+   [5] RESEARCH_TECH by tribe 1 : SHIELDS | visits=3
+   [6] RESEARCH_TECH by tribe 1 : AQUATISM | visits=7
+   [7] RESEARCH_TECH by tribe 1 : SPIRITUALISM | visits=4
+   [8] END_TURN by tribe 1 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 6
+Chosen action: CLEAR_FOREST by city 3 at 5 : 8
+---- Visit counts ----
+   [0] END_TURN by tribe 1 | visits=3
+   [1] CLEAR_FOREST by city 3 at 4 : 6 | visits=6
+   [2] CLEAR_FOREST by city 3 at 4 : 7 | visits=5
+   [3] CLEAR_FOREST by city 3 at 4 : 8 | visits=9
+   [4] CLEAR_FOREST by city 3 at 5 : 6 | visits=5
+>> [5] CLEAR_FOREST by city 3 at 5 : 8 | visits=12
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 22
+Chosen action: RESEARCH_TECH by tribe 1 : SHIELDS
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : RIDING | visits=2
+   [1] RESEARCH_TECH by tribe 1 : FARMING | visits=2
+   [2] RESEARCH_TECH by tribe 1 : MINING | visits=1
+   [3] RESEARCH_TECH by tribe 1 : SAILING | visits=1
+>> [4] RESEARCH_TECH by tribe 1 : SHIELDS | visits=4
+   [5] RESEARCH_TECH by tribe 1 : AQUATISM | visits=1
+   [6] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=1
+   [7] RESEARCH_TECH by tribe 1 : SPIRITUALISM | visits=2
+   [8] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
+   [9] END_TURN by tribe 1 | visits=1
+   [10] BUILD by city 3 at 4 : 6 : LUMBER_HUT | visits=2
+   [11] BUILD by city 3 at 4 : 7 : LUMBER_HUT | visits=1
+   [12] BUILD by city 3 at 4 : 8 : LUMBER_HUT | visits=2
+   [13] BUILD by city 3 at 5 : 6 : LUMBER_HUT | visits=2
+   [14] CLEAR_FOREST by city 3 at 4 : 6 | visits=2
+   [15] CLEAR_FOREST by city 3 at 4 : 7 | visits=1
+   [16] CLEAR_FOREST by city 3 at 4 : 8 | visits=3
+   [17] CLEAR_FOREST by city 3 at 5 : 6 | visits=2
+   [18] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [19] RESOURCE_GATHERED by city 3 : ANIMAL | visits=3
+   [20] RESOURCE_GATHERED by city 3 : ANIMAL | visits=3
+   [21] SPAWN by city 3 : WARRIOR | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 12
+Chosen action: RESEARCH_TECH by tribe 1 : AQUATISM
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : RIDING | visits=3
+   [1] RESEARCH_TECH by tribe 1 : FARMING | visits=3
+   [2] RESEARCH_TECH by tribe 1 : MINING | visits=3
+   [3] RESEARCH_TECH by tribe 1 : SAILING | visits=3
+>> [4] RESEARCH_TECH by tribe 1 : AQUATISM | visits=5
+   [5] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=3
+   [6] RESEARCH_TECH by tribe 1 : SPIRITUALISM | visits=3
+   [7] END_TURN by tribe 1 | visits=4
+   [8] CLEAR_FOREST by city 3 at 4 : 6 | visits=4
+   [9] CLEAR_FOREST by city 3 at 4 : 7 | visits=4
+   [10] CLEAR_FOREST by city 3 at 4 : 8 | visits=3
+   [11] CLEAR_FOREST by city 3 at 5 : 6 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 5
+Chosen action: CLEAR_FOREST by city 3 at 4 : 7
+---- Visit counts ----
+   [0] END_TURN by tribe 1 | visits=6
+   [1] CLEAR_FOREST by city 3 at 4 : 6 | visits=9
+>> [2] CLEAR_FOREST by city 3 at 4 : 7 | visits=9
+   [3] CLEAR_FOREST by city 3 at 4 : 8 | visits=9
+   [4] CLEAR_FOREST by city 3 at 5 : 6 | visits=7
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 18
+Chosen action: RESOURCE_GATHERED by city 3 : ANIMAL
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : RIDING | visits=2
+   [1] RESEARCH_TECH by tribe 1 : FARMING | visits=2
+   [2] RESEARCH_TECH by tribe 1 : MINING | visits=3
+   [3] RESEARCH_TECH by tribe 1 : SAILING | visits=3
+   [4] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=2
+   [5] RESEARCH_TECH by tribe 1 : SPIRITUALISM | visits=2
+   [6] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
+   [7] END_TURN by tribe 1 | visits=1
+   [8] BUILD by city 3 at 4 : 6 : LUMBER_HUT | visits=2
+   [9] BUILD by city 3 at 4 : 8 : LUMBER_HUT | visits=2
+   [10] BUILD by city 3 at 5 : 6 : LUMBER_HUT | visits=2
+   [11] CLEAR_FOREST by city 3 at 4 : 6 | visits=2
+   [12] CLEAR_FOREST by city 3 at 4 : 8 | visits=2
+   [13] CLEAR_FOREST by city 3 at 5 : 6 | visits=2
+>> [14] RESOURCE_GATHERED by city 3 : ANIMAL | visits=5
+   [15] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [16] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [17] SPAWN by city 3 : WARRIOR | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 4
+Chosen action: CLEAR_FOREST by city 3 at 4 : 8
+---- Visit counts ----
+   [0] END_TURN by tribe 1 | visits=5
+   [1] CLEAR_FOREST by city 3 at 4 : 6 | visits=8
+>> [2] CLEAR_FOREST by city 3 at 4 : 8 | visits=18
+   [3] CLEAR_FOREST by city 3 at 5 : 6 | visits=9
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 15
+Chosen action: RESEARCH_TECH by tribe 1 : SPIRITUALISM
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : RIDING | visits=4
+   [1] RESEARCH_TECH by tribe 1 : FARMING | visits=2
+   [2] RESEARCH_TECH by tribe 1 : MINING | visits=2
+   [3] RESEARCH_TECH by tribe 1 : SAILING | visits=3
+   [4] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=2
+>> [5] RESEARCH_TECH by tribe 1 : SPIRITUALISM | visits=6
+   [6] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
+   [7] END_TURN by tribe 1 | visits=2
+   [8] BUILD by city 3 at 4 : 6 : LUMBER_HUT | visits=2
+   [9] BUILD by city 3 at 5 : 6 : LUMBER_HUT | visits=2
+   [10] CLEAR_FOREST by city 3 at 4 : 6 | visits=3
+   [11] CLEAR_FOREST by city 3 at 5 : 6 | visits=2
+   [12] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [13] RESOURCE_GATHERED by city 3 : ANIMAL | visits=3
+   [14] SPAWN by city 3 : WARRIOR | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 8
+Chosen action: RESEARCH_TECH by tribe 1 : SAILING
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : RIDING | visits=4
+   [1] RESEARCH_TECH by tribe 1 : FARMING | visits=4
+   [2] RESEARCH_TECH by tribe 1 : MINING | visits=4
+>> [3] RESEARCH_TECH by tribe 1 : SAILING | visits=11
+   [4] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=3
+   [5] END_TURN by tribe 1 | visits=2
+   [6] CLEAR_FOREST by city 3 at 4 : 6 | visits=7
+   [7] CLEAR_FOREST by city 3 at 5 : 6 | visits=5
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 3
+Chosen action: CLEAR_FOREST by city 3 at 5 : 6
+---- Visit counts ----
+   [0] END_TURN by tribe 1 | visits=10
+   [1] CLEAR_FOREST by city 3 at 4 : 6 | visits=11
+>> [2] CLEAR_FOREST by city 3 at 5 : 6 | visits=19
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 12
+Chosen action: SPAWN by city 3 : WARRIOR
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : RIDING | visits=4
+   [1] RESEARCH_TECH by tribe 1 : FARMING | visits=3
+   [2] RESEARCH_TECH by tribe 1 : MINING | visits=5
+   [3] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=3
+   [4] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=3
+   [5] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=4
+   [6] END_TURN by tribe 1 | visits=1
+   [7] BUILD by city 3 at 4 : 6 : LUMBER_HUT | visits=2
+   [8] CLEAR_FOREST by city 3 at 4 : 6 | visits=4
+   [9] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [10] RESOURCE_GATHERED by city 3 : ANIMAL | visits=4
+>> [11] SPAWN by city 3 : WARRIOR | visits=5
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 2
+Chosen action: END_TURN by tribe 1
+---- Visit counts ----
+>> [0] END_TURN by tribe 1 | visits=24
+   [1] CLEAR_FOREST by city 3 at 4 : 6 | visits=16
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 26
+Chosen action: END_TURN by tribe 0
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : CLIMBING | visits=1
+   [1] RESEARCH_TECH by tribe 0 : FISHING | visits=2
+   [2] RESEARCH_TECH by tribe 0 : RIDING | visits=1
+   [3] RESEARCH_TECH by tribe 0 : FARMING | visits=1
+   [4] RESEARCH_TECH by tribe 0 : SHIELDS | visits=1
+   [5] RESEARCH_TECH by tribe 0 : MATHEMATICS | visits=1
+   [6] RESEARCH_TECH by tribe 0 : SPIRITUALISM | visits=2
+   [7] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=1
+   [8] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=1
+   [9] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=1
+   [10] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=3
+   [11] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=1
+   [12] SEND_STARS by tribe 0 to: 1 : 6 stars | visits=1
+   [13] SEND_STARS by tribe 0 to: 1 : 7 stars | visits=2
+>> [14] END_TURN by tribe 0 | visits=4
+   [15] SPAWN by city 1 : WARRIOR | visits=1
+   [16] SPAWN by city 1 : ARCHER | visits=2
+   [17] MOVE by unit 2 to 2 : 1 | visits=1
+   [18] MOVE by unit 2 to 4 : 2 | visits=1
+   [19] MOVE by unit 2 to 4 : 0 | visits=1
+   [20] MOVE by unit 2 to 3 : 2 | visits=1
+   [21] MOVE by unit 2 to 3 : 0 | visits=3
+   [22] MOVE by unit 6 to 5 : 5 | visits=1
+   [23] MOVE by unit 6 to 6 : 4 | visits=3
+   [24] MOVE by unit 6 to 6 : 3 | visits=1
+   [25] RECOVER by unit 6 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 29
+Chosen action: MOVE by unit 7 to 4 : 7
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : RIDING | visits=2
+   [1] RESEARCH_TECH by tribe 1 : FARMING | visits=1
+   [2] RESEARCH_TECH by tribe 1 : MINING | visits=1
+   [3] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=1
+   [4] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=1
+   [5] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
+   [6] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [7] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=1
+   [8] END_TURN by tribe 1 | visits=1
+   [9] BUILD by city 3 at 4 : 6 : LUMBER_HUT | visits=2
+   [10] CLEAR_FOREST by city 3 at 4 : 6 | visits=1
+   [11] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [12] RESOURCE_GATHERED by city 3 : ANIMAL | visits=3
+   [13] EXAMINE by unit 5 of ruins. | visits=1
+   [14] MOVE by unit 5 to 3 : 9 | visits=1
+   [15] MOVE by unit 5 to 5 : 10 | visits=1
+   [16] MOVE by unit 5 to 5 : 9 | visits=1
+   [17] MOVE by unit 5 to 5 : 8 | visits=1
+   [18] MOVE by unit 5 to 4 : 10 | visits=1
+   [19] MOVE by unit 5 to 4 : 8 | visits=1
+   [20] MOVE by unit 5 to 3 : 10 | visits=1
+   [21] MOVE by unit 7 to 4 : 6 | visits=2
+   [22] MOVE by unit 7 to 6 : 8 | visits=1
+   [23] MOVE by unit 7 to 6 : 7 | visits=2
+   [24] MOVE by unit 7 to 6 : 6 | visits=1
+   [25] MOVE by unit 7 to 5 : 8 | visits=1
+   [26] MOVE by unit 7 to 5 : 6 | visits=2
+   [27] MOVE by unit 7 to 4 : 8 | visits=1
+>> [28] MOVE by unit 7 to 4 : 7 | visits=4
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 24
+Chosen action: RESEARCH_TECH by tribe 1 : RIDING
+---- Visit counts ----
+>> [0] RESEARCH_TECH by tribe 1 : RIDING | visits=4
+   [1] RESEARCH_TECH by tribe 1 : FARMING | visits=2
+   [2] RESEARCH_TECH by tribe 1 : MINING | visits=1
+   [3] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=1
+   [4] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=1
+   [5] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [6] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=2
+   [7] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=3
+   [8] END_TURN by tribe 1 | visits=1
+   [9] BUILD by city 3 at 4 : 6 : LUMBER_HUT | visits=1
+   [10] CLEAR_FOREST by city 3 at 4 : 6 | visits=1
+   [11] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [12] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [13] SPAWN by city 3 : WARRIOR | visits=3
+   [14] SPAWN by city 3 : DEFENDER | visits=1
+   [15] SPAWN by city 3 : ARCHER | visits=1
+   [16] EXAMINE by unit 5 of ruins. | visits=2
+   [17] MOVE by unit 5 to 3 : 9 | visits=3
+   [18] MOVE by unit 5 to 5 : 10 | visits=2
+   [19] MOVE by unit 5 to 5 : 9 | visits=2
+   [20] MOVE by unit 5 to 5 : 8 | visits=1
+   [21] MOVE by unit 5 to 4 : 10 | visits=1
+   [22] MOVE by unit 5 to 4 : 8 | visits=1
+   [23] MOVE by unit 5 to 3 : 10 | visits=2
 ========================
 
 
 ===== MCTS DECISION =====
 Player: 1
 Available actions: 25
+Chosen action: MOVE by unit 5 to 5 : 10
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : FARMING | visits=1
+   [1] RESEARCH_TECH by tribe 1 : FREE_SPIRIT | visits=1
+   [2] RESEARCH_TECH by tribe 1 : MINING | visits=1
+   [3] RESEARCH_TECH by tribe 1 : ROADS | visits=1
+   [4] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=2
+   [5] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=2
+   [6] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
+   [7] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [8] END_TURN by tribe 1 | visits=1
+   [9] BUILD by city 3 at 4 : 6 : LUMBER_HUT | visits=1
+   [10] CLEAR_FOREST by city 3 at 4 : 6 | visits=1
+   [11] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [12] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [13] SPAWN by city 3 : WARRIOR | visits=1
+   [14] SPAWN by city 3 : RIDER | visits=2
+   [15] SPAWN by city 3 : DEFENDER | visits=3
+   [16] SPAWN by city 3 : ARCHER | visits=1
+   [17] EXAMINE by unit 5 of ruins. | visits=4
+   [18] MOVE by unit 5 to 3 : 9 | visits=1
+>> [19] MOVE by unit 5 to 5 : 10 | visits=4
+   [20] MOVE by unit 5 to 5 : 9 | visits=1
+   [21] MOVE by unit 5 to 5 : 8 | visits=1
+   [22] MOVE by unit 5 to 4 : 10 | visits=1
+   [23] MOVE by unit 5 to 4 : 8 | visits=3
+   [24] MOVE by unit 5 to 3 : 10 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 17
+Chosen action: SPAWN by city 3 : DEFENDER
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : FARMING | visits=2
+   [1] RESEARCH_TECH by tribe 1 : FREE_SPIRIT | visits=2
+   [2] RESEARCH_TECH by tribe 1 : MINING | visits=2
+   [3] RESEARCH_TECH by tribe 1 : ROADS | visits=2
+   [4] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=3
+   [5] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=2
+   [6] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=3
+   [7] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=2
+   [8] END_TURN by tribe 1 | visits=1
+   [9] BUILD by city 3 at 4 : 6 : LUMBER_HUT | visits=2
+   [10] CLEAR_FOREST by city 3 at 4 : 6 | visits=2
+   [11] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [12] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [13] SPAWN by city 3 : WARRIOR | visits=2
+   [14] SPAWN by city 3 : RIDER | visits=2
+>> [15] SPAWN by city 3 : DEFENDER | visits=7
+   [16] SPAWN by city 3 : ARCHER | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 2
 Chosen action: END_TURN by tribe 1
 ---- Visit counts ----
-   [0] RESEARCH_TECH by tribe 1 : CLIMBING | visits=36
-   [1] RESEARCH_TECH by tribe 1 : FISHING | visits=18
-   [2] RESEARCH_TECH by tribe 1 : HUNTING | visits=19
-   [3] RESEARCH_TECH by tribe 1 : RIDING | visits=10
-   [4] RESEARCH_TECH by tribe 1 : FARMING | visits=15
-   [5] RESEARCH_TECH by tribe 1 : SHIELDS | visits=10
-   [6] DECLARE_WAR by tribe 1 on tribe 0 | visits=47
-   [7] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
-   [8] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=2
-   [9] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=2
-   [10] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=2
-   [11] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=2
-   [12] SEND_STARS by tribe 1 to: 0 : 6 stars | visits=2
-   [13] SEND_STARS by tribe 1 to: 0 : 7 stars | visits=1
-   [14] SEND_STARS by tribe 1 to: 0 : 8 stars | visits=1
-   [15] SEND_STARS by tribe 1 to: 0 : 9 stars | visits=1
-   [16] SEND_STARS by tribe 1 to: 0 : 10 stars | visits=2
->> [17] END_TURN by tribe 1 | visits=294
-   [18] RESOURCE_GATHERED by city 3 : FRUIT | visits=11
-   [19] RESOURCE_GATHERED by city 3 : FRUIT | visits=11
-   [20] MOVE by unit 4 to 7 : 7 | visits=1
-   [21] MOVE by unit 4 to 9 : 8 | visits=1
-   [22] MOVE by unit 4 to 9 : 7 | visits=1
-   [23] MOVE by unit 4 to 9 : 6 | visits=1
-   [24] MOVE by unit 4 to 8 : 6 | visits=1
+>> [0] END_TURN by tribe 1 | visits=24
+   [1] CLEAR_FOREST by city 3 at 4 : 6 | visits=16
 ========================
 
 
 ===== MCTS DECISION =====
 Player: 0
+Available actions: 30
+Chosen action: RESEARCH_TECH by tribe 0 : FISHING
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : CLIMBING | visits=1
+>> [1] RESEARCH_TECH by tribe 0 : FISHING | visits=3
+   [2] RESEARCH_TECH by tribe 0 : RIDING | visits=1
+   [3] RESEARCH_TECH by tribe 0 : FARMING | visits=1
+   [4] RESEARCH_TECH by tribe 0 : SHIELDS | visits=2
+   [5] RESEARCH_TECH by tribe 0 : MATHEMATICS | visits=1
+   [6] RESEARCH_TECH by tribe 0 : SPIRITUALISM | visits=1
+   [7] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=1
+   [8] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=1
+   [9] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=2
+   [10] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=1
+   [11] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=2
+   [12] SEND_STARS by tribe 0 to: 1 : 6 stars | visits=2
+   [13] SEND_STARS by tribe 0 to: 1 : 7 stars | visits=1
+   [14] SEND_STARS by tribe 0 to: 1 : 8 stars | visits=2
+   [15] SEND_STARS by tribe 0 to: 1 : 9 stars | visits=1
+   [16] SEND_STARS by tribe 0 to: 1 : 10 stars | visits=1
+   [17] SEND_STARS by tribe 0 to: 1 : 11 stars | visits=1
+   [18] END_TURN by tribe 0 | visits=1
+   [19] SPAWN by city 1 : WARRIOR | visits=1
+   [20] SPAWN by city 1 : ARCHER | visits=1
+   [21] MOVE by unit 2 to 2 : 1 | visits=1
+   [22] MOVE by unit 2 to 4 : 2 | visits=1
+   [23] MOVE by unit 2 to 4 : 0 | visits=1
+   [24] MOVE by unit 2 to 3 : 2 | visits=1
+   [25] MOVE by unit 2 to 3 : 0 | visits=1
+   [26] MOVE by unit 6 to 5 : 5 | visits=2
+   [27] MOVE by unit 6 to 6 : 4 | visits=1
+   [28] MOVE by unit 6 to 6 : 3 | visits=1
+   [29] RECOVER by unit 6 | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 26
+Chosen action: MOVE by unit 2 to 4 : 2
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : CLIMBING | visits=1
+   [1] RESEARCH_TECH by tribe 0 : RIDING | visits=2
+   [2] RESEARCH_TECH by tribe 0 : FARMING | visits=1
+   [3] RESEARCH_TECH by tribe 0 : SAILING | visits=1
+   [4] RESEARCH_TECH by tribe 0 : SHIELDS | visits=1
+   [5] RESEARCH_TECH by tribe 0 : WHALING | visits=1
+   [6] RESEARCH_TECH by tribe 0 : MATHEMATICS | visits=2
+   [7] RESEARCH_TECH by tribe 0 : SPIRITUALISM | visits=2
+   [8] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=1
+   [9] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=2
+   [10] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=1
+   [11] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=1
+   [12] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=1
+   [13] SEND_STARS by tribe 0 to: 1 : 6 stars | visits=3
+   [14] END_TURN by tribe 0 | visits=1
+   [15] SPAWN by city 1 : WARRIOR | visits=3
+   [16] SPAWN by city 1 : ARCHER | visits=1
+   [17] MOVE by unit 2 to 2 : 1 | visits=2
+>> [18] MOVE by unit 2 to 4 : 2 | visits=3
+   [19] MOVE by unit 2 to 4 : 0 | visits=1
+   [20] MOVE by unit 2 to 3 : 2 | visits=3
+   [21] MOVE by unit 2 to 3 : 0 | visits=1
+   [22] MOVE by unit 6 to 5 : 5 | visits=1
+   [23] MOVE by unit 6 to 6 : 4 | visits=2
+   [24] MOVE by unit 6 to 6 : 3 | visits=1
+   [25] RECOVER by unit 6 | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 21
+Chosen action: RESEARCH_TECH by tribe 0 : CLIMBING
+---- Visit counts ----
+>> [0] RESEARCH_TECH by tribe 0 : CLIMBING | visits=4
+   [1] RESEARCH_TECH by tribe 0 : RIDING | visits=2
+   [2] RESEARCH_TECH by tribe 0 : FARMING | visits=1
+   [3] RESEARCH_TECH by tribe 0 : SAILING | visits=2
+   [4] RESEARCH_TECH by tribe 0 : SHIELDS | visits=2
+   [5] RESEARCH_TECH by tribe 0 : WHALING | visits=2
+   [6] RESEARCH_TECH by tribe 0 : MATHEMATICS | visits=2
+   [7] RESEARCH_TECH by tribe 0 : SPIRITUALISM | visits=1
+   [8] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=2
+   [9] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=1
+   [10] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=3
+   [11] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=1
+   [12] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=3
+   [13] SEND_STARS by tribe 0 to: 1 : 6 stars | visits=2
+   [14] END_TURN by tribe 0 | visits=1
+   [15] SPAWN by city 1 : WARRIOR | visits=1
+   [16] SPAWN by city 1 : ARCHER | visits=2
+   [17] MOVE by unit 6 to 5 : 5 | visits=1
+   [18] MOVE by unit 6 to 6 : 4 | visits=2
+   [19] MOVE by unit 6 to 6 : 3 | visits=2
+   [20] RECOVER by unit 6 | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 9
+Chosen action: SEND_STARS by tribe 0 to: 1 : 1 stars
+---- Visit counts ----
+>> [0] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=8
+   [1] END_TURN by tribe 0 | visits=3
+   [2] SPAWN by city 1 : WARRIOR | visits=5
+   [3] MOVE by unit 6 to 4 : 5 | visits=3
+   [4] MOVE by unit 6 to 6 : 4 | visits=5
+   [5] MOVE by unit 6 to 6 : 3 | visits=4
+   [6] MOVE by unit 6 to 5 : 5 | visits=4
+   [7] MOVE by unit 6 to 5 : 3 | visits=3
+   [8] RECOVER by unit 6 | visits=5
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 7
+Chosen action: MOVE by unit 6 to 5 : 5
+---- Visit counts ----
+   [0] END_TURN by tribe 0 | visits=4
+   [1] MOVE by unit 6 to 4 : 5 | visits=4
+   [2] MOVE by unit 6 to 6 : 4 | visits=4
+   [3] MOVE by unit 6 to 6 : 3 | visits=4
+>> [4] MOVE by unit 6 to 5 : 5 | visits=16
+   [5] MOVE by unit 6 to 5 : 3 | visits=4
+   [6] RECOVER by unit 6 | visits=4
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 37
+Chosen action: MOVE by unit 7 to 4 : 6
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : FARMING | visits=1
+   [1] RESEARCH_TECH by tribe 1 : FREE_SPIRIT | visits=1
+   [2] RESEARCH_TECH by tribe 1 : MINING | visits=1
+   [3] RESEARCH_TECH by tribe 1 : ROADS | visits=1
+   [4] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=1
+   [5] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=1
+   [6] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [7] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [8] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=1
+   [9] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=2
+   [10] END_TURN by tribe 1 | visits=1
+   [11] BUILD by city 3 at 4 : 6 : LUMBER_HUT | visits=1
+   [12] CLEAR_FOREST by city 3 at 4 : 6 | visits=1
+   [13] GROW_FOREST by city 3 at 4 : 7 | visits=1
+   [14] GROW_FOREST by city 3 at 4 : 8 | visits=1
+   [15] GROW_FOREST by city 3 at 5 : 6 | visits=1
+   [16] GROW_FOREST by city 3 at 5 : 8 | visits=1
+   [17] GROW_FOREST by city 3 at 6 : 6 | visits=1
+   [18] GROW_FOREST by city 3 at 6 : 8 | visits=1
+   [19] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [20] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [21] MOVE by unit 5 to 4 : 9 | visits=2
+   [22] MOVE by unit 5 to 6 : 10 | visits=1
+   [23] MOVE by unit 5 to 6 : 9 | visits=1
+   [24] MOVE by unit 5 to 5 : 9 | visits=1
+   [25] MOVE by unit 5 to 4 : 10 | visits=1
+>> [26] MOVE by unit 7 to 4 : 6 | visits=2
+   [27] MOVE by unit 7 to 5 : 8 | visits=1
+   [28] MOVE by unit 7 to 5 : 6 | visits=1
+   [29] MOVE by unit 7 to 4 : 8 | visits=1
+   [30] MOVE by unit 8 to 4 : 6 | visits=1
+   [31] MOVE by unit 8 to 6 : 8 | visits=1
+   [32] MOVE by unit 8 to 6 : 7 | visits=1
+   [33] MOVE by unit 8 to 6 : 6 | visits=1
+   [34] MOVE by unit 8 to 5 : 8 | visits=1
+   [35] MOVE by unit 8 to 5 : 6 | visits=1
+   [36] MOVE by unit 8 to 4 : 8 | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 34
+Chosen action: MOVE by unit 8 to 6 : 8
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : FARMING | visits=1
+   [1] RESEARCH_TECH by tribe 1 : FREE_SPIRIT | visits=1
+   [2] RESEARCH_TECH by tribe 1 : MINING | visits=1
+   [3] RESEARCH_TECH by tribe 1 : ROADS | visits=1
+   [4] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=1
+   [5] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=1
+   [6] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [7] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [8] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=1
+   [9] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=1
+   [10] END_TURN by tribe 1 | visits=1
+   [11] BUILD by city 3 at 4 : 6 : LUMBER_HUT | visits=2
+   [12] CLEAR_FOREST by city 3 at 4 : 6 | visits=1
+   [13] GROW_FOREST by city 3 at 4 : 7 | visits=1
+   [14] GROW_FOREST by city 3 at 4 : 8 | visits=1
+   [15] GROW_FOREST by city 3 at 5 : 6 | visits=1
+   [16] GROW_FOREST by city 3 at 5 : 8 | visits=1
+   [17] GROW_FOREST by city 3 at 6 : 6 | visits=1
+   [18] GROW_FOREST by city 3 at 6 : 8 | visits=1
+   [19] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [20] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [21] MOVE by unit 5 to 4 : 9 | visits=1
+   [22] MOVE by unit 5 to 6 : 10 | visits=1
+   [23] MOVE by unit 5 to 6 : 9 | visits=1
+   [24] MOVE by unit 5 to 5 : 9 | visits=1
+   [25] MOVE by unit 5 to 4 : 10 | visits=3
+   [26] ATTACK by unit 7 to unit 6 | visits=1
+>> [27] MOVE by unit 8 to 6 : 8 | visits=4
+   [28] MOVE by unit 8 to 6 : 7 | visits=1
+   [29] MOVE by unit 8 to 6 : 6 | visits=1
+   [30] MOVE by unit 8 to 5 : 8 | visits=1
+   [31] MOVE by unit 8 to 5 : 6 | visits=1
+   [32] MOVE by unit 8 to 4 : 8 | visits=1
+   [33] MOVE by unit 8 to 4 : 7 | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 32
+Chosen action: RESEARCH_TECH by tribe 1 : FREE_SPIRIT
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : FARMING | visits=1
+>> [1] RESEARCH_TECH by tribe 1 : FREE_SPIRIT | visits=3
+   [2] RESEARCH_TECH by tribe 1 : MINING | visits=1
+   [3] RESEARCH_TECH by tribe 1 : ROADS | visits=1
+   [4] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=1
+   [5] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=1
+   [6] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [7] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [8] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=1
+   [9] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=2
+   [10] END_TURN by tribe 1 | visits=1
+   [11] BUILD by city 3 at 4 : 6 : LUMBER_HUT | visits=1
+   [12] CLEAR_FOREST by city 3 at 4 : 6 | visits=1
+   [13] GROW_FOREST by city 3 at 4 : 7 | visits=1
+   [14] GROW_FOREST by city 3 at 4 : 8 | visits=1
+   [15] GROW_FOREST by city 3 at 5 : 6 | visits=1
+   [16] GROW_FOREST by city 3 at 5 : 8 | visits=1
+   [17] GROW_FOREST by city 3 at 6 : 6 | visits=1
+   [18] GROW_FOREST by city 3 at 6 : 8 | visits=1
+   [19] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [20] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [21] SPAWN by city 3 : WARRIOR | visits=1
+   [22] SPAWN by city 3 : RIDER | visits=2
+   [23] SPAWN by city 3 : DEFENDER | visits=2
+   [24] SPAWN by city 3 : ARCHER | visits=2
+   [25] SPAWN by city 3 : MIND_BENDER | visits=2
+   [26] MOVE by unit 5 to 4 : 9 | visits=1
+   [27] MOVE by unit 5 to 6 : 10 | visits=1
+   [28] MOVE by unit 5 to 6 : 9 | visits=1
+   [29] MOVE by unit 5 to 5 : 9 | visits=2
+   [30] MOVE by unit 5 to 4 : 10 | visits=1
+   [31] ATTACK by unit 7 to unit 6 | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 25
+Chosen action: SEND_STARS by tribe 1 to: 0 : 1 stars
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : FARMING | visits=2
+   [1] RESEARCH_TECH by tribe 1 : MINING | visits=3
+   [2] RESEARCH_TECH by tribe 1 : ROADS | visits=2
+   [3] RESEARCH_TECH by tribe 1 : CHIVALRY | visits=1
+   [4] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=2
+   [5] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=1
+>> [6] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=5
+   [7] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=2
+   [8] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=1
+   [9] END_TURN by tribe 1 | visits=1
+   [10] BUILD by city 3 at 4 : 6 : LUMBER_HUT | visits=1
+   [11] CLEAR_FOREST by city 3 at 4 : 6 | visits=2
+   [12] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [13] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [14] SPAWN by city 3 : WARRIOR | visits=1
+   [15] SPAWN by city 3 : RIDER | visits=1
+   [16] SPAWN by city 3 : DEFENDER | visits=2
+   [17] SPAWN by city 3 : ARCHER | visits=2
+   [18] DISBAND of unit 5 | visits=1
+   [19] MOVE by unit 5 to 4 : 9 | visits=2
+   [20] MOVE by unit 5 to 6 : 10 | visits=1
+   [21] MOVE by unit 5 to 6 : 9 | visits=1
+   [22] MOVE by unit 5 to 5 : 9 | visits=1
+   [23] MOVE by unit 5 to 4 : 10 | visits=1
+   [24] ATTACK by unit 7 to unit 6 | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
 Available actions: 24
-Chosen action: END_TURN by tribe 0
+Chosen action: RESOURCE_GATHERED by city 3 : ANIMAL
 ---- Visit counts ----
-   [0] RESEARCH_TECH by tribe 0 : FISHING | visits=18
-   [1] RESEARCH_TECH by tribe 0 : HUNTING | visits=19
-   [2] RESEARCH_TECH by tribe 0 : ORGANIZATION | visits=14
-   [3] RESEARCH_TECH by tribe 0 : RIDING | visits=10
-   [4] RESEARCH_TECH by tribe 0 : MEDITATION | visits=6
-   [5] RESEARCH_TECH by tribe 0 : MINING | visits=10
-   [6] DECLARE_WAR by tribe 0 on tribe 1 | visits=39
-   [7] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=2
-   [8] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=2
-   [9] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=2
-   [10] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=2
-   [11] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=2
-   [12] SEND_STARS by tribe 0 to: 1 : 6 stars | visits=2
-   [13] SEND_STARS by tribe 0 to: 1 : 7 stars | visits=1
-   [14] SEND_STARS by tribe 0 to: 1 : 8 stars | visits=1
-   [15] SEND_STARS by tribe 0 to: 1 : 9 stars | visits=1
-   [16] SEND_STARS by tribe 0 to: 1 : 10 stars | visits=2
-   [17] SEND_STARS by tribe 0 to: 1 : 11 stars | visits=1
-   [18] SEND_STARS by tribe 0 to: 1 : 12 stars | visits=1
->> [19] END_TURN by tribe 0 | visits=297
-   [20] MOVE by unit 2 to 2 : 4 | visits=1
-   [21] MOVE by unit 2 to 4 : 3 | visits=1
-   [22] MOVE by unit 2 to 3 : 5 | visits=1
-   [23] MOVE by unit 2 to 2 : 5 | visits=1
+   [0] RESEARCH_TECH by tribe 1 : FARMING | visits=2
+   [1] RESEARCH_TECH by tribe 1 : MINING | visits=1
+   [2] RESEARCH_TECH by tribe 1 : ROADS | visits=2
+   [3] RESEARCH_TECH by tribe 1 : CHIVALRY | visits=3
+   [4] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=2
+   [5] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=3
+   [6] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [7] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [8] END_TURN by tribe 1 | visits=1
+   [9] BUILD by city 3 at 4 : 6 : LUMBER_HUT | visits=1
+   [10] CLEAR_FOREST by city 3 at 4 : 6 | visits=1
+>> [11] RESOURCE_GATHERED by city 3 : ANIMAL | visits=4
+   [12] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [13] SPAWN by city 3 : WARRIOR | visits=1
+   [14] SPAWN by city 3 : RIDER | visits=1
+   [15] SPAWN by city 3 : DEFENDER | visits=1
+   [16] SPAWN by city 3 : ARCHER | visits=1
+   [17] DISBAND of unit 5 | visits=2
+   [18] MOVE by unit 5 to 4 : 9 | visits=1
+   [19] MOVE by unit 5 to 6 : 10 | visits=3
+   [20] MOVE by unit 5 to 6 : 9 | visits=1
+   [21] MOVE by unit 5 to 5 : 9 | visits=2
+   [22] MOVE by unit 5 to 4 : 10 | visits=2
+   [23] ATTACK by unit 7 to unit 6 | visits=2
 ========================
 
 
 ===== MCTS DECISION =====
 Player: 1
+Available actions: 15
+Chosen action: MOVE by unit 5 to 4 : 9
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : FARMING | visits=3
+   [1] RESEARCH_TECH by tribe 1 : MINING | visits=2
+   [2] RESEARCH_TECH by tribe 1 : ROADS | visits=3
+   [3] RESEARCH_TECH by tribe 1 : CHIVALRY | visits=3
+   [4] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=2
+   [5] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=3
+   [6] END_TURN by tribe 1 | visits=2
+   [7] CLEAR_FOREST by city 3 at 4 : 6 | visits=2
+   [8] DISBAND of unit 5 | visits=3
+>> [9] MOVE by unit 5 to 4 : 9 | visits=5
+   [10] MOVE by unit 5 to 6 : 10 | visits=2
+   [11] MOVE by unit 5 to 6 : 9 | visits=3
+   [12] MOVE by unit 5 to 5 : 9 | visits=3
+   [13] MOVE by unit 5 to 4 : 10 | visits=2
+   [14] ATTACK by unit 7 to unit 6 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 9
+Chosen action: RESEARCH_TECH by tribe 1 : FARMING
+---- Visit counts ----
+>> [0] RESEARCH_TECH by tribe 1 : FARMING | visits=6
+   [1] RESEARCH_TECH by tribe 1 : MINING | visits=4
+   [2] RESEARCH_TECH by tribe 1 : ROADS | visits=4
+   [3] RESEARCH_TECH by tribe 1 : CHIVALRY | visits=6
+   [4] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=4
+   [5] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=4
+   [6] END_TURN by tribe 1 | visits=3
+   [7] CLEAR_FOREST by city 3 at 4 : 6 | visits=5
+   [8] ATTACK by unit 7 to unit 6 | visits=4
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 3
+Chosen action: CLEAR_FOREST by city 3 at 4 : 6
+---- Visit counts ----
+   [0] END_TURN by tribe 1 | visits=10
+>> [1] CLEAR_FOREST by city 3 at 4 : 6 | visits=18
+   [2] ATTACK by unit 7 to unit 6 | visits=12
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 11
+Chosen action: RESEARCH_TECH by tribe 1 : MINING
+---- Visit counts ----
+>> [0] RESEARCH_TECH by tribe 1 : MINING | visits=7
+   [1] RESEARCH_TECH by tribe 1 : ROADS | visits=3
+   [2] RESEARCH_TECH by tribe 1 : CHIVALRY | visits=3
+   [3] RESEARCH_TECH by tribe 1 : CONSTRUCTION | visits=3
+   [4] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=4
+   [5] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=3
+   [6] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=4
+   [7] END_TURN by tribe 1 | visits=1
+   [8] RESOURCE_GATHERED by city 3 : ANIMAL | visits=5
+   [9] SPAWN by city 3 : WARRIOR | visits=4
+   [10] ATTACK by unit 7 to unit 6 | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 8
+Chosen action: ATTACK by unit 7 to unit 6
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 1 : ROADS | visits=4
+   [1] RESEARCH_TECH by tribe 1 : CHIVALRY | visits=6
+   [2] RESEARCH_TECH by tribe 1 : CONSTRUCTION | visits=7
+   [3] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=4
+   [4] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=5
+   [5] RESEARCH_TECH by tribe 1 : SMITHERY | visits=4
+   [6] END_TURN by tribe 1 | visits=2
+>> [7] ATTACK by unit 7 to unit 6 | visits=8
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 7
+Chosen action: RESEARCH_TECH by tribe 1 : ROADS
+---- Visit counts ----
+>> [0] RESEARCH_TECH by tribe 1 : ROADS | visits=10
+   [1] RESEARCH_TECH by tribe 1 : CHIVALRY | visits=6
+   [2] RESEARCH_TECH by tribe 1 : CONSTRUCTION | visits=5
+   [3] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=5
+   [4] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=6
+   [5] RESEARCH_TECH by tribe 1 : SMITHERY | visits=5
+   [6] END_TURN by tribe 1 | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 28
+Chosen action: ATTACK by unit 6 to unit 7
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : RIDING | visits=1
+   [1] RESEARCH_TECH by tribe 0 : FARMING | visits=2
+   [2] RESEARCH_TECH by tribe 0 : MEDITATION | visits=1
+   [3] RESEARCH_TECH by tribe 0 : MINING | visits=2
+   [4] RESEARCH_TECH by tribe 0 : SAILING | visits=1
+   [5] RESEARCH_TECH by tribe 0 : SHIELDS | visits=1
+   [6] RESEARCH_TECH by tribe 0 : WHALING | visits=1
+   [7] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=1
+   [8] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=1
+   [9] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=1
+   [10] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=2
+   [11] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=1
+   [12] END_TURN by tribe 0 | visits=1
+   [13] SPAWN by city 1 : WARRIOR | visits=1
+   [14] SPAWN by city 1 : ARCHER | visits=3
+   [15] MOVE by unit 2 to 3 : 1 | visits=1
+   [16] MOVE by unit 2 to 5 : 3 | visits=1
+   [17] MOVE by unit 2 to 5 : 2 | visits=1
+   [18] MOVE by unit 2 to 5 : 1 | visits=2
+   [19] MOVE by unit 2 to 4 : 1 | visits=1
+   [20] MOVE by unit 2 to 3 : 2 | visits=1
+>> [21] ATTACK by unit 6 to unit 7 | visits=4
+   [22] MOVE by unit 6 to 4 : 5 | visits=1
+   [23] MOVE by unit 6 to 6 : 6 | visits=3
+   [24] MOVE by unit 6 to 6 : 4 | visits=2
+   [25] MOVE by unit 6 to 5 : 6 | visits=1
+   [26] MOVE by unit 6 to 5 : 4 | visits=1
+   [27] RECOVER by unit 6 | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 21
+Chosen action: MOVE by unit 2 to 5 : 3
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : RIDING | visits=2
+   [1] RESEARCH_TECH by tribe 0 : FARMING | visits=2
+   [2] RESEARCH_TECH by tribe 0 : MEDITATION | visits=3
+   [3] RESEARCH_TECH by tribe 0 : MINING | visits=1
+   [4] RESEARCH_TECH by tribe 0 : SAILING | visits=2
+   [5] RESEARCH_TECH by tribe 0 : SHIELDS | visits=1
+   [6] RESEARCH_TECH by tribe 0 : WHALING | visits=2
+   [7] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=3
+   [8] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=2
+   [9] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=2
+   [10] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=1
+   [11] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=2
+   [12] END_TURN by tribe 0 | visits=1
+   [13] SPAWN by city 1 : WARRIOR | visits=2
+   [14] SPAWN by city 1 : ARCHER | visits=1
+   [15] MOVE by unit 2 to 3 : 1 | visits=2
+>> [16] MOVE by unit 2 to 5 : 3 | visits=4
+   [17] MOVE by unit 2 to 5 : 2 | visits=1
+   [18] MOVE by unit 2 to 5 : 1 | visits=2
+   [19] MOVE by unit 2 to 4 : 1 | visits=1
+   [20] MOVE by unit 2 to 3 : 2 | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 15
+Chosen action: RESEARCH_TECH by tribe 0 : MINING
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : RIDING | visits=2
+   [1] RESEARCH_TECH by tribe 0 : FARMING | visits=2
+   [2] RESEARCH_TECH by tribe 0 : MEDITATION | visits=3
+>> [3] RESEARCH_TECH by tribe 0 : MINING | visits=5
+   [4] RESEARCH_TECH by tribe 0 : SAILING | visits=2
+   [5] RESEARCH_TECH by tribe 0 : SHIELDS | visits=3
+   [6] RESEARCH_TECH by tribe 0 : WHALING | visits=2
+   [7] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=4
+   [8] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=3
+   [9] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=3
+   [10] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=2
+   [11] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=2
+   [12] END_TURN by tribe 0 | visits=1
+   [13] SPAWN by city 1 : WARRIOR | visits=3
+   [14] SPAWN by city 1 : ARCHER | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 52
+Chosen action: MOVE by unit 5 to 3 : 10
+---- Visit counts ----
+   [0] BUILD_ROAD by tribe 1 at location 3 : 9 | visits=1
+   [1] BUILD_ROAD by tribe 1 at location 4 : 7 | visits=1
+   [2] BUILD_ROAD by tribe 1 at location 4 : 8 | visits=1
+   [3] BUILD_ROAD by tribe 1 at location 4 : 9 | visits=1
+   [4] BUILD_ROAD by tribe 1 at location 4 : 10 | visits=1
+   [5] BUILD_ROAD by tribe 1 at location 5 : 4 | visits=1
+   [6] BUILD_ROAD by tribe 1 at location 5 : 5 | visits=1
+   [7] BUILD_ROAD by tribe 1 at location 5 : 6 | visits=0
+   [8] BUILD_ROAD by tribe 1 at location 5 : 8 | visits=0
+   [9] BUILD_ROAD by tribe 1 at location 5 : 9 | visits=0
+   [10] BUILD_ROAD by tribe 1 at location 6 : 3 | visits=1
+   [11] BUILD_ROAD by tribe 1 at location 6 : 4 | visits=1
+   [12] BUILD_ROAD by tribe 1 at location 6 : 6 | visits=1
+   [13] BUILD_ROAD by tribe 1 at location 6 : 8 | visits=1
+   [14] BUILD_ROAD by tribe 1 at location 6 : 9 | visits=1
+   [15] BUILD_ROAD by tribe 1 at location 6 : 10 | visits=1
+   [16] BUILD_ROAD by tribe 1 at location 7 : 9 | visits=1
+   [17] BUILD_ROAD by tribe 1 at location 7 : 10 | visits=1
+   [18] BUILD_ROAD by tribe 1 at location 8 : 9 | visits=1
+   [19] BUILD_ROAD by tribe 1 at location 8 : 10 | visits=0
+   [20] RESEARCH_TECH by tribe 1 : CHIVALRY | visits=0
+   [21] RESEARCH_TECH by tribe 1 : CONSTRUCTION | visits=1
+   [22] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=1
+   [23] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=1
+   [24] RESEARCH_TECH by tribe 1 : SMITHERY | visits=0
+   [25] RESEARCH_TECH by tribe 1 : TRADE | visits=1
+   [26] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [27] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [28] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=0
+   [29] END_TURN by tribe 1 | visits=1
+   [30] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [31] SPAWN by city 3 : WARRIOR | visits=0
+   [32] SPAWN by city 3 : RIDER | visits=1
+   [33] SPAWN by city 3 : DEFENDER | visits=1
+   [34] SPAWN by city 3 : ARCHER | visits=1
+   [35] DISBAND of unit 5 | visits=1
+   [36] EXAMINE by unit 5 of ruins. | visits=0
+   [37] MOVE by unit 5 to 3 : 9 | visits=1
+   [38] MOVE by unit 5 to 5 : 10 | visits=0
+   [39] MOVE by unit 5 to 5 : 9 | visits=0
+   [40] MOVE by unit 5 to 5 : 8 | visits=1
+   [41] MOVE by unit 5 to 4 : 10 | visits=1
+   [42] MOVE by unit 5 to 4 : 8 | visits=1
+>> [43] MOVE by unit 5 to 3 : 10 | visits=1
+   [44] DISBAND of unit 8 | visits=1
+   [45] MOVE by unit 8 to 5 : 7 | visits=1
+   [46] MOVE by unit 8 to 7 : 9 | visits=1
+   [47] MOVE by unit 8 to 7 : 8 | visits=1
+   [48] MOVE by unit 8 to 6 : 9 | visits=1
+   [49] MOVE by unit 8 to 6 : 7 | visits=1
+   [50] MOVE by unit 8 to 5 : 9 | visits=1
+   [51] MOVE by unit 8 to 5 : 8 | visits=0
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 45
+Chosen action: DISBAND of unit 8
+---- Visit counts ----
+   [0] BUILD_ROAD by tribe 1 at location 1 : 10 | visits=1
+   [1] BUILD_ROAD by tribe 1 at location 2 : 10 | visits=1
+   [2] BUILD_ROAD by tribe 1 at location 3 : 9 | visits=1
+   [3] BUILD_ROAD by tribe 1 at location 4 : 7 | visits=1
+   [4] BUILD_ROAD by tribe 1 at location 4 : 8 | visits=1
+   [5] BUILD_ROAD by tribe 1 at location 4 : 9 | visits=1
+   [6] BUILD_ROAD by tribe 1 at location 4 : 10 | visits=1
+   [7] BUILD_ROAD by tribe 1 at location 5 : 4 | visits=1
+   [8] BUILD_ROAD by tribe 1 at location 5 : 5 | visits=1
+   [9] BUILD_ROAD by tribe 1 at location 5 : 6 | visits=1
+   [10] BUILD_ROAD by tribe 1 at location 5 : 8 | visits=1
+   [11] BUILD_ROAD by tribe 1 at location 5 : 9 | visits=0
+   [12] BUILD_ROAD by tribe 1 at location 6 : 3 | visits=1
+   [13] BUILD_ROAD by tribe 1 at location 6 : 4 | visits=1
+   [14] BUILD_ROAD by tribe 1 at location 6 : 6 | visits=1
+   [15] BUILD_ROAD by tribe 1 at location 6 : 8 | visits=1
+   [16] BUILD_ROAD by tribe 1 at location 6 : 9 | visits=1
+   [17] BUILD_ROAD by tribe 1 at location 6 : 10 | visits=1
+   [18] BUILD_ROAD by tribe 1 at location 7 : 9 | visits=1
+   [19] BUILD_ROAD by tribe 1 at location 7 : 10 | visits=1
+   [20] BUILD_ROAD by tribe 1 at location 8 : 9 | visits=0
+   [21] BUILD_ROAD by tribe 1 at location 8 : 10 | visits=1
+   [22] RESEARCH_TECH by tribe 1 : CHIVALRY | visits=1
+   [23] RESEARCH_TECH by tribe 1 : CONSTRUCTION | visits=1
+   [24] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=1
+   [25] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=0
+   [26] RESEARCH_TECH by tribe 1 : SMITHERY | visits=1
+   [27] RESEARCH_TECH by tribe 1 : TRADE | visits=1
+   [28] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [29] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [30] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=1
+   [31] END_TURN by tribe 1 | visits=1
+   [32] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [33] SPAWN by city 3 : WARRIOR | visits=1
+   [34] SPAWN by city 3 : RIDER | visits=1
+   [35] SPAWN by city 3 : DEFENDER | visits=1
+   [36] SPAWN by city 3 : ARCHER | visits=1
+>> [37] DISBAND of unit 8 | visits=1
+   [38] MOVE by unit 8 to 5 : 7 | visits=1
+   [39] MOVE by unit 8 to 7 : 9 | visits=1
+   [40] MOVE by unit 8 to 7 : 8 | visits=1
+   [41] MOVE by unit 8 to 6 : 9 | visits=0
+   [42] MOVE by unit 8 to 6 : 7 | visits=1
+   [43] MOVE by unit 8 to 5 : 9 | visits=1
+   [44] MOVE by unit 8 to 5 : 8 | visits=0
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 47
+Chosen action: RESEARCH_TECH by tribe 1 : MATHEMATICS
+---- Visit counts ----
+   [0] BUILD_ROAD by tribe 1 at location 1 : 10 | visits=1
+   [1] BUILD_ROAD by tribe 1 at location 2 : 10 | visits=1
+   [2] BUILD_ROAD by tribe 1 at location 3 : 9 | visits=1
+   [3] BUILD_ROAD by tribe 1 at location 4 : 7 | visits=1
+   [4] BUILD_ROAD by tribe 1 at location 4 : 8 | visits=0
+   [5] BUILD_ROAD by tribe 1 at location 4 : 9 | visits=1
+   [6] BUILD_ROAD by tribe 1 at location 4 : 10 | visits=1
+   [7] BUILD_ROAD by tribe 1 at location 5 : 4 | visits=1
+   [8] BUILD_ROAD by tribe 1 at location 5 : 5 | visits=1
+   [9] BUILD_ROAD by tribe 1 at location 5 : 6 | visits=1
+   [10] BUILD_ROAD by tribe 1 at location 5 : 8 | visits=1
+   [11] BUILD_ROAD by tribe 1 at location 5 : 9 | visits=0
+   [12] BUILD_ROAD by tribe 1 at location 6 : 3 | visits=1
+   [13] BUILD_ROAD by tribe 1 at location 6 : 4 | visits=1
+   [14] BUILD_ROAD by tribe 1 at location 6 : 6 | visits=1
+   [15] BUILD_ROAD by tribe 1 at location 6 : 8 | visits=1
+   [16] BUILD_ROAD by tribe 1 at location 6 : 9 | visits=1
+   [17] BUILD_ROAD by tribe 1 at location 6 : 10 | visits=1
+   [18] BUILD_ROAD by tribe 1 at location 7 : 9 | visits=1
+   [19] BUILD_ROAD by tribe 1 at location 7 : 10 | visits=0
+   [20] BUILD_ROAD by tribe 1 at location 8 : 9 | visits=1
+   [21] BUILD_ROAD by tribe 1 at location 8 : 10 | visits=1
+   [22] RESEARCH_TECH by tribe 1 : CHIVALRY | visits=1
+   [23] RESEARCH_TECH by tribe 1 : CONSTRUCTION | visits=1
+>> [24] RESEARCH_TECH by tribe 1 : MATHEMATICS | visits=1
+   [25] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=1
+   [26] RESEARCH_TECH by tribe 1 : SMITHERY | visits=1
+   [27] RESEARCH_TECH by tribe 1 : TRADE | visits=0
+   [28] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [29] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [30] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=1
+   [31] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=1
+   [32] END_TURN by tribe 1 | visits=1
+   [33] BUILD by city 3 at 6 : 7 : MINE | visits=1
+   [34] GROW_FOREST by city 3 at 4 : 6 | visits=0
+   [35] GROW_FOREST by city 3 at 4 : 7 | visits=0
+   [36] GROW_FOREST by city 3 at 4 : 8 | visits=0
+   [37] GROW_FOREST by city 3 at 5 : 6 | visits=1
+   [38] GROW_FOREST by city 3 at 5 : 8 | visits=1
+   [39] GROW_FOREST by city 3 at 6 : 6 | visits=1
+   [40] GROW_FOREST by city 3 at 6 : 8 | visits=1
+   [41] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [42] SPAWN by city 3 : WARRIOR | visits=1
+   [43] SPAWN by city 3 : RIDER | visits=1
+   [44] SPAWN by city 3 : DEFENDER | visits=1
+   [45] SPAWN by city 3 : ARCHER | visits=1
+   [46] SPAWN by city 3 : MIND_BENDER | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 36
+Chosen action: BUILD_ROAD by tribe 1 at location 3 : 9
+---- Visit counts ----
+   [0] BUILD_ROAD by tribe 1 at location 1 : 10 | visits=2
+   [1] BUILD_ROAD by tribe 1 at location 2 : 10 | visits=1
+>> [2] BUILD_ROAD by tribe 1 at location 3 : 9 | visits=3
+   [3] BUILD_ROAD by tribe 1 at location 4 : 7 | visits=1
+   [4] BUILD_ROAD by tribe 1 at location 4 : 8 | visits=1
+   [5] BUILD_ROAD by tribe 1 at location 4 : 9 | visits=1
+   [6] BUILD_ROAD by tribe 1 at location 4 : 10 | visits=1
+   [7] BUILD_ROAD by tribe 1 at location 5 : 4 | visits=1
+   [8] BUILD_ROAD by tribe 1 at location 5 : 5 | visits=1
+   [9] BUILD_ROAD by tribe 1 at location 5 : 6 | visits=1
+   [10] BUILD_ROAD by tribe 1 at location 5 : 8 | visits=1
+   [11] BUILD_ROAD by tribe 1 at location 5 : 9 | visits=1
+   [12] BUILD_ROAD by tribe 1 at location 6 : 3 | visits=1
+   [13] BUILD_ROAD by tribe 1 at location 6 : 4 | visits=1
+   [14] BUILD_ROAD by tribe 1 at location 6 : 6 | visits=1
+   [15] BUILD_ROAD by tribe 1 at location 6 : 8 | visits=2
+   [16] BUILD_ROAD by tribe 1 at location 6 : 9 | visits=1
+   [17] BUILD_ROAD by tribe 1 at location 6 : 10 | visits=1
+   [18] BUILD_ROAD by tribe 1 at location 7 : 9 | visits=1
+   [19] BUILD_ROAD by tribe 1 at location 7 : 10 | visits=1
+   [20] BUILD_ROAD by tribe 1 at location 8 : 9 | visits=1
+   [21] BUILD_ROAD by tribe 1 at location 8 : 10 | visits=1
+   [22] RESEARCH_TECH by tribe 1 : CHIVALRY | visits=1
+   [23] RESEARCH_TECH by tribe 1 : CONSTRUCTION | visits=1
+   [24] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=1
+   [25] RESEARCH_TECH by tribe 1 : SMITHERY | visits=1
+   [26] RESEARCH_TECH by tribe 1 : TRADE | visits=1
+   [27] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [28] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [29] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=1
+   [30] END_TURN by tribe 1 | visits=1
+   [31] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [32] SPAWN by city 3 : WARRIOR | visits=1
+   [33] SPAWN by city 3 : RIDER | visits=1
+   [34] SPAWN by city 3 : DEFENDER | visits=1
+   [35] SPAWN by city 3 : ARCHER | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 30
+Chosen action: BUILD_ROAD by tribe 1 at location 7 : 10
+---- Visit counts ----
+   [0] BUILD_ROAD by tribe 1 at location 1 : 10 | visits=1
+   [1] BUILD_ROAD by tribe 1 at location 2 : 10 | visits=1
+   [2] BUILD_ROAD by tribe 1 at location 4 : 7 | visits=1
+   [3] BUILD_ROAD by tribe 1 at location 4 : 8 | visits=2
+   [4] BUILD_ROAD by tribe 1 at location 4 : 9 | visits=3
+   [5] BUILD_ROAD by tribe 1 at location 4 : 10 | visits=1
+   [6] BUILD_ROAD by tribe 1 at location 5 : 4 | visits=1
+   [7] BUILD_ROAD by tribe 1 at location 5 : 5 | visits=1
+   [8] BUILD_ROAD by tribe 1 at location 5 : 6 | visits=1
+   [9] BUILD_ROAD by tribe 1 at location 5 : 8 | visits=2
+   [10] BUILD_ROAD by tribe 1 at location 5 : 9 | visits=1
+   [11] BUILD_ROAD by tribe 1 at location 6 : 3 | visits=2
+   [12] BUILD_ROAD by tribe 1 at location 6 : 4 | visits=2
+   [13] BUILD_ROAD by tribe 1 at location 6 : 6 | visits=1
+   [14] BUILD_ROAD by tribe 1 at location 6 : 8 | visits=1
+   [15] BUILD_ROAD by tribe 1 at location 6 : 9 | visits=1
+   [16] BUILD_ROAD by tribe 1 at location 6 : 10 | visits=1
+   [17] BUILD_ROAD by tribe 1 at location 7 : 9 | visits=2
+>> [18] BUILD_ROAD by tribe 1 at location 7 : 10 | visits=3
+   [19] BUILD_ROAD by tribe 1 at location 8 : 9 | visits=2
+   [20] BUILD_ROAD by tribe 1 at location 8 : 10 | visits=1
+   [21] RESEARCH_TECH by tribe 1 : CHIVALRY | visits=1
+   [22] RESEARCH_TECH by tribe 1 : CONSTRUCTION | visits=1
+   [23] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=1
+   [24] RESEARCH_TECH by tribe 1 : SMITHERY | visits=1
+   [25] RESEARCH_TECH by tribe 1 : TRADE | visits=1
+   [26] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [27] END_TURN by tribe 1 | visits=1
+   [28] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [29] SPAWN by city 3 : WARRIOR | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 18
+Chosen action: SEND_STARS by tribe 0 to: 1 : 3 stars
+---- Visit counts ----
+   [0] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=2
+   [1] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=2
+>> [2] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=4
+   [3] END_TURN by tribe 0 | visits=1
+   [4] SPAWN by city 1 : WARRIOR | visits=2
+   [5] SPAWN by city 1 : ARCHER | visits=4
+   [6] MOVE by unit 2 to 4 : 2 | visits=2
+   [7] MOVE by unit 2 to 6 : 4 | visits=2
+   [8] MOVE by unit 2 to 6 : 3 | visits=2
+   [9] MOVE by unit 2 to 6 : 2 | visits=1
+   [10] MOVE by unit 2 to 5 : 4 | visits=2
+   [11] MOVE by unit 2 to 5 : 2 | visits=2
+   [12] MOVE by unit 6 to 4 : 5 | visits=2
+   [13] MOVE by unit 6 to 5 : 7 | visits=2
+   [14] MOVE by unit 6 to 5 : 6 | visits=3
+   [15] MOVE by unit 6 to 5 : 5 | visits=3
+   [16] MOVE by unit 6 to 4 : 7 | visits=2
+   [17] RECOVER by unit 6 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 13
+Chosen action: MOVE by unit 6 to 5 : 7
+---- Visit counts ----
+   [0] END_TURN by tribe 0 | visits=1
+   [1] MOVE by unit 2 to 4 : 2 | visits=3
+   [2] MOVE by unit 2 to 6 : 4 | visits=4
+   [3] MOVE by unit 2 to 6 : 3 | visits=3
+   [4] MOVE by unit 2 to 6 : 2 | visits=2
+   [5] MOVE by unit 2 to 5 : 4 | visits=2
+   [6] MOVE by unit 2 to 5 : 2 | visits=3
+   [7] MOVE by unit 6 to 4 : 5 | visits=2
+>> [8] MOVE by unit 6 to 5 : 7 | visits=6
+   [9] MOVE by unit 6 to 5 : 6 | visits=2
+   [10] MOVE by unit 6 to 5 : 5 | visits=6
+   [11] MOVE by unit 6 to 4 : 7 | visits=3
+   [12] RECOVER by unit 6 | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 7
+Chosen action: END_TURN by tribe 0
+---- Visit counts ----
+>> [0] END_TURN by tribe 0 | visits=14
+   [1] MOVE by unit 2 to 4 : 2 | visits=4
+   [2] MOVE by unit 2 to 6 : 4 | visits=4
+   [3] MOVE by unit 2 to 6 : 3 | visits=4
+   [4] MOVE by unit 2 to 6 : 2 | visits=4
+   [5] MOVE by unit 2 to 5 : 4 | visits=4
+   [6] MOVE by unit 2 to 5 : 2 | visits=6
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 35
+Chosen action: MOVE by unit 5 to 4 : 10
+---- Visit counts ----
+   [0] BUILD_ROAD by tribe 1 at location 1 : 10 | visits=1
+   [1] BUILD_ROAD by tribe 1 at location 2 : 10 | visits=1
+   [2] BUILD_ROAD by tribe 1 at location 4 : 6 | visits=1
+   [3] BUILD_ROAD by tribe 1 at location 4 : 7 | visits=1
+   [4] BUILD_ROAD by tribe 1 at location 4 : 8 | visits=1
+   [5] BUILD_ROAD by tribe 1 at location 4 : 9 | visits=1
+   [6] BUILD_ROAD by tribe 1 at location 4 : 10 | visits=2
+   [7] BUILD_ROAD by tribe 1 at location 5 : 4 | visits=1
+   [8] BUILD_ROAD by tribe 1 at location 5 : 5 | visits=1
+   [9] BUILD_ROAD by tribe 1 at location 5 : 6 | visits=1
+   [10] BUILD_ROAD by tribe 1 at location 5 : 8 | visits=1
+   [11] BUILD_ROAD by tribe 1 at location 5 : 9 | visits=1
+   [12] BUILD_ROAD by tribe 1 at location 6 : 3 | visits=1
+   [13] BUILD_ROAD by tribe 1 at location 6 : 4 | visits=1
+   [14] BUILD_ROAD by tribe 1 at location 6 : 6 | visits=1
+   [15] BUILD_ROAD by tribe 1 at location 6 : 8 | visits=1
+   [16] BUILD_ROAD by tribe 1 at location 6 : 9 | visits=1
+   [17] BUILD_ROAD by tribe 1 at location 6 : 10 | visits=1
+   [18] BUILD_ROAD by tribe 1 at location 7 : 9 | visits=1
+   [19] BUILD_ROAD by tribe 1 at location 8 : 9 | visits=1
+   [20] BUILD_ROAD by tribe 1 at location 8 : 10 | visits=1
+   [21] RESEARCH_TECH by tribe 1 : CHIVALRY | visits=1
+   [22] RESEARCH_TECH by tribe 1 : CONSTRUCTION | visits=1
+   [23] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=1
+   [24] RESEARCH_TECH by tribe 1 : SMITHERY | visits=1
+   [25] RESEARCH_TECH by tribe 1 : TRADE | visits=1
+   [26] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [27] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [28] END_TURN by tribe 1 | visits=1
+   [29] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [30] DISBAND of unit 5 | visits=2
+   [31] MOVE by unit 5 to 2 : 10 | visits=1
+>> [32] MOVE by unit 5 to 4 : 10 | visits=3
+   [33] MOVE by unit 5 to 4 : 9 | visits=1
+   [34] MOVE by unit 5 to 3 : 9 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 30
+Chosen action: BUILD_ROAD by tribe 1 at location 5 : 6
+---- Visit counts ----
+   [0] BUILD_ROAD by tribe 1 at location 1 : 10 | visits=1
+   [1] BUILD_ROAD by tribe 1 at location 2 : 10 | visits=1
+   [2] BUILD_ROAD by tribe 1 at location 4 : 6 | visits=2
+   [3] BUILD_ROAD by tribe 1 at location 4 : 7 | visits=1
+   [4] BUILD_ROAD by tribe 1 at location 4 : 8 | visits=2
+   [5] BUILD_ROAD by tribe 1 at location 4 : 9 | visits=2
+   [6] BUILD_ROAD by tribe 1 at location 4 : 10 | visits=1
+   [7] BUILD_ROAD by tribe 1 at location 5 : 4 | visits=1
+   [8] BUILD_ROAD by tribe 1 at location 5 : 5 | visits=1
+>> [9] BUILD_ROAD by tribe 1 at location 5 : 6 | visits=3
+   [10] BUILD_ROAD by tribe 1 at location 5 : 8 | visits=2
+   [11] BUILD_ROAD by tribe 1 at location 5 : 9 | visits=1
+   [12] BUILD_ROAD by tribe 1 at location 6 : 3 | visits=1
+   [13] BUILD_ROAD by tribe 1 at location 6 : 4 | visits=1
+   [14] BUILD_ROAD by tribe 1 at location 6 : 6 | visits=1
+   [15] BUILD_ROAD by tribe 1 at location 6 : 8 | visits=1
+   [16] BUILD_ROAD by tribe 1 at location 6 : 9 | visits=1
+   [17] BUILD_ROAD by tribe 1 at location 6 : 10 | visits=1
+   [18] BUILD_ROAD by tribe 1 at location 7 : 9 | visits=1
+   [19] BUILD_ROAD by tribe 1 at location 8 : 9 | visits=2
+   [20] BUILD_ROAD by tribe 1 at location 8 : 10 | visits=1
+   [21] RESEARCH_TECH by tribe 1 : CHIVALRY | visits=2
+   [22] RESEARCH_TECH by tribe 1 : CONSTRUCTION | visits=1
+   [23] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=1
+   [24] RESEARCH_TECH by tribe 1 : SMITHERY | visits=3
+   [25] RESEARCH_TECH by tribe 1 : TRADE | visits=1
+   [26] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [27] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [28] END_TURN by tribe 1 | visits=1
+   [29] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 6
+Chosen action: RESEARCH_TECH by tribe 1 : CHIVALRY
+---- Visit counts ----
+>> [0] RESEARCH_TECH by tribe 1 : CHIVALRY | visits=12
+   [1] RESEARCH_TECH by tribe 1 : CONSTRUCTION | visits=6
+   [2] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=6
+   [3] RESEARCH_TECH by tribe 1 : SMITHERY | visits=7
+   [4] RESEARCH_TECH by tribe 1 : TRADE | visits=5
+   [5] END_TURN by tribe 1 | visits=4
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 25
+Chosen action: MOVE by unit 6 to 5 : 6
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : RIDING | visits=2
+   [1] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=1
+   [2] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=1
+   [3] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=1
+   [4] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=1
+   [5] END_TURN by tribe 0 | visits=1
+   [6] BUILD by city 1 at 4 : 1 : MINE | visits=3
+   [7] SPAWN by city 1 : WARRIOR | visits=1
+   [8] SPAWN by city 1 : ARCHER | visits=1
+   [9] MOVE by unit 2 to 4 : 2 | visits=1
+   [10] MOVE by unit 2 to 6 : 4 | visits=1
+   [11] MOVE by unit 2 to 6 : 3 | visits=2
+   [12] MOVE by unit 2 to 6 : 2 | visits=2
+   [13] MOVE by unit 2 to 5 : 4 | visits=1
+   [14] MOVE by unit 2 to 5 : 2 | visits=3
+   [15] CAPTURE by unit 6 of target CITY: 3 | visits=1
+   [16] MOVE by unit 6 to 4 : 6 | visits=1
+   [17] MOVE by unit 6 to 6 : 8 | visits=2
+   [18] MOVE by unit 6 to 6 : 7 | visits=1
+   [19] MOVE by unit 6 to 6 : 6 | visits=2
+   [20] MOVE by unit 6 to 5 : 8 | visits=1
+>> [21] MOVE by unit 6 to 5 : 6 | visits=4
+   [22] MOVE by unit 6 to 4 : 8 | visits=3
+   [23] MOVE by unit 6 to 4 : 7 | visits=1
+   [24] RECOVER by unit 6 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 15
+Chosen action: SEND_STARS by tribe 0 to: 1 : 4 stars
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : RIDING | visits=2
+   [1] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=2
+   [2] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=2
+   [3] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=2
+>> [4] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=7
+   [5] END_TURN by tribe 0 | visits=1
+   [6] BUILD by city 1 at 4 : 1 : MINE | visits=3
+   [7] SPAWN by city 1 : WARRIOR | visits=2
+   [8] SPAWN by city 1 : ARCHER | visits=2
+   [9] MOVE by unit 2 to 4 : 2 | visits=2
+   [10] MOVE by unit 2 to 6 : 4 | visits=4
+   [11] MOVE by unit 2 to 6 : 3 | visits=3
+   [12] MOVE by unit 2 to 6 : 2 | visits=3
+   [13] MOVE by unit 2 to 5 : 4 | visits=2
+   [14] MOVE by unit 2 to 5 : 2 | visits=3
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 7
+Chosen action: MOVE by unit 2 to 6 : 2
+---- Visit counts ----
+   [0] END_TURN by tribe 0 | visits=7
+   [1] MOVE by unit 2 to 4 : 2 | visits=5
+   [2] MOVE by unit 2 to 6 : 4 | visits=6
+   [3] MOVE by unit 2 to 6 : 3 | visits=4
+>> [4] MOVE by unit 2 to 6 : 2 | visits=8
+   [5] MOVE by unit 2 to 5 : 4 | visits=6
+   [6] MOVE by unit 2 to 5 : 2 | visits=4
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 54
+Chosen action: MOVE by unit 5 to 3 : 10
+---- Visit counts ----
+   [0] BUILD_ROAD by tribe 1 at location 1 : 10 | visits=1
+   [1] BUILD_ROAD by tribe 1 at location 2 : 10 | visits=0
+   [2] BUILD_ROAD by tribe 1 at location 4 : 6 | visits=1
+   [3] BUILD_ROAD by tribe 1 at location 4 : 7 | visits=1
+   [4] BUILD_ROAD by tribe 1 at location 4 : 8 | visits=0
+   [5] BUILD_ROAD by tribe 1 at location 4 : 9 | visits=1
+   [6] BUILD_ROAD by tribe 1 at location 4 : 10 | visits=1
+   [7] BUILD_ROAD by tribe 1 at location 5 : 4 | visits=1
+   [8] BUILD_ROAD by tribe 1 at location 5 : 5 | visits=1
+   [9] BUILD_ROAD by tribe 1 at location 5 : 8 | visits=1
+   [10] BUILD_ROAD by tribe 1 at location 5 : 9 | visits=1
+   [11] BUILD_ROAD by tribe 1 at location 6 : 3 | visits=0
+   [12] BUILD_ROAD by tribe 1 at location 6 : 4 | visits=0
+   [13] BUILD_ROAD by tribe 1 at location 6 : 6 | visits=1
+   [14] BUILD_ROAD by tribe 1 at location 6 : 8 | visits=1
+   [15] BUILD_ROAD by tribe 1 at location 6 : 9 | visits=0
+   [16] BUILD_ROAD by tribe 1 at location 6 : 10 | visits=0
+   [17] BUILD_ROAD by tribe 1 at location 7 : 9 | visits=1
+   [18] BUILD_ROAD by tribe 1 at location 8 : 9 | visits=1
+   [19] BUILD_ROAD by tribe 1 at location 8 : 10 | visits=0
+   [20] RESEARCH_TECH by tribe 1 : CONSTRUCTION | visits=1
+   [21] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=1
+   [22] RESEARCH_TECH by tribe 1 : SMITHERY | visits=1
+   [23] RESEARCH_TECH by tribe 1 : TRADE | visits=0
+   [24] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [25] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=0
+   [26] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=1
+   [27] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=0
+   [28] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=0
+   [29] SEND_STARS by tribe 1 to: 0 : 6 stars | visits=1
+   [30] SEND_STARS by tribe 1 to: 0 : 7 stars | visits=0
+   [31] END_TURN by tribe 1 | visits=1
+   [32] BUILD by city 3 at 6 : 7 : MINE | visits=1
+   [33] GROW_FOREST by city 3 at 4 : 6 | visits=1
+   [34] GROW_FOREST by city 3 at 4 : 7 | visits=1
+   [35] GROW_FOREST by city 3 at 4 : 8 | visits=1
+   [36] GROW_FOREST by city 3 at 5 : 6 | visits=1
+   [37] GROW_FOREST by city 3 at 5 : 8 | visits=1
+   [38] GROW_FOREST by city 3 at 6 : 6 | visits=1
+   [39] GROW_FOREST by city 3 at 6 : 8 | visits=1
+   [40] RESOURCE_GATHERED by city 3 : ANIMAL | visits=0
+   [41] SPAWN by city 3 : WARRIOR | visits=0
+   [42] SPAWN by city 3 : RIDER | visits=1
+   [43] SPAWN by city 3 : DEFENDER | visits=1
+   [44] SPAWN by city 3 : ARCHER | visits=1
+   [45] SPAWN by city 3 : CATAPULT | visits=1
+   [46] SPAWN by city 3 : KNIGHT | visits=1
+   [47] SPAWN by city 3 : MIND_BENDER | visits=1
+   [48] DISBAND of unit 5 | visits=1
+   [49] MOVE by unit 5 to 3 : 9 | visits=1
+   [50] MOVE by unit 5 to 5 : 10 | visits=1
+   [51] MOVE by unit 5 to 5 : 9 | visits=1
+   [52] MOVE by unit 5 to 4 : 9 | visits=1
+>> [53] MOVE by unit 5 to 3 : 10 | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 48
+Chosen action: RESEARCH_TECH by tribe 1 : CONSTRUCTION
+---- Visit counts ----
+   [0] BUILD_ROAD by tribe 1 at location 1 : 10 | visits=1
+   [1] BUILD_ROAD by tribe 1 at location 2 : 10 | visits=1
+   [2] BUILD_ROAD by tribe 1 at location 4 : 6 | visits=1
+   [3] BUILD_ROAD by tribe 1 at location 4 : 7 | visits=1
+   [4] BUILD_ROAD by tribe 1 at location 4 : 8 | visits=1
+   [5] BUILD_ROAD by tribe 1 at location 4 : 9 | visits=1
+   [6] BUILD_ROAD by tribe 1 at location 4 : 10 | visits=1
+   [7] BUILD_ROAD by tribe 1 at location 5 : 4 | visits=1
+   [8] BUILD_ROAD by tribe 1 at location 5 : 5 | visits=1
+   [9] BUILD_ROAD by tribe 1 at location 5 : 8 | visits=1
+   [10] BUILD_ROAD by tribe 1 at location 5 : 9 | visits=0
+   [11] BUILD_ROAD by tribe 1 at location 6 : 3 | visits=1
+   [12] BUILD_ROAD by tribe 1 at location 6 : 4 | visits=1
+   [13] BUILD_ROAD by tribe 1 at location 6 : 6 | visits=1
+   [14] BUILD_ROAD by tribe 1 at location 6 : 8 | visits=1
+   [15] BUILD_ROAD by tribe 1 at location 6 : 9 | visits=0
+   [16] BUILD_ROAD by tribe 1 at location 6 : 10 | visits=1
+   [17] BUILD_ROAD by tribe 1 at location 7 : 9 | visits=0
+   [18] BUILD_ROAD by tribe 1 at location 8 : 9 | visits=1
+   [19] BUILD_ROAD by tribe 1 at location 8 : 10 | visits=1
+>> [20] RESEARCH_TECH by tribe 1 : CONSTRUCTION | visits=1
+   [21] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=1
+   [22] RESEARCH_TECH by tribe 1 : SMITHERY | visits=1
+   [23] RESEARCH_TECH by tribe 1 : TRADE | visits=1
+   [24] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [25] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=0
+   [26] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=0
+   [27] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=1
+   [28] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=1
+   [29] SEND_STARS by tribe 1 to: 0 : 6 stars | visits=1
+   [30] SEND_STARS by tribe 1 to: 0 : 7 stars | visits=1
+   [31] END_TURN by tribe 1 | visits=1
+   [32] BUILD by city 3 at 6 : 7 : MINE | visits=1
+   [33] GROW_FOREST by city 3 at 4 : 6 | visits=0
+   [34] GROW_FOREST by city 3 at 4 : 7 | visits=1
+   [35] GROW_FOREST by city 3 at 4 : 8 | visits=1
+   [36] GROW_FOREST by city 3 at 5 : 6 | visits=1
+   [37] GROW_FOREST by city 3 at 5 : 8 | visits=0
+   [38] GROW_FOREST by city 3 at 6 : 6 | visits=1
+   [39] GROW_FOREST by city 3 at 6 : 8 | visits=1
+   [40] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [41] SPAWN by city 3 : WARRIOR | visits=1
+   [42] SPAWN by city 3 : RIDER | visits=1
+   [43] SPAWN by city 3 : DEFENDER | visits=0
+   [44] SPAWN by city 3 : ARCHER | visits=1
+   [45] SPAWN by city 3 : CATAPULT | visits=1
+   [46] SPAWN by city 3 : KNIGHT | visits=1
+   [47] SPAWN by city 3 : MIND_BENDER | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 45
+Chosen action: DESTROY by city 3 at 6 : 6
+---- Visit counts ----
+   [0] BUILD_ROAD by tribe 1 at location 1 : 10 | visits=1
+   [1] BUILD_ROAD by tribe 1 at location 2 : 10 | visits=1
+   [2] BUILD_ROAD by tribe 1 at location 4 : 6 | visits=1
+   [3] BUILD_ROAD by tribe 1 at location 4 : 7 | visits=1
+   [4] BUILD_ROAD by tribe 1 at location 4 : 8 | visits=0
+   [5] BUILD_ROAD by tribe 1 at location 4 : 9 | visits=1
+   [6] BUILD_ROAD by tribe 1 at location 4 : 10 | visits=1
+   [7] BUILD_ROAD by tribe 1 at location 5 : 4 | visits=1
+   [8] BUILD_ROAD by tribe 1 at location 5 : 5 | visits=1
+   [9] BUILD_ROAD by tribe 1 at location 5 : 8 | visits=0
+   [10] BUILD_ROAD by tribe 1 at location 5 : 9 | visits=1
+   [11] BUILD_ROAD by tribe 1 at location 6 : 3 | visits=1
+   [12] BUILD_ROAD by tribe 1 at location 6 : 4 | visits=0
+   [13] BUILD_ROAD by tribe 1 at location 6 : 6 | visits=1
+   [14] BUILD_ROAD by tribe 1 at location 6 : 8 | visits=1
+   [15] BUILD_ROAD by tribe 1 at location 6 : 9 | visits=1
+   [16] BUILD_ROAD by tribe 1 at location 6 : 10 | visits=0
+   [17] BUILD_ROAD by tribe 1 at location 7 : 9 | visits=1
+   [18] BUILD_ROAD by tribe 1 at location 8 : 9 | visits=1
+   [19] BUILD_ROAD by tribe 1 at location 8 : 10 | visits=1
+   [20] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=1
+   [21] RESEARCH_TECH by tribe 1 : SMITHERY | visits=1
+   [22] RESEARCH_TECH by tribe 1 : TRADE | visits=1
+   [23] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [24] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [25] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=1
+   [26] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=1
+   [27] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=1
+   [28] SEND_STARS by tribe 1 to: 0 : 6 stars | visits=1
+   [29] END_TURN by tribe 1 | visits=1
+   [30] BUILD by city 3 at 6 : 7 : MINE | visits=1
+>> [31] DESTROY by city 3 at 6 : 6 | visits=1
+   [32] GROW_FOREST by city 3 at 4 : 6 | visits=1
+   [33] GROW_FOREST by city 3 at 4 : 7 | visits=1
+   [34] GROW_FOREST by city 3 at 4 : 8 | visits=1
+   [35] GROW_FOREST by city 3 at 5 : 6 | visits=1
+   [36] GROW_FOREST by city 3 at 5 : 8 | visits=0
+   [37] GROW_FOREST by city 3 at 6 : 6 | visits=1
+   [38] GROW_FOREST by city 3 at 6 : 8 | visits=1
+   [39] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [40] SPAWN by city 3 : WARRIOR | visits=1
+   [41] SPAWN by city 3 : RIDER | visits=1
+   [42] SPAWN by city 3 : DEFENDER | visits=1
+   [43] SPAWN by city 3 : ARCHER | visits=1
+   [44] SPAWN by city 3 : MIND_BENDER | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 44
+Chosen action: RESEARCH_TECH by tribe 1 : SMITHERY
+---- Visit counts ----
+   [0] BUILD_ROAD by tribe 1 at location 1 : 10 | visits=1
+   [1] BUILD_ROAD by tribe 1 at location 2 : 10 | visits=1
+   [2] BUILD_ROAD by tribe 1 at location 4 : 6 | visits=0
+   [3] BUILD_ROAD by tribe 1 at location 4 : 7 | visits=1
+   [4] BUILD_ROAD by tribe 1 at location 4 : 8 | visits=1
+   [5] BUILD_ROAD by tribe 1 at location 4 : 9 | visits=1
+   [6] BUILD_ROAD by tribe 1 at location 4 : 10 | visits=1
+   [7] BUILD_ROAD by tribe 1 at location 5 : 4 | visits=1
+   [8] BUILD_ROAD by tribe 1 at location 5 : 5 | visits=1
+   [9] BUILD_ROAD by tribe 1 at location 5 : 8 | visits=1
+   [10] BUILD_ROAD by tribe 1 at location 5 : 9 | visits=1
+   [11] BUILD_ROAD by tribe 1 at location 6 : 3 | visits=1
+   [12] BUILD_ROAD by tribe 1 at location 6 : 4 | visits=1
+   [13] BUILD_ROAD by tribe 1 at location 6 : 6 | visits=1
+   [14] BUILD_ROAD by tribe 1 at location 6 : 8 | visits=1
+   [15] BUILD_ROAD by tribe 1 at location 6 : 9 | visits=1
+   [16] BUILD_ROAD by tribe 1 at location 6 : 10 | visits=1
+   [17] BUILD_ROAD by tribe 1 at location 7 : 9 | visits=1
+   [18] BUILD_ROAD by tribe 1 at location 8 : 9 | visits=1
+   [19] BUILD_ROAD by tribe 1 at location 8 : 10 | visits=1
+   [20] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=1
+>> [21] RESEARCH_TECH by tribe 1 : SMITHERY | visits=1
+   [22] RESEARCH_TECH by tribe 1 : TRADE | visits=1
+   [23] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [24] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [25] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=1
+   [26] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=1
+   [27] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=1
+   [28] SEND_STARS by tribe 1 to: 0 : 6 stars | visits=1
+   [29] END_TURN by tribe 1 | visits=1
+   [30] BUILD by city 3 at 6 : 7 : MINE | visits=1
+   [31] GROW_FOREST by city 3 at 4 : 6 | visits=0
+   [32] GROW_FOREST by city 3 at 4 : 7 | visits=1
+   [33] GROW_FOREST by city 3 at 4 : 8 | visits=1
+   [34] GROW_FOREST by city 3 at 5 : 6 | visits=0
+   [35] GROW_FOREST by city 3 at 5 : 8 | visits=1
+   [36] GROW_FOREST by city 3 at 6 : 6 | visits=1
+   [37] GROW_FOREST by city 3 at 6 : 8 | visits=1
+   [38] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [39] SPAWN by city 3 : WARRIOR | visits=1
+   [40] SPAWN by city 3 : RIDER | visits=0
+   [41] SPAWN by city 3 : DEFENDER | visits=1
+   [42] SPAWN by city 3 : ARCHER | visits=1
+   [43] SPAWN by city 3 : MIND_BENDER | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 43
+Chosen action: SEND_STARS by tribe 1 to: 0 : 1 stars
+---- Visit counts ----
+   [0] BUILD_ROAD by tribe 1 at location 1 : 10 | visits=1
+   [1] BUILD_ROAD by tribe 1 at location 2 : 10 | visits=1
+   [2] BUILD_ROAD by tribe 1 at location 4 : 6 | visits=1
+   [3] BUILD_ROAD by tribe 1 at location 4 : 7 | visits=1
+   [4] BUILD_ROAD by tribe 1 at location 4 : 8 | visits=1
+   [5] BUILD_ROAD by tribe 1 at location 4 : 9 | visits=1
+   [6] BUILD_ROAD by tribe 1 at location 4 : 10 | visits=1
+   [7] BUILD_ROAD by tribe 1 at location 5 : 4 | visits=1
+   [8] BUILD_ROAD by tribe 1 at location 5 : 5 | visits=1
+   [9] BUILD_ROAD by tribe 1 at location 5 : 8 | visits=1
+   [10] BUILD_ROAD by tribe 1 at location 5 : 9 | visits=1
+   [11] BUILD_ROAD by tribe 1 at location 6 : 3 | visits=1
+   [12] BUILD_ROAD by tribe 1 at location 6 : 4 | visits=0
+   [13] BUILD_ROAD by tribe 1 at location 6 : 6 | visits=1
+   [14] BUILD_ROAD by tribe 1 at location 6 : 8 | visits=1
+   [15] BUILD_ROAD by tribe 1 at location 6 : 9 | visits=1
+   [16] BUILD_ROAD by tribe 1 at location 6 : 10 | visits=0
+   [17] BUILD_ROAD by tribe 1 at location 7 : 9 | visits=1
+   [18] BUILD_ROAD by tribe 1 at location 8 : 9 | visits=1
+   [19] BUILD_ROAD by tribe 1 at location 8 : 10 | visits=1
+   [20] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=1
+   [21] RESEARCH_TECH by tribe 1 : TRADE | visits=1
+>> [22] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [23] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [24] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=1
+   [25] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=1
+   [26] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=1
+   [27] END_TURN by tribe 1 | visits=1
+   [28] BUILD by city 3 at 6 : 7 : MINE | visits=1
+   [29] GROW_FOREST by city 3 at 4 : 6 | visits=1
+   [30] GROW_FOREST by city 3 at 4 : 7 | visits=1
+   [31] GROW_FOREST by city 3 at 4 : 8 | visits=1
+   [32] GROW_FOREST by city 3 at 5 : 6 | visits=0
+   [33] GROW_FOREST by city 3 at 5 : 8 | visits=1
+   [34] GROW_FOREST by city 3 at 6 : 6 | visits=1
+   [35] GROW_FOREST by city 3 at 6 : 8 | visits=1
+   [36] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [37] SPAWN by city 3 : WARRIOR | visits=1
+   [38] SPAWN by city 3 : RIDER | visits=1
+   [39] SPAWN by city 3 : DEFENDER | visits=1
+   [40] SPAWN by city 3 : SWORDMAN | visits=1
+   [41] SPAWN by city 3 : ARCHER | visits=1
+   [42] SPAWN by city 3 : MIND_BENDER | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 42
+Chosen action: SEND_STARS by tribe 1 to: 0 : 1 stars
+---- Visit counts ----
+   [0] BUILD_ROAD by tribe 1 at location 1 : 10 | visits=1
+   [1] BUILD_ROAD by tribe 1 at location 2 : 10 | visits=1
+   [2] BUILD_ROAD by tribe 1 at location 4 : 6 | visits=1
+   [3] BUILD_ROAD by tribe 1 at location 4 : 7 | visits=1
+   [4] BUILD_ROAD by tribe 1 at location 4 : 8 | visits=1
+   [5] BUILD_ROAD by tribe 1 at location 4 : 9 | visits=1
+   [6] BUILD_ROAD by tribe 1 at location 4 : 10 | visits=1
+   [7] BUILD_ROAD by tribe 1 at location 5 : 4 | visits=1
+   [8] BUILD_ROAD by tribe 1 at location 5 : 5 | visits=1
+   [9] BUILD_ROAD by tribe 1 at location 5 : 8 | visits=1
+   [10] BUILD_ROAD by tribe 1 at location 5 : 9 | visits=1
+   [11] BUILD_ROAD by tribe 1 at location 6 : 3 | visits=1
+   [12] BUILD_ROAD by tribe 1 at location 6 : 4 | visits=1
+   [13] BUILD_ROAD by tribe 1 at location 6 : 6 | visits=1
+   [14] BUILD_ROAD by tribe 1 at location 6 : 8 | visits=1
+   [15] BUILD_ROAD by tribe 1 at location 6 : 9 | visits=1
+   [16] BUILD_ROAD by tribe 1 at location 6 : 10 | visits=1
+   [17] BUILD_ROAD by tribe 1 at location 7 : 9 | visits=1
+   [18] BUILD_ROAD by tribe 1 at location 8 : 9 | visits=1
+   [19] BUILD_ROAD by tribe 1 at location 8 : 10 | visits=1
+   [20] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=1
+   [21] RESEARCH_TECH by tribe 1 : TRADE | visits=1
+>> [22] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [23] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [24] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=1
+   [25] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=1
+   [26] END_TURN by tribe 1 | visits=1
+   [27] BUILD by city 3 at 6 : 7 : MINE | visits=0
+   [28] GROW_FOREST by city 3 at 4 : 6 | visits=1
+   [29] GROW_FOREST by city 3 at 4 : 7 | visits=1
+   [30] GROW_FOREST by city 3 at 4 : 8 | visits=1
+   [31] GROW_FOREST by city 3 at 5 : 6 | visits=1
+   [32] GROW_FOREST by city 3 at 5 : 8 | visits=0
+   [33] GROW_FOREST by city 3 at 6 : 6 | visits=1
+   [34] GROW_FOREST by city 3 at 6 : 8 | visits=1
+   [35] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [36] SPAWN by city 3 : WARRIOR | visits=1
+   [37] SPAWN by city 3 : RIDER | visits=1
+   [38] SPAWN by city 3 : DEFENDER | visits=1
+   [39] SPAWN by city 3 : SWORDMAN | visits=1
+   [40] SPAWN by city 3 : ARCHER | visits=1
+   [41] SPAWN by city 3 : MIND_BENDER | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 31
+Chosen action: BUILD_ROAD by tribe 1 at location 8 : 9
+---- Visit counts ----
+   [0] BUILD_ROAD by tribe 1 at location 1 : 10 | visits=1
+   [1] BUILD_ROAD by tribe 1 at location 2 : 10 | visits=1
+   [2] BUILD_ROAD by tribe 1 at location 4 : 6 | visits=2
+   [3] BUILD_ROAD by tribe 1 at location 4 : 7 | visits=1
+   [4] BUILD_ROAD by tribe 1 at location 4 : 8 | visits=1
+   [5] BUILD_ROAD by tribe 1 at location 4 : 9 | visits=2
+   [6] BUILD_ROAD by tribe 1 at location 4 : 10 | visits=2
+   [7] BUILD_ROAD by tribe 1 at location 5 : 4 | visits=1
+   [8] BUILD_ROAD by tribe 1 at location 5 : 5 | visits=1
+   [9] BUILD_ROAD by tribe 1 at location 5 : 8 | visits=1
+   [10] BUILD_ROAD by tribe 1 at location 5 : 9 | visits=1
+   [11] BUILD_ROAD by tribe 1 at location 6 : 3 | visits=1
+   [12] BUILD_ROAD by tribe 1 at location 6 : 4 | visits=2
+   [13] BUILD_ROAD by tribe 1 at location 6 : 6 | visits=1
+   [14] BUILD_ROAD by tribe 1 at location 6 : 8 | visits=1
+   [15] BUILD_ROAD by tribe 1 at location 6 : 9 | visits=1
+   [16] BUILD_ROAD by tribe 1 at location 6 : 10 | visits=1
+   [17] BUILD_ROAD by tribe 1 at location 7 : 9 | visits=1
+>> [18] BUILD_ROAD by tribe 1 at location 8 : 9 | visits=3
+   [19] BUILD_ROAD by tribe 1 at location 8 : 10 | visits=2
+   [20] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=1
+   [21] RESEARCH_TECH by tribe 1 : TRADE | visits=2
+   [22] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=1
+   [23] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=1
+   [24] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=1
+   [25] END_TURN by tribe 1 | visits=1
+   [26] RESOURCE_GATHERED by city 3 : ANIMAL | visits=1
+   [27] SPAWN by city 3 : WARRIOR | visits=1
+   [28] SPAWN by city 3 : RIDER | visits=1
+   [29] SPAWN by city 3 : DEFENDER | visits=1
+   [30] SPAWN by city 3 : ARCHER | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 25
+Chosen action: BUILD_ROAD by tribe 1 at location 4 : 9
+---- Visit counts ----
+   [0] BUILD_ROAD by tribe 1 at location 1 : 10 | visits=1
+   [1] BUILD_ROAD by tribe 1 at location 2 : 10 | visits=2
+   [2] BUILD_ROAD by tribe 1 at location 4 : 6 | visits=2
+   [3] BUILD_ROAD by tribe 1 at location 4 : 7 | visits=2
+   [4] BUILD_ROAD by tribe 1 at location 4 : 8 | visits=2
+>> [5] BUILD_ROAD by tribe 1 at location 4 : 9 | visits=3
+   [6] BUILD_ROAD by tribe 1 at location 4 : 10 | visits=1
+   [7] BUILD_ROAD by tribe 1 at location 5 : 4 | visits=1
+   [8] BUILD_ROAD by tribe 1 at location 5 : 5 | visits=1
+   [9] BUILD_ROAD by tribe 1 at location 5 : 8 | visits=1
+   [10] BUILD_ROAD by tribe 1 at location 5 : 9 | visits=2
+   [11] BUILD_ROAD by tribe 1 at location 6 : 3 | visits=2
+   [12] BUILD_ROAD by tribe 1 at location 6 : 4 | visits=2
+   [13] BUILD_ROAD by tribe 1 at location 6 : 6 | visits=1
+   [14] BUILD_ROAD by tribe 1 at location 6 : 8 | visits=1
+   [15] BUILD_ROAD by tribe 1 at location 6 : 9 | visits=2
+   [16] BUILD_ROAD by tribe 1 at location 6 : 10 | visits=2
+   [17] BUILD_ROAD by tribe 1 at location 7 : 9 | visits=1
+   [18] BUILD_ROAD by tribe 1 at location 8 : 10 | visits=1
+   [19] RESEARCH_TECH by tribe 1 : NAVIGATION | visits=1
+   [20] RESEARCH_TECH by tribe 1 : TRADE | visits=2
+   [21] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
+   [22] END_TURN by tribe 1 | visits=1
+   [23] RESOURCE_GATHERED by city 3 : ANIMAL | visits=2
+   [24] SPAWN by city 3 : WARRIOR | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 34
+Chosen action: MOVE by unit 2 to 5 : 2
+---- Visit counts ----
+   [0] RESEARCH_TECH by tribe 0 : RIDING | visits=1
+   [1] RESEARCH_TECH by tribe 0 : FARMING | visits=1
+   [2] RESEARCH_TECH by tribe 0 : MEDITATION | visits=1
+   [3] RESEARCH_TECH by tribe 0 : SAILING | visits=1
+   [4] RESEARCH_TECH by tribe 0 : SHIELDS | visits=1
+   [5] RESEARCH_TECH by tribe 0 : WHALING | visits=1
+   [6] RESEARCH_TECH by tribe 0 : MATHEMATICS | visits=1
+   [7] RESEARCH_TECH by tribe 0 : SMITHERY | visits=1
+   [8] RESEARCH_TECH by tribe 0 : SPIRITUALISM | visits=1
+   [9] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=1
+   [10] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=1
+   [11] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=2
+   [12] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=1
+   [13] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=2
+   [14] SEND_STARS by tribe 0 to: 1 : 6 stars | visits=1
+   [15] END_TURN by tribe 0 | visits=1
+   [16] BUILD by city 1 at 4 : 1 : MINE | visits=1
+   [17] SPAWN by city 1 : WARRIOR | visits=1
+   [18] SPAWN by city 1 : ARCHER | visits=2
+   [19] MOVE by unit 2 to 5 : 1 | visits=1
+   [20] MOVE by unit 2 to 7 : 2 | visits=1
+   [21] MOVE by unit 2 to 7 : 1 | visits=1
+   [22] MOVE by unit 2 to 6 : 3 | visits=1
+   [23] MOVE by unit 2 to 6 : 1 | visits=1
+   [24] MOVE by unit 2 to 5 : 3 | visits=1
+>> [25] MOVE by unit 2 to 5 : 2 | visits=2
+   [26] MOVE by unit 6 to 4 : 5 | visits=2
+   [27] MOVE by unit 6 to 6 : 7 | visits=1
+   [28] MOVE by unit 6 to 6 : 6 | visits=1
+   [29] MOVE by unit 6 to 5 : 7 | visits=1
+   [30] MOVE by unit 6 to 5 : 5 | visits=1
+   [31] MOVE by unit 6 to 4 : 7 | visits=1
+   [32] MOVE by unit 6 to 4 : 6 | visits=1
+   [33] RECOVER by unit 6 | visits=2
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
 Available actions: 27
-Chosen action: END_TURN by tribe 1
+Chosen action: RESEARCH_TECH by tribe 0 : WHALING
 ---- Visit counts ----
-   [0] RESEARCH_TECH by tribe 1 : CLIMBING | visits=34
-   [1] RESEARCH_TECH by tribe 1 : FISHING | visits=17
-   [2] RESEARCH_TECH by tribe 1 : HUNTING | visits=18
-   [3] RESEARCH_TECH by tribe 1 : RIDING | visits=10
-   [4] RESEARCH_TECH by tribe 1 : FARMING | visits=14
-   [5] RESEARCH_TECH by tribe 1 : SHIELDS | visits=10
-   [6] DECLARE_WAR by tribe 1 on tribe 0 | visits=47
-   [7] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
-   [8] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=2
-   [9] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=2
-   [10] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=2
-   [11] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=2
-   [12] SEND_STARS by tribe 1 to: 0 : 6 stars | visits=2
-   [13] SEND_STARS by tribe 1 to: 0 : 7 stars | visits=1
-   [14] SEND_STARS by tribe 1 to: 0 : 8 stars | visits=1
-   [15] SEND_STARS by tribe 1 to: 0 : 9 stars | visits=1
-   [16] SEND_STARS by tribe 1 to: 0 : 10 stars | visits=2
-   [17] SEND_STARS by tribe 1 to: 0 : 11 stars | visits=1
-   [18] SEND_STARS by tribe 1 to: 0 : 12 stars | visits=1
->> [19] END_TURN by tribe 1 | visits=297
-   [20] RESOURCE_GATHERED by city 3 : FRUIT | visits=11
-   [21] RESOURCE_GATHERED by city 3 : FRUIT | visits=11
-   [22] MOVE by unit 4 to 7 : 7 | visits=1
-   [23] MOVE by unit 4 to 9 : 8 | visits=1
-   [24] MOVE by unit 4 to 9 : 7 | visits=1
-   [25] MOVE by unit 4 to 9 : 6 | visits=1
-   [26] MOVE by unit 4 to 8 : 6 | visits=1
+   [0] RESEARCH_TECH by tribe 0 : RIDING | visits=1
+   [1] RESEARCH_TECH by tribe 0 : FARMING | visits=1
+   [2] RESEARCH_TECH by tribe 0 : MEDITATION | visits=2
+   [3] RESEARCH_TECH by tribe 0 : SAILING | visits=1
+   [4] RESEARCH_TECH by tribe 0 : SHIELDS | visits=1
+>> [5] RESEARCH_TECH by tribe 0 : WHALING | visits=3
+   [6] RESEARCH_TECH by tribe 0 : MATHEMATICS | visits=1
+   [7] RESEARCH_TECH by tribe 0 : SMITHERY | visits=3
+   [8] RESEARCH_TECH by tribe 0 : SPIRITUALISM | visits=3
+   [9] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=3
+   [10] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=1
+   [11] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=1
+   [12] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=1
+   [13] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=1
+   [14] SEND_STARS by tribe 0 to: 1 : 6 stars | visits=1
+   [15] END_TURN by tribe 0 | visits=1
+   [16] BUILD by city 1 at 4 : 1 : MINE | visits=1
+   [17] SPAWN by city 1 : WARRIOR | visits=3
+   [18] SPAWN by city 1 : ARCHER | visits=1
+   [19] MOVE by unit 6 to 4 : 5 | visits=2
+   [20] MOVE by unit 6 to 6 : 7 | visits=1
+   [21] MOVE by unit 6 to 6 : 6 | visits=2
+   [22] MOVE by unit 6 to 5 : 7 | visits=1
+   [23] MOVE by unit 6 to 5 : 5 | visits=1
+   [24] MOVE by unit 6 to 4 : 7 | visits=1
+   [25] MOVE by unit 6 to 4 : 6 | visits=1
+   [26] RECOVER by unit 6 | visits=1
+========================
+
+
+===== MCTS DECISION =====
+Player: 0
+Available actions: 9
+Chosen action: MOVE by unit 6 to 5 : 7
+---- Visit counts ----
+   [0] END_TURN by tribe 0 | visits=3
+   [1] MOVE by unit 6 to 4 : 5 | visits=6
+   [2] MOVE by unit 6 to 6 : 7 | visits=5
+   [3] MOVE by unit 6 to 6 : 6 | visits=3
+>> [4] MOVE by unit 6 to 5 : 7 | visits=9
+   [5] MOVE by unit 6 to 5 : 5 | visits=3
+   [6] MOVE by unit 6 to 4 : 7 | visits=4
+   [7] MOVE by unit 6 to 4 : 6 | visits=3
+   [8] RECOVER by unit 6 | visits=4
+========================
+
+
+===== MCTS DECISION =====
+Player: 1
+Available actions: 6
+Chosen action: MOVE by unit 5 to 2 : 10
+---- Visit counts ----
+   [0] END_TURN by tribe 1 | visits=4
+   [1] DISBAND of unit 5 | visits=7
+>> [2] MOVE by unit 5 to 2 : 10 | visits=8
+   [3] MOVE by unit 5 to 4 : 10 | visits=6
+   [4] MOVE by unit 5 to 4 : 9 | visits=8
+   [5] MOVE by unit 5 to 3 : 9 | visits=7
 ========================
 
 
 ===== MCTS DECISION =====
 Player: 0
 Available actions: 26
-Chosen action: END_TURN by tribe 0
+Chosen action: SPAWN by city 1 : ARCHER
 ---- Visit counts ----
-   [0] RESEARCH_TECH by tribe 0 : FISHING | visits=16
-   [1] RESEARCH_TECH by tribe 0 : HUNTING | visits=17
-   [2] RESEARCH_TECH by tribe 0 : ORGANIZATION | visits=12
-   [3] RESEARCH_TECH by tribe 0 : RIDING | visits=9
-   [4] RESEARCH_TECH by tribe 0 : MEDITATION | visits=5
-   [5] RESEARCH_TECH by tribe 0 : MINING | visits=9
-   [6] DECLARE_WAR by tribe 0 on tribe 1 | visits=40
-   [7] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=2
-   [8] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=2
-   [9] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=2
-   [10] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=2
-   [11] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=2
-   [12] SEND_STARS by tribe 0 to: 1 : 6 stars | visits=2
-   [13] SEND_STARS by tribe 0 to: 1 : 7 stars | visits=1
-   [14] SEND_STARS by tribe 0 to: 1 : 8 stars | visits=1
-   [15] SEND_STARS by tribe 0 to: 1 : 9 stars | visits=1
-   [16] SEND_STARS by tribe 0 to: 1 : 10 stars | visits=1
-   [17] SEND_STARS by tribe 0 to: 1 : 11 stars | visits=1
-   [18] SEND_STARS by tribe 0 to: 1 : 12 stars | visits=1
-   [19] SEND_STARS by tribe 0 to: 1 : 13 stars | visits=2
-   [20] SEND_STARS by tribe 0 to: 1 : 14 stars | visits=1
->> [21] END_TURN by tribe 0 | visits=299
-   [22] MOVE by unit 2 to 2 : 4 | visits=1
-   [23] MOVE by unit 2 to 4 : 3 | visits=1
-   [24] MOVE by unit 2 to 3 : 5 | visits=1
-   [25] MOVE by unit 2 to 2 : 5 | visits=1
-========================
-
-
-===== MCTS DECISION =====
-Player: 1
-Available actions: 29
-Chosen action: END_TURN by tribe 1
----- Visit counts ----
-   [0] RESEARCH_TECH by tribe 1 : CLIMBING | visits=33
-   [1] RESEARCH_TECH by tribe 1 : FISHING | visits=16
-   [2] RESEARCH_TECH by tribe 1 : HUNTING | visits=18
-   [3] RESEARCH_TECH by tribe 1 : RIDING | visits=10
-   [4] RESEARCH_TECH by tribe 1 : FARMING | visits=14
-   [5] RESEARCH_TECH by tribe 1 : SHIELDS | visits=10
-   [6] DECLARE_WAR by tribe 1 on tribe 0 | visits=47
-   [7] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
-   [8] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=2
-   [9] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=2
-   [10] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=2
-   [11] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=2
-   [12] SEND_STARS by tribe 1 to: 0 : 6 stars | visits=2
-   [13] SEND_STARS by tribe 1 to: 0 : 7 stars | visits=1
-   [14] SEND_STARS by tribe 1 to: 0 : 8 stars | visits=1
-   [15] SEND_STARS by tribe 1 to: 0 : 9 stars | visits=1
-   [16] SEND_STARS by tribe 1 to: 0 : 10 stars | visits=2
-   [17] SEND_STARS by tribe 1 to: 0 : 11 stars | visits=1
-   [18] SEND_STARS by tribe 1 to: 0 : 12 stars | visits=1
-   [19] SEND_STARS by tribe 1 to: 0 : 13 stars | visits=2
-   [20] SEND_STARS by tribe 1 to: 0 : 14 stars | visits=1
->> [21] END_TURN by tribe 1 | visits=299
-   [22] RESOURCE_GATHERED by city 3 : FRUIT | visits=11
-   [23] RESOURCE_GATHERED by city 3 : FRUIT | visits=11
-   [24] MOVE by unit 4 to 7 : 7 | visits=1
-   [25] MOVE by unit 4 to 9 : 8 | visits=1
-   [26] MOVE by unit 4 to 9 : 7 | visits=1
-   [27] MOVE by unit 4 to 9 : 6 | visits=1
-   [28] MOVE by unit 4 to 8 : 6 | visits=1
+   [0] RESEARCH_TECH by tribe 0 : RIDING | visits=1
+   [1] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=2
+   [2] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=1
+   [3] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=1
+   [4] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=1
+   [5] END_TURN by tribe 0 | visits=1
+   [6] BUILD by city 1 at 4 : 1 : MINE | visits=2
+   [7] SPAWN by city 1 : WARRIOR | visits=2
+>> [8] SPAWN by city 1 : ARCHER | visits=4
+   [9] MOVE by unit 2 to 4 : 1 | visits=1
+   [10] MOVE by unit 2 to 6 : 3 | visits=1
+   [11] MOVE by unit 2 to 6 : 2 | visits=1
+   [12] MOVE by unit 2 to 6 : 1 | visits=1
+   [13] MOVE by unit 2 to 5 : 3 | visits=2
+   [14] MOVE by unit 2 to 5 : 1 | visits=1
+   [15] MOVE by unit 2 to 4 : 2 | visits=3
+   [16] CAPTURE by unit 6 of target CITY: 3 | visits=1
+   [17] MOVE by unit 6 to 4 : 6 | visits=2
+   [18] MOVE by unit 6 to 6 : 8 | visits=1
+   [19] MOVE by unit 6 to 6 : 7 | visits=2
+   [20] MOVE by unit 6 to 6 : 6 | visits=1
+   [21] MOVE by unit 6 to 5 : 8 | visits=1
+   [22] MOVE by unit 6 to 5 : 6 | visits=2
+   [23] MOVE by unit 6 to 4 : 8 | visits=2
+   [24] MOVE by unit 6 to 4 : 7 | visits=2
+   [25] RECOVER by unit 6 | visits=1
 ========================
 
 
 ===== MCTS DECISION =====
 Player: 0
-Available actions: 26
-Chosen action: END_TURN by tribe 0
+Available actions: 19
+Chosen action: MOVE by unit 2 to 5 : 3
 ---- Visit counts ----
-   [0] RESEARCH_TECH by tribe 0 : FISHING | visits=16
-   [1] RESEARCH_TECH by tribe 0 : HUNTING | visits=17
-   [2] RESEARCH_TECH by tribe 0 : ORGANIZATION | visits=12
-   [3] RESEARCH_TECH by tribe 0 : RIDING | visits=9
-   [4] RESEARCH_TECH by tribe 0 : MEDITATION | visits=5
-   [5] RESEARCH_TECH by tribe 0 : MINING | visits=9
-   [6] DECLARE_WAR by tribe 0 on tribe 1 | visits=40
-   [7] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=2
-   [8] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=2
-   [9] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=2
-   [10] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=2
-   [11] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=2
-   [12] SEND_STARS by tribe 0 to: 1 : 6 stars | visits=2
-   [13] SEND_STARS by tribe 0 to: 1 : 7 stars | visits=1
-   [14] SEND_STARS by tribe 0 to: 1 : 8 stars | visits=1
-   [15] SEND_STARS by tribe 0 to: 1 : 9 stars | visits=1
-   [16] SEND_STARS by tribe 0 to: 1 : 10 stars | visits=1
-   [17] SEND_STARS by tribe 0 to: 1 : 11 stars | visits=1
-   [18] SEND_STARS by tribe 0 to: 1 : 12 stars | visits=1
-   [19] SEND_STARS by tribe 0 to: 1 : 13 stars | visits=2
-   [20] SEND_STARS by tribe 0 to: 1 : 14 stars | visits=1
->> [21] END_TURN by tribe 0 | visits=299
-   [22] MOVE by unit 2 to 2 : 4 | visits=1
-   [23] MOVE by unit 2 to 4 : 3 | visits=1
-   [24] MOVE by unit 2 to 3 : 5 | visits=1
-   [25] MOVE by unit 2 to 2 : 5 | visits=1
-========================
-
-
-===== MCTS DECISION =====
-Player: 1
-Available actions: 29
-Chosen action: END_TURN by tribe 1
----- Visit counts ----
-   [0] RESEARCH_TECH by tribe 1 : CLIMBING | visits=34
-   [1] RESEARCH_TECH by tribe 1 : FISHING | visits=16
-   [2] RESEARCH_TECH by tribe 1 : HUNTING | visits=18
-   [3] RESEARCH_TECH by tribe 1 : RIDING | visits=10
-   [4] RESEARCH_TECH by tribe 1 : FARMING | visits=14
-   [5] RESEARCH_TECH by tribe 1 : SHIELDS | visits=10
-   [6] DECLARE_WAR by tribe 1 on tribe 0 | visits=47
-   [7] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
-   [8] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=2
-   [9] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=2
-   [10] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=2
-   [11] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=2
-   [12] SEND_STARS by tribe 1 to: 0 : 6 stars | visits=2
-   [13] SEND_STARS by tribe 1 to: 0 : 7 stars | visits=1
-   [14] SEND_STARS by tribe 1 to: 0 : 8 stars | visits=1
-   [15] SEND_STARS by tribe 1 to: 0 : 9 stars | visits=1
-   [16] SEND_STARS by tribe 1 to: 0 : 10 stars | visits=2
-   [17] SEND_STARS by tribe 1 to: 0 : 11 stars | visits=1
-   [18] SEND_STARS by tribe 1 to: 0 : 12 stars | visits=1
-   [19] SEND_STARS by tribe 1 to: 0 : 13 stars | visits=2
-   [20] SEND_STARS by tribe 1 to: 0 : 14 stars | visits=1
->> [21] END_TURN by tribe 1 | visits=299
-   [22] RESOURCE_GATHERED by city 3 : FRUIT | visits=11
-   [23] RESOURCE_GATHERED by city 3 : FRUIT | visits=11
-   [24] MOVE by unit 4 to 7 : 7 | visits=1
-   [25] MOVE by unit 4 to 9 : 8 | visits=1
-   [26] MOVE by unit 4 to 9 : 7 | visits=1
-   [27] MOVE by unit 4 to 9 : 6 | visits=1
-   [28] MOVE by unit 4 to 8 : 6 | visits=1
+   [0] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=2
+   [1] END_TURN by tribe 0 | visits=1
+   [2] MOVE by unit 2 to 4 : 1 | visits=1
+   [3] MOVE by unit 2 to 6 : 3 | visits=3
+   [4] MOVE by unit 2 to 6 : 2 | visits=2
+   [5] MOVE by unit 2 to 6 : 1 | visits=1
+>> [6] MOVE by unit 2 to 5 : 3 | visits=5
+   [7] MOVE by unit 2 to 5 : 1 | visits=2
+   [8] MOVE by unit 2 to 4 : 2 | visits=2
+   [9] CAPTURE by unit 6 of target CITY: 3 | visits=2
+   [10] MOVE by unit 6 to 4 : 6 | visits=3
+   [11] MOVE by unit 6 to 6 : 8 | visits=3
+   [12] MOVE by unit 6 to 6 : 7 | visits=2
+   [13] MOVE by unit 6 to 6 : 6 | visits=2
+   [14] MOVE by unit 6 to 5 : 8 | visits=2
+   [15] MOVE by unit 6 to 5 : 6 | visits=2
+   [16] MOVE by unit 6 to 4 : 8 | visits=2
+   [17] MOVE by unit 6 to 4 : 7 | visits=1
+   [18] RECOVER by unit 6 | visits=2
 ========================
 
 
 ===== MCTS DECISION =====
 Player: 0
-Available actions: 26
-Chosen action: END_TURN by tribe 0
+Available actions: 12
+Chosen action: CAPTURE by unit 6 of target CITY: 3
 ---- Visit counts ----
-   [0] RESEARCH_TECH by tribe 0 : FISHING | visits=16
-   [1] RESEARCH_TECH by tribe 0 : HUNTING | visits=17
-   [2] RESEARCH_TECH by tribe 0 : ORGANIZATION | visits=12
-   [3] RESEARCH_TECH by tribe 0 : RIDING | visits=9
-   [4] RESEARCH_TECH by tribe 0 : MEDITATION | visits=5
-   [5] RESEARCH_TECH by tribe 0 : MINING | visits=9
-   [6] DECLARE_WAR by tribe 0 on tribe 1 | visits=40
-   [7] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=2
-   [8] SEND_STARS by tribe 0 to: 1 : 2 stars | visits=2
-   [9] SEND_STARS by tribe 0 to: 1 : 3 stars | visits=2
-   [10] SEND_STARS by tribe 0 to: 1 : 4 stars | visits=2
-   [11] SEND_STARS by tribe 0 to: 1 : 5 stars | visits=2
-   [12] SEND_STARS by tribe 0 to: 1 : 6 stars | visits=2
-   [13] SEND_STARS by tribe 0 to: 1 : 7 stars | visits=1
-   [14] SEND_STARS by tribe 0 to: 1 : 8 stars | visits=1
-   [15] SEND_STARS by tribe 0 to: 1 : 9 stars | visits=1
-   [16] SEND_STARS by tribe 0 to: 1 : 10 stars | visits=1
-   [17] SEND_STARS by tribe 0 to: 1 : 11 stars | visits=1
-   [18] SEND_STARS by tribe 0 to: 1 : 12 stars | visits=1
-   [19] SEND_STARS by tribe 0 to: 1 : 13 stars | visits=2
-   [20] SEND_STARS by tribe 0 to: 1 : 14 stars | visits=1
->> [21] END_TURN by tribe 0 | visits=299
-   [22] MOVE by unit 2 to 2 : 4 | visits=1
-   [23] MOVE by unit 2 to 4 : 3 | visits=1
-   [24] MOVE by unit 2 to 3 : 5 | visits=1
-   [25] MOVE by unit 2 to 2 : 5 | visits=1
+   [0] SEND_STARS by tribe 0 to: 1 : 1 stars | visits=4
+   [1] END_TURN by tribe 0 | visits=1
+>> [2] CAPTURE by unit 6 of target CITY: 3 | visits=20
+   [3] MOVE by unit 6 to 4 : 6 | visits=2
+   [4] MOVE by unit 6 to 6 : 8 | visits=3
+   [5] MOVE by unit 6 to 6 : 7 | visits=2
+   [6] MOVE by unit 6 to 6 : 6 | visits=2
+   [7] MOVE by unit 6 to 5 : 8 | visits=1
+   [8] MOVE by unit 6 to 5 : 6 | visits=1
+   [9] MOVE by unit 6 to 4 : 8 | visits=1
+   [10] MOVE by unit 6 to 4 : 7 | visits=1
+   [11] RECOVER by unit 6 | visits=2
 ========================
 
-
-===== MCTS DECISION =====
-Player: 1
-Available actions: 29
-Chosen action: END_TURN by tribe 1
----- Visit counts ----
-   [0] RESEARCH_TECH by tribe 1 : CLIMBING | visits=35
-   [1] RESEARCH_TECH by tribe 1 : FISHING | visits=16
-   [2] RESEARCH_TECH by tribe 1 : HUNTING | visits=18
-   [3] RESEARCH_TECH by tribe 1 : RIDING | visits=10
-   [4] RESEARCH_TECH by tribe 1 : FARMING | visits=14
-   [5] RESEARCH_TECH by tribe 1 : SHIELDS | visits=10
-   [6] DECLARE_WAR by tribe 1 on tribe 0 | visits=47
-   [7] SEND_STARS by tribe 1 to: 0 : 1 stars | visits=2
-   [8] SEND_STARS by tribe 1 to: 0 : 2 stars | visits=2
-   [9] SEND_STARS by tribe 1 to: 0 : 3 stars | visits=2
-   [10] SEND_STARS by tribe 1 to: 0 : 4 stars | visits=2
-   [11] SEND_STARS by tribe 1 to: 0 : 5 stars | visits=2
-   [12] SEND_STARS by tribe 1 to: 0 : 6 stars | visits=2
-   [13] SEND_STARS by tribe 1 to: 0 : 7 stars | visits=1
-   [14] SEND_STARS by tribe 1 to: 0 : 8 stars | visits=1
-   [15] SEND_STARS by tribe 1 to: 0 : 9 stars | visits=1
-   [16] SEND_STARS by tribe 1 to: 0 : 10 stars | visits=2
-   [17] SEND_STARS by tribe 1 to: 0 : 11 stars | visits=1
-   [18] SEND_STARS by tribe 1 to: 0 : 12 stars | visits=1
-   [19] SEND_STARS by tribe 1 to: 0 : 13 stars | visits=2
-   [20] SEND_STARS by tribe 1 to: 0 : 14 stars | visits=1
->> [21] END_TURN by tribe 1 | visits=299
-   [22] RESOURCE_GATHERED by city 3 : FRUIT | visits=11
-   [23] RESOURCE_GATHERED by city 3 : FRUIT | visits=11
-   [24] MOVE by unit 4 to 7 : 7 | visits=1
-   [25] MOVE by unit 4 to 9 : 8 | visits=1
-   [26] MOVE by unit 4 to 9 : 7 | visits=1
-   [27] MOVE by unit 4 to 9 : 6 | visits=1
-   [28] MOVE by unit 4 to 8 : 6 | visits=1
-========================
-
+17; Game Results: 
+ #1: Tribe IMPERIUS (MCTSPlayer): WIN, 2129 points; #tech: 8, #cities: 2, production: 3
+Diplomacy - #wars: 4, #stars sent: 29
+ #2: Tribe XIN_XI (MCTSPlayer): LOSS, 4884 points; #tech: 22, #cities: 0, production: 0
+Diplomacy - #wars: 4, #stars sent: 14

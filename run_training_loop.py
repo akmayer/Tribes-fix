@@ -106,7 +106,7 @@ def ensure_initial_weights():
 from pathlib import Path
 import torch
 
-from model import TribesModel, StateEncoder
+from model import TribesTransformerModel, StateEncoder
 
 MODEL_PATH = Path("model_weights.pth")
 
