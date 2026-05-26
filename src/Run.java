@@ -179,6 +179,9 @@ class Run {
                 azParams.FORCE_TURN_END = FORCE_TURN_END ? 5 : azParams.ROLLOUT_LENGTH + 1;
                 azParams.ROLOUTS_ENABLED = MCTS_ROLLOUTS;
                 azParams.CAPTURE_MCTS = true;
+                azParams.NEURAL_PRIORS = true;
+                azParams.NEURAL_VALUE = true;
+                azParams.CPUCT = 1.5;
                 return new MCTSPlayer(agentSeed, azParams);
             case PORTFOLIO_MCTS:
                 PortfolioMCTSParams portfolioMCTSParams = new PortfolioMCTSParams();

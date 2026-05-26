@@ -34,6 +34,144 @@ public class PythonBridge {
         return postJson(payload.toString());
     }
 
+    public static JSONObject queryPolicyJson(GameState gs, ArrayList<Action> allActions) throws IOException {
+        return new JSONObject(queryPolicy(gs, allActions));
+    }
+
+    /**
+     * Compute a normalized joint prior over the provided available actions.
+     * Uses the factorized probabilities returned by the FastAPI /query endpoint.
+     */
+    public static double[] actionPriorsFromPolicy(ArrayList<Action> allActions, GameState gs, JSONObject policyResponse) {
+        double[] priors = new double[allActions.size()];
+
+        JSONArray actionTypeProbs = policyResponse.optJSONArray("action_type_probs");
+        JSONArray sourceProbs = policyResponse.optJSONArray("source_probs");
+        JSONArray targetProbs = policyResponse.optJSONArray("target_probs");
+        JSONArray paramProbs = policyResponse.optJSONArray("param_probs");
+
+        if (actionTypeProbs == null || sourceProbs == null || targetProbs == null || paramProbs == null) {
+            return uniform(priors.length);
+        }
+
+        double sum = 0.0;
+        for (int i = 0; i < allActions.size(); i++) {
+            Action action = allActions.get(i);
+            JSONObject components = encodeActionComponents(action, gs);
+            double p = jointProbability(action, components, actionTypeProbs, sourceProbs, targetProbs, paramProbs);
+            priors[i] = p;
+            sum += p;
+        }
+
+        if (sum <= 0.0) {
+            return uniform(priors.length);
+        }
+
+        for (int i = 0; i < priors.length; i++) {
+            priors[i] = priors[i] / sum;
+        }
+        return priors;
+    }
+
+    private static double jointProbability(Action action, JSONObject components, JSONArray actionTypeProbs, JSONArray sourceProbs, JSONArray targetProbs, JSONArray paramProbs) {
+        if (action == null) {
+            return 0.0;
+        }
+        Types.ACTION type = action.getActionType();
+        double probability = probAt(actionTypeProbs, components.optInt("action_type_index", 0));
+        if (type == null) {
+            return probability;
+        }
+
+        switch (type) {
+            case END_TURN:
+                return probability;
+
+            case MOVE:
+            case ATTACK:
+            case CAPTURE:
+            case CONVERT:
+                probability *= probAt(sourceProbs, components.optInt("source_actor_index", 0));
+                probability *= probAt(targetProbs, components.optInt("target_actor_index", 0));
+                return probability;
+
+            case BUILD_ROAD:
+            case DECLARE_WAR:
+                probability *= probAt(targetProbs, components.optInt("target_actor_index", 0));
+                return probability;
+
+            case SEND_STARS:
+                probability *= probAt(targetProbs, components.optInt("target_actor_index", 0));
+                probability *= probAt(paramProbs, components.optInt("param_index", 0));
+                return probability;
+
+            case RESEARCH_TECH:
+                probability *= probAt(paramProbs, components.optInt("param_index", 0));
+                return probability;
+
+            case BUILD:
+                probability *= probAt(sourceProbs, components.optInt("source_actor_index", 0));
+                probability *= probAt(targetProbs, components.optInt("target_actor_index", 0));
+                probability *= probAt(paramProbs, components.optInt("param_index", 0));
+                return probability;
+
+            case SPAWN:
+                probability *= probAt(sourceProbs, components.optInt("source_actor_index", 0));
+                probability *= probAt(paramProbs, components.optInt("param_index", 0));
+                return probability;
+
+            case BURN_FOREST:
+            case CLEAR_FOREST:
+            case DESTROY:
+            case GROW_FOREST:
+                probability *= probAt(sourceProbs, components.optInt("source_actor_index", 0));
+                probability *= probAt(targetProbs, components.optInt("target_actor_index", 0));
+                return probability;
+
+            case LEVEL_UP:
+                probability *= probAt(sourceProbs, components.optInt("source_actor_index", 0));
+                probability *= probAt(paramProbs, components.optInt("param_index", 0));
+                return probability;
+
+            case RESOURCE_GATHERING:
+                probability *= probAt(sourceProbs, components.optInt("source_actor_index", 0));
+                return probability;
+
+            case DISBAND:
+            case EXAMINE:
+            case HEAL_OTHERS:
+            case MAKE_VETERAN:
+            case RECOVER:
+            case CLIMB_MOUNTAIN:
+            case UPGRADE_BOAT:
+            case UPGRADE_SHIP:
+                probability *= probAt(sourceProbs, components.optInt("source_actor_index", 0));
+                return probability;
+
+            default:
+                return probability;
+        }
+    }
+
+    private static double probAt(JSONArray probs, int index) {
+        if (probs == null || index < 0 || index >= probs.length()) {
+            return 0.0;
+        }
+        return probs.optDouble(index, 0.0);
+    }
+
+    private static double[] uniform(int n) {
+        double[] out = new double[n];
+        if (n <= 0) {
+            return out;
+        }
+        double v = 1.0 / n;
+        for (int i = 0; i < n; i++) {
+            out[i] = v;
+        }
+        return out;
+    }
+
     public static void captureMctsSample(GameState gs, ArrayList<Action> allActions, int[] visitCounts, double rootValue, int playerId) {
         try {
             JSONObject payload = buildPayload(gs, allActions);

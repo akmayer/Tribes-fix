@@ -1,4 +1,5 @@
 import json
+import os
 import numpy as np
 import torch
 from datetime import datetime, timezone
@@ -14,6 +15,14 @@ CAPTURE_DIR = Path("captures")
 CAPTURE_DIR.mkdir(parents=True, exist_ok=True)
 RESULTS_DIR = Path("results")
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+
+# /query can be called extremely frequently by MCTS (tens of thousands of times per game).
+# Logging every inference request to disk will quickly create huge numbers of files and slow runs.
+# Enable this only when you explicitly want to debug payload contents.
+SAVE_INFERENCE_REQUESTS = os.environ.get("TRIBES_SAVE_INFERENCE", "0").strip().lower() in {"1", "true", "yes"}
+INFERENCE_DIR = Path(os.environ.get("TRIBES_INFERENCE_DIR", "inference"))
+if SAVE_INFERENCE_REQUESTS:
+    INFERENCE_DIR.mkdir(parents=True, exist_ok=True)
 
 # Load the action space encoder
 encoder = ActionSpaceEncoder()
@@ -99,15 +108,17 @@ async def query(req: Request):
     """
     payload = await req.json()
 
-    # Save the capture for analysis
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
     tick = payload.get("tick", "unknown")
     action_count = payload.get("available_action_count", "na")
-    filename = f"capture_tick{tick}_actions{action_count}_{timestamp}.json"
-    output_path = CAPTURE_DIR / filename
 
-    with output_path.open("w", encoding="utf-8") as file_handle:
-        json.dump(payload, file_handle, indent=2, sort_keys=True)
+    output_path = None
+    if SAVE_INFERENCE_REQUESTS:
+        # Save the request for analysis (kept separate from training captures)
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
+        filename = f"inference_tick{tick}_actions{action_count}_{timestamp}.json"
+        output_path = INFERENCE_DIR / filename
+        with output_path.open("w", encoding="utf-8") as file_handle:
+            json.dump(payload, file_handle, indent=2, sort_keys=True)
 
     # Extract game state
     available_actions = payload.get("available_actions", [])
@@ -122,13 +133,15 @@ async def query(req: Request):
         
         with torch.no_grad():
             state_batch = state_tensor.unsqueeze(0).to(device)  # Add batch dimension
-            action_type_logits, source_logits, target_logits, param_logits, _ = model(state_batch)
+            action_type_logits, source_logits, target_logits, param_logits, value_pred = model(state_batch)
             
             # Remove batch dimension and convert to numpy
             action_type_logits = action_type_logits.squeeze(0).cpu().numpy()
             source_logits = source_logits.squeeze(0).cpu().numpy()
             target_logits = target_logits.squeeze(0).cpu().numpy()
             param_logits = param_logits.squeeze(0).cpu().numpy()
+            # Value is returned from the perspective of the active player.
+            value = torch.tanh(value_pred.squeeze(0).squeeze(-1)).cpu().item()
         
         # Apply masks (multiply by mask to zero out illegal actions)
         action_type_logits = action_type_logits * masks["action_type_mask"]
@@ -160,6 +173,7 @@ async def query(req: Request):
         policy_response = {
             "status": "success",
             "policy_type": "neural_network",
+            "value": float(value),
             "action_type_logits": action_type_logits.tolist(),
             "action_type_probs": action_type_probs.tolist(),
             "source_logits": source_logits.tolist(),
@@ -175,7 +189,7 @@ async def query(req: Request):
                 "param_mask": masks["param_mask"].tolist(),
             },
             "num_legal_actions": len(available_actions),
-            "captured_path": str(output_path),
+            "captured_path": str(output_path) if output_path else None,
             "tick": tick,
         }
     except Exception as e:
@@ -185,7 +199,7 @@ async def query(req: Request):
             "status": "error",
             "error": str(e),
             "traceback": traceback.format_exc(),
-            "captured_path": str(output_path),
+            "captured_path": str(output_path) if output_path else None,
             "tick": tick,
         }
 

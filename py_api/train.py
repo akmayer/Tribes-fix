@@ -26,6 +26,43 @@ from model import TribesModel, StateEncoder, encode_state
 from action_encoding import ActionSpaceEncoder
 
 
+def prune_capture_files(capture_dir: Path, max_files: int, patterns: Optional[List[str]] = None) -> int:
+    """Delete oldest capture files so at most `max_files` remain.
+
+    Prunes only files matching `patterns` (defaults to training captures: capture_*.json + mcts_*.json).
+    Returns the number of files deleted.
+    """
+    if max_files is None or max_files <= 0:
+        return 0
+    capture_dir = Path(capture_dir)
+    if not capture_dir.exists():
+        return 0
+
+    if patterns is None:
+        patterns = ["capture_*.json", "mcts_*.json"]
+
+    files: List[Path] = []
+    for pattern in patterns:
+        files.extend(capture_dir.glob(pattern))
+
+    # Deduplicate and sort by mtime (oldest first)
+    unique_files = list({p.resolve(): p for p in files}.values())
+    unique_files.sort(key=lambda p: p.stat().st_mtime)
+
+    if len(unique_files) <= max_files:
+        return 0
+
+    to_delete = unique_files[: max(0, len(unique_files) - max_files)]
+    deleted = 0
+    for path in to_delete:
+        try:
+            path.unlink()
+            deleted += 1
+        except Exception as exc:
+            print(f"Failed to delete {path}: {exc}")
+    return deleted
+
+
 class GameCaptureDataset(Dataset):
     """
     Dataset that loads game captures from files.
@@ -333,6 +370,8 @@ def main():
                         help="Path to checkpoint to resume from")
     parser.add_argument("--max-samples", type=int, default=None,
                         help="Max number of samples to load (for testing)")
+    parser.add_argument("--max-captures", type=int, default=10000,
+                        help="Max number of capture files to keep (oldest deleted) before training; set 0 to disable")
     parser.add_argument("--device", type=str, default="cpu",
                         help="Device to use (cpu or cuda)")
     
@@ -345,6 +384,10 @@ def main():
     
     print(f"Device: {device}")
     print(f"Loading data from: {args.capture_dir}")
+
+    deleted = prune_capture_files(Path(args.capture_dir), max_files=args.max_captures)
+    if deleted > 0:
+        print(f"Pruned {deleted} old capture files (kept newest {args.max_captures}).")
     
     # Load dataset
     dataset = GameCaptureDataset(capture_dir=args.capture_dir, max_samples=args.max_samples)
