@@ -2,27 +2,67 @@
 
 ## Current Status
 ✅ FOW fix implemented and verified
-✅ Model loaded in FastAPI server
-✅ Game successfully runs with model inference
-✅ Training data being collected with FOW filtering
+✅ FastAPI `/query` returns policy + value
+✅ `AZ_MCTS` uses AlphaZero-style PUCT (NN priors + NN value)
+✅ Self-play captures via `/capture` (`mcts_*.json`) + `/result` (`result_*.json`)
+✅ `train.py` supports capture buffer pruning (default: keep newest 10k)
 
 ---
 
 ## Immediate Next Steps
 
-### 1. Generate More Training Data (Optional but Recommended)
+### 1. Two-loop AlphaZero smoke test (self-play → train → self-play)
+
+Optional: start from a clean slate (avoids shell glob limits if there are many files):
+```bash
+cd /home/akmayer/Tribes/py_api
+find captures -maxdepth 1 -type f -name '*.json' -delete
+find results -maxdepth 1 -type f -name '*.json' -delete
+```
+
+Terminal 1 (start FastAPI):
+```bash
+cd /home/akmayer/Tribes/py_api
+/home/akmayer/Tribes/py_api/.venv/bin/python -m uvicorn app:app --host 127.0.0.1 --port 8000
+```
+
+Terminal 2 (self-play; uses `play.json`):
+```bash
+cd /home/akmayer/Tribes
+javac -cp .:lib/json.jar $(find src -name "*.java")
+java -cp .:src:lib/json.jar Play
+```
+
+Train (writes `model_weights.pth`):
+```bash
+cd /home/akmayer/Tribes/py_api
+/home/akmayer/Tribes/py_api/.venv/bin/python train.py --epochs 1 --max-captures 10000
+```
+
+Restart FastAPI (so it reloads the new `model_weights.pth`), then run `Play` again for loop 2.
+
+---
+
+### 2. Generate More Training Data (Optional but Recommended)
 ```bash
 cd /home/akmayer/Tribes
 
-# Run several games to generate diverse training data
-java -cp "src:lib/*" Play Random Random   # 2-3 times
-java -cp "src:lib/*" Play Random "Rule Based"
-java -cp "src:lib/*" Play "Do Nothing" Random
+# `Play` reads configuration from play.json (players, tribes, seeds, etc.).
+# To generate MCTS-labeled training data for AlphaZero-style training, use AZ_MCTS in play.json.
+
+# Compile once:
+javac -cp .:lib/json.jar $(find src -name "*.java")
+
+# Run several self-play games (each run generates new mcts_*.json + result_*.json):
+for i in {1..3}; do
+   echo "Self-play game $i"
+   java -cp .:src:lib/json.jar Play
+done
 ```
 
-This creates more captures in `py_api/captures/` for better training.
+This creates more `mcts_*.json` files in `py_api/captures/` (and `result_*.json` in `py_api/results/`).
 
-### 2. Train the Model
+### 3. Train the Model
 ```bash
 cd py_api
 source .venv/bin/activate
@@ -41,15 +81,15 @@ python train.py --resume-from checkpoints/checkpoint_epoch_10.pth --epochs 50
 - `model_weights.pth` - Final trained weights (auto-loaded by FastAPI)
 - `checkpoints/checkpoint_epoch_*.pth` - Per-epoch snapshots
 
-### 3. Test Trained Model
+### 4. Test Trained Model
 ```bash
 # Start FastAPI (uses updated model_weights.pth automatically)
 cd py_api
 python -m uvicorn app:app --host 127.0.0.1 --port 8000
 
-# In another terminal, run game with RandomAgent
+# In another terminal, run a game (uses play.json players)
 cd /home/akmayer/Tribes
-java -cp "src:lib/*" Play Random Random
+java -cp .:src:lib/json.jar Play
 ```
 
 ---
@@ -61,8 +101,8 @@ java -cp "src:lib/*" Play Random Random
 # Terminal 1: Start FastAPI server
 cd py_api && python -m uvicorn app:app --host 127.0.0.1 --port 8000
 
-# Terminal 2: Run game
-cd /home/akmayer/Tribes && java -cp "src:lib/*" Play Random Random
+# Terminal 2: Run game (uses play.json)
+cd /home/akmayer/Tribes && java -cp .:src:lib/json.jar Play
 ```
 
 ### Monitor Training
@@ -80,7 +120,7 @@ python train.py --epochs 20 --batch-size 32
 cd /home/akmayer/Tribes
 for i in {1..5}; do
   echo "Generating game $i..."
-  timeout 30 java -cp "src:lib/*" Play Random Random
+   timeout 30 java -cp .:src:lib/json.jar Play
 done
 ```
 
@@ -89,14 +129,13 @@ done
 ## Training Data Quality
 
 ### Current Status
-- **Captures:** 6+ already generated with FOW filtering
-- **Policy Targets:** Currently using uniform over masked actions
-- **Value Targets:** Random (placeholder)
+- **Captures:** Produced via FastAPI `/capture` and stored in `py_api/captures/`
+- **Policy Targets:** MCTS visit counts when available (`mcts_*.json`)
+- **Value Targets:** Game outcomes via `/result` (stored in `py_api/results/`)
 
 ### To Improve:
 1. **Better Policy Targets:**
-   - Run MCTS during capture generation
-   - Use actual game outcomes
+   - Increase MCTS budget per decision (see hyperparameters below)
    
 2. **More Diverse Data:**
    - Different starting positions
@@ -112,14 +151,12 @@ done
 ## Performance Expectations
 
 ### With Random (Untrained) Model
-- Policy is random (uniform over masked actions)
-- Value is garbage
-- Agent plays poorly but legally
+- Policy/value heads are effectively random
+- Agent should still play legally (masking enforced)
 
-### After Training on Uniform Targets
-- Policy learns to distinguish actions
-- But based on weak targets (uniform)
-- Performance: modest improvement
+### After Training on MCTS Targets
+- Policy is trained to match MCTS visit counts
+- Value is trained from game results
 
 ### With MCTS-Improved Targets
 - Policy learns from better strategies
@@ -135,13 +172,18 @@ done
 
 ## Important Notes
 
-⚠️ **Model Initialization:** Currently using random weights. First training epoch will show high loss, then decreasing.
+⚠️ **Model Initialization:** If no weights exist, FastAPI starts with random weights.
 
 ⚠️ **FOW Filtering:** Is now active. Only visible enemy units/cities in captures. This is correct behavior.
 
-⚠️ **No AlphaZero Yet:** We're not running the full AlphaZero loop (MCTS + self-play). Current setup just trains on uniform policies.
+⚠️ **Inference logging:** `/query` can be called extremely frequently by MCTS. By default it does **not** dump per-query JSON files.
+Enable request logging only when debugging payload contents:
+```bash
+export TRIBES_SAVE_INFERENCE=1
+export TRIBES_INFERENCE_DIR=inference
+```
 
-✅ **Foundation Ready:** All infrastructure in place for full AlphaZero when needed.
+✅ **AlphaZero-style loop is wired:** `AZ_MCTS` self-play → `train.py` → self-play.
 
 ---
 
@@ -155,10 +197,14 @@ done
 │   ├── train.py                   ← Training script
 │   ├── app.py                     ← FastAPI server
 │   ├── captures/                  ← Game data
+│   │   └── mcts_*.json             ← MCTS-labeled samples (visit counts)
+│   ├── results/                   ← Terminal values
+│   │   └── result_*.json           ← Game outcomes/value targets
 │   └── checkpoints/               ← Training checkpoints
 ├── src/
 │   ├── players/PythonBridge.java  ← FOW filtering
 │   ├── players/RandomAgent.java   ← Model inference
+│   ├── players/mcts/SingleTreeNode.java ← PUCT + NN value integration
 │   └── Play.java                  ← Game entry point
 └── VERIFICATION_REPORT.md         ← Test results
 ```
@@ -171,9 +217,9 @@ Before/after each training run:
 
 - [ ] FastAPI server starts without errors
 - [ ] Model loads with `model_weights.pth`
-- [ ] Game runs with RandomAgent
-- [ ] Model inference happens 40+ times per game
-- [ ] Captures are valid (no errors)
+- [ ] `AZ_MCTS` self-play runs end-to-end
+- [ ] `py_api/captures/` contains new `mcts_*.json`
+- [ ] `py_api/results/` contains new `result_*.json`
 - [ ] FOW filtering works (check captures for enemy visibility)
 
 ---
@@ -193,8 +239,9 @@ Before/after each training run:
 → Try GPU: add `--device cuda` to train.py
 
 ### "No captures found" during training
-→ Run a few games first: `java -cp "src:lib/*" Play Random Random`
-→ Captures saved to `py_api/captures/`
+→ Ensure `play.json` uses `AZ_MCTS` (it posts to `/capture`), then run a few self-play games:
+`java -cp .:src:lib/json.jar Play`
+→ Captures saved to `py_api/captures/` (look for `mcts_*.json`)
 
 ---
 
@@ -213,7 +260,21 @@ After training, model should be better than random:
 1. ✅ FOW Fix - DONE
 2. ✅ Model Integration - DONE
 3. ⏳ Model Training - READY TO START
-4. ⏳ Performance Evaluation - NEXT
-5. ⏳ MCTS Integration - FUTURE
-6. ⏳ Full AlphaZero - FUTURE
+4. ✅ MCTS Integration (PUCT + priors/value) - DONE
+5. ⏳ Performance Evaluation - NEXT
+6. ⏳ Longer self-play runs - NEXT
+
+---
+
+## Key Hyperparameters (current defaults)
+
+### Java (AZ_MCTS)
+- `NEURAL_PRIORS=true`, `NEURAL_VALUE=true`, `CPUCT=1.5` (see `src/Run.java`)
+- Budget: `stop_type=STOP_FMCALLS` (set in `src/Run.java`), `num_fmcalls=2000` (default in `src/players/heuristics/AlgParams.java`)
+- Rollouts: controlled by `play.json` → `"Rollouts"` (typically `false` for NN value)
+- Rollout length: `play.json` → `"Search Depth"` (wired to `Run.MAX_LENGTH`)
+
+### Python training (`py_api/train.py`)
+- `--epochs` (default 10), `--batch-size` (default 32), `--learning-rate` (default 1e-3)
+- `--max-captures` (default 10000) prunes oldest `capture_*.json` + `mcts_*.json`
 

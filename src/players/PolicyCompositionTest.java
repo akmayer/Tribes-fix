@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class PolicyCompositionTest {
 
     public static void main(String[] args) throws Exception {
-        RandomAgent agent = new RandomAgent(12345L);
+        BridgeAgentAttempt agent = new BridgeAgentAttempt(12345L);
 
         ArrayList<Action> actions = new ArrayList<>();
 
@@ -47,7 +47,7 @@ public class PolicyCompositionTest {
         paramProbs.put(0, 1.0);
         policy.put("param_probs", paramProbs);
 
-        Method m = RandomAgent.class.getDeclaredMethod("selectActionFromPolicy", ArrayList.class, GameState.class, JSONObject.class);
+        Method m = BridgeAgentAttempt.class.getDeclaredMethod("selectActionFromPolicy", ArrayList.class, GameState.class, JSONObject.class);
         m.setAccessible(true);
         int selected = (int) m.invoke(agent, actions, null, policy);
 

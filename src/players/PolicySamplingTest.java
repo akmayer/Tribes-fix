@@ -29,7 +29,7 @@ public class PolicySamplingTest {
     }
 
     public static void main(String[] args) throws Exception {
-        RandomAgent agent = new RandomAgent(12345L);
+        BridgeAgentAttempt agent = new BridgeAgentAttempt(12345L);
 
         ArrayList<Action> actions = new ArrayList<>();
         // index 0 -> ATTACK, index 1 -> MOVE
@@ -53,7 +53,7 @@ public class PolicySamplingTest {
         policy.put("status", "success");
 
         // Call private selectActionFromPolicy via reflection
-        Method m = RandomAgent.class.getDeclaredMethod("selectActionFromPolicy", ArrayList.class, GameState.class, JSONObject.class);
+        Method m = BridgeAgentAttempt.class.getDeclaredMethod("selectActionFromPolicy", ArrayList.class, GameState.class, JSONObject.class);
         m.setAccessible(true);
         int selected = (int) m.invoke(agent, actions, null, policy);
 

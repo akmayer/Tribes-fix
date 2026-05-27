@@ -74,6 +74,7 @@ public class Game {
         this.seed = seed;
         this.rnd = new Random(seed);
         this.gs = new GameState(rnd, gameMode);
+        this.gs.setGameSeed(seed);
 
         this.gs.init(filename);
         initGameStructures(players, this.gs.getTribes().length);
@@ -101,6 +102,7 @@ public class Game {
         this.seed = seed;
         this.rnd = new Random(seed);
         this.gs = new GameState(rnd, gameMode);
+        this.gs.setGameSeed(seed);
 
         this.gs.init(levelgen_seed, tribes);
         initGameStructures(players, tribes);
@@ -120,6 +122,7 @@ public class Game {
         this.rnd = new Random(seed);
         Tribe[] tribes = gameLoader.getTribes();
         this.gs = new GameState(rnd, gameLoader.getGame_mode(), tribes, gameLoader.getBoard(), gameLoader.getTick());
+        this.gs.setGameSeed(seed);
         this.gs.setGameIsOver(gameLoader.getGameIsOver());
         initGameStructures(players, tribes.length);
         updateAssignedGameStates();

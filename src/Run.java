@@ -25,7 +25,6 @@ import java.awt.GraphicsEnvironment;
 
 import static core.Constants.*;
 import static core.Types.TRIBE.*;
-import static core.Types.TRIBE.OUMAJI;
 
 class Run {
 
@@ -70,6 +69,7 @@ class Run {
         MC,
         SIMPLE,
         MCTS,
+        AZ_MCTS,
         RHEA,
         OEP,
         EMCTS,
@@ -101,6 +101,7 @@ class Run {
             case "OSLA": return Run.PlayerType.OSLA;
             case "MC": return Run.PlayerType.MC;
             case "MCTS": return Run.PlayerType.MCTS;
+            case "AZ_MCTS": return Run.PlayerType.AZ_MCTS;
             case "RHEA": return Run.PlayerType.RHEA;
             case "OEP": return Run.PlayerType.OEP;
             case "pMCTS": return Run.PlayerType.PORTFOLIO_MCTS;
@@ -144,7 +145,7 @@ class Run {
         switch (playerType)
         {
             case DONOTHING: return new DoNothingAgent(agentSeed);
-            case RANDOM: return new RandomAgent(agentSeed);
+            case RANDOM: return new BridgeAgentAttempt(agentSeed);
             case SIMPLE: return new SimpleAgent(agentSeed);
             case OSLA:
                 OSLAParams oslaParams = new OSLAParams();
@@ -168,6 +169,27 @@ class Run {
                 mctsParams.FORCE_TURN_END = FORCE_TURN_END ? 5 : mctsParams.ROLLOUT_LENGTH + 1;
                 mctsParams.ROLOUTS_ENABLED = MCTS_ROLLOUTS;
                 return new MCTSPlayer(agentSeed, mctsParams);
+            case AZ_MCTS:
+                MCTSParams azParams = new MCTSParams();
+                azParams.stop_type = azParams.STOP_ITERATIONS;
+                azParams.heuristic_method = azParams.DIFF_HEURISTIC;
+                azParams.PRIORITIZE_ROOT = false;
+                azParams.ROLLOUT_LENGTH = MAX_LENGTH;
+                azParams.FORCE_TURN_END = FORCE_TURN_END ? 5 : azParams.ROLLOUT_LENGTH + 1;
+                azParams.ROLOUTS_ENABLED = false;
+                azParams.CAPTURE_MCTS = true;
+                azParams.NEURAL_PRIORS = true;
+                azParams.NEURAL_VALUE = true;
+                azParams.CPUCT = 1.5;
+                // Early-training smoothing. The Java bridge composes logits over legal actions,
+                // so random weights no longer structurally favor END_TURN.
+                azParams.USE_UNIFORM_PRIORS = true;
+                azParams.UNIFORM_PRIOR_WEIGHT = 0.10;
+                azParams.DIRICHLET_ROOT_NOISE = true;
+                azParams.DIRICHLET_ALPHA = 0.30;
+                azParams.DIRICHLET_EPSILON = 0.25;
+                azParams.FORCE_END_TURN_IN_SEARCH = false;
+                return new MCTSPlayer(agentSeed, azParams);
             case PORTFOLIO_MCTS:
                 PortfolioMCTSParams portfolioMCTSParams = new PortfolioMCTSParams();
                 portfolioMCTSParams.stop_type = portfolioMCTSParams.STOP_FMCALLS;
