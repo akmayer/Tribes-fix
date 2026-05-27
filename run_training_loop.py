@@ -337,7 +337,7 @@ def run_selfplay_game(game_idx, loop_idx):
     print(f"\n=== SELF-PLAY GAME {game_idx} (LOOP {loop_idx}) ===")
 
     run_command(
-        ["java", "-Djava.awt.headless=true", "-cp", ".:src:lib/json.jar", "Play"],,
+        ["java", "-Djava.awt.headless=true", "-cp", ".:src:lib/json.jar", "Play"],
         cwd=ROOT,
         env=java_training_env(),
         log_name=f"selfplay_loop{loop_idx}_game{game_idx}.log",
