@@ -21,6 +21,7 @@ from typing import Dict, List, Tuple, Optional
 import numpy as np
 from datetime import datetime
 import argparse
+import torch.nn.functional as F
 
 from model import TribesModel, StateEncoder, encode_state, TribesTransformerModel
 from action_encoding import ActionSpaceEncoder
@@ -284,10 +285,17 @@ class PolicyValueTrainer:
 
         self.train_log = []
 
-    def _masked_log_softmax(self, logits: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
-        mask = mask.to(device=logits.device, dtype=torch.bool)
-        masked_logits = logits.masked_fill(~mask, -1e9)
-        return torch.log_softmax(masked_logits, dim=-1)
+    def _masked_log_softmax(self, logits, mask):
+        mask = mask.bool()
+
+        valid_rows = mask.any(dim=-1, keepdim=True)
+        safe_mask = torch.where(valid_rows, mask, torch.ones_like(mask))
+
+        mask_value = -1e4 if logits.dtype == torch.float16 else -1e9
+
+        masked_logits = logits.masked_fill(~safe_mask, mask_value)
+
+        return F.log_softmax(masked_logits, dim=-1)
 
     def _policy_loss(self, log_probs: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         return -(target * log_probs).sum(dim=-1).mean()
@@ -311,10 +319,10 @@ class PolicyValueTrainer:
             value_target = batch["value"].to(self.device)
             value_weight = batch["value_weight"].to(self.device)
             masks = batch["masks"]
-            action_type_mask = masks["action_type_mask"].to(self.device)
-            source_mask = masks["source_mask"].to(self.device)
-            target_mask = masks["target_mask"].to(self.device)
-            param_mask = masks["param_mask"].to(self.device)
+            action_type_mask = masks["action_type_mask"].to(self.device).bool()
+            source_mask = masks["source_mask"].to(self.device).bool()
+            target_mask = masks["target_mask"].to(self.device).bool()
+            param_mask = masks["param_mask"].to(self.device).bool()
 
             with torch.amp.autocast("cuda", enabled=self.use_amp):
 
@@ -335,6 +343,7 @@ class PolicyValueTrainer:
                 ) / 4.0
 
                 value_prediction = torch.tanh(value_pred.squeeze(-1))
+                value_target = value_target.float()
                 value_error = (value_prediction - value_target).pow(2)
                 if torch.sum(value_weight) > 0:
                     value_loss = torch.sum(value_error * value_weight) / torch.sum(value_weight)
@@ -348,6 +357,10 @@ class PolicyValueTrainer:
 
             # Backward pass
             self.optimizer.zero_grad()
+            if not torch.isfinite(loss):
+                print(f"Skipping non-finite loss at batch {batch_idx}: {loss.item()}")
+                self.optimizer.zero_grad(set_to_none=True)
+                continue
 
             self.scaler.scale(loss).backward()
 
