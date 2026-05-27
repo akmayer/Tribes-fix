@@ -342,7 +342,7 @@ class PolicyValueTrainer:
                     self._policy_loss(param_log_probs, param_policy_target)
                 ) / 4.0
 
-                value_prediction = torch.tanh(value_pred.squeeze(-1))
+                value_prediction = torch.tanh(value_pred.float().squeeze(-1))
                 value_target = value_target.float()
                 value_error = (value_prediction - value_target).pow(2)
                 if torch.sum(value_weight) > 0:
