@@ -3,8 +3,10 @@ import time
 import signal
 import os
 import sys
+import json
+import shutil
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 import torch
 
@@ -46,12 +48,20 @@ AZ_DIRICHLET_ALPHA = 0.30
 AZ_DIRICHLET_EPSILON = 0.25
 AZ_FORCE_END_TURN_IN_SEARCH = False
 
+# If Ctrl+C interrupts a self-play game, any MCTS captures from that unfinished
+# game will lack final value targets. The dataloader can skip value loss for
+# those files, but for AlphaZero training it is cleaner to drop interrupted-game
+# captures before each train step.
+DROP_ORPHAN_CAPTURES_BEFORE_TRAIN = True
+CHECKPOINT_INTERVAL_SECONDS = 30 * 60
+
 SLEEP_AFTER_SERVER_START = 5
 
 LOG_DIR = ROOT / "training_logs"
 LOG_DIR.mkdir(exist_ok=True)
 
 MODEL_PATH = PY_API / "model_weights.pth"
+CHECKPOINT_DIR = PY_API / "checkpoints"
 
 
 def validate_paths():
@@ -87,6 +97,38 @@ def print_config():
         f"dirichlet_alpha={AZ_DIRICHLET_ALPHA}, "
         f"dirichlet_epsilon={AZ_DIRICHLET_EPSILON}"
     )
+    print(f"Drop orphan captures before training: {DROP_ORPHAN_CAPTURES_BEFORE_TRAIN}")
+    print(f"Checkpoint interval: {CHECKPOINT_INTERVAL_SECONDS // 60} minutes")
+
+
+def terminate_process(proc, name, timeout=5):
+    if proc is None or proc.poll() is not None:
+        return
+
+    print(f"Stopping {name} (PID={proc.pid})...")
+    try:
+        os.killpg(proc.pid, signal.SIGINT)
+        proc.wait(timeout=timeout)
+        return
+    except ProcessLookupError:
+        return
+    except subprocess.TimeoutExpired:
+        print(f"{name} did not exit after SIGINT; terminating...")
+
+    try:
+        os.killpg(proc.pid, signal.SIGTERM)
+        proc.wait(timeout=timeout)
+        return
+    except ProcessLookupError:
+        return
+    except subprocess.TimeoutExpired:
+        print(f"{name} did not exit after SIGTERM; killing...")
+
+    try:
+        os.killpg(proc.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        return
+    proc.wait()
 
 
 class FastAPIServer:
@@ -122,6 +164,7 @@ class FastAPIServer:
             cwd=PY_API,
             stdout=self.log_file,
             stderr=subprocess.STDOUT,
+            start_new_session=True,
         )
 
         time.sleep(SLEEP_AFTER_SERVER_START)
@@ -137,13 +180,7 @@ class FastAPIServer:
 
         print("\n=== STOPPING FASTAPI SERVER ===")
 
-        try:
-            self.proc.send_signal(signal.SIGINT)
-            self.proc.wait(timeout=10)
-        except subprocess.TimeoutExpired:
-            print("FastAPI did not exit cleanly, killing...")
-            self.proc.kill()
-            self.proc.wait()
+        terminate_process(self.proc, "FastAPI", timeout=5)
 
         if self.log_file is not None:
             self.log_file.close()
@@ -205,6 +242,50 @@ def timestamp():
     return datetime.now().strftime("%Y%m%d_%H%M%S")
 
 
+def utc_minute_timestamp():
+    return datetime.now(timezone.utc).strftime("%Y%m%dT%H%MZ")
+
+
+class CheckpointManager:
+    def __init__(self, interval_seconds):
+        self.interval_seconds = interval_seconds
+        self.last_checkpoint_monotonic = time.monotonic()
+        CHECKPOINT_DIR.mkdir(parents=True, exist_ok=True)
+
+    def maybe_save(self, reason):
+        now = time.monotonic()
+        if now - self.last_checkpoint_monotonic < self.interval_seconds:
+            return False
+        self.save(reason)
+        return True
+
+    def save(self, reason):
+        if not MODEL_PATH.exists():
+            print(f"Skipping checkpoint ({reason}); model weights do not exist yet: {MODEL_PATH}")
+            return None
+
+        output_path = unique_checkpoint_path()
+        temp_path = output_path.with_suffix(output_path.suffix + ".tmp")
+        shutil.copy2(MODEL_PATH, temp_path)
+        temp_path.replace(output_path)
+        self.last_checkpoint_monotonic = time.monotonic()
+        print(f"Saved checkpoint ({reason}): {output_path}")
+        return output_path
+
+
+def unique_checkpoint_path():
+    base = CHECKPOINT_DIR / f"checkpoint_{utc_minute_timestamp()}.pth"
+    if not base.exists():
+        return base
+
+    idx = 2
+    while True:
+        candidate = CHECKPOINT_DIR / f"{base.stem}_{idx}{base.suffix}"
+        if not candidate.exists():
+            return candidate
+        idx += 1
+
+
 def run_command(cmd, cwd=None, env=None, log_name=None):
     print(f"\nRUNNING: {' '.join(cmd)}")
 
@@ -214,21 +295,27 @@ def run_command(cmd, cwd=None, env=None, log_name=None):
         stdout = open(LOG_DIR / log_name, "a", buffering=1)
 
     result = None
+    proc = None
     try:
-        result = subprocess.run(
+        proc = subprocess.Popen(
             cmd,
             cwd=cwd,
             env=env,
             stdout=stdout if stdout else None,
             stderr=subprocess.STDOUT,
+            start_new_session=True,
         )
+        result = proc.wait()
+    except KeyboardInterrupt:
+        terminate_process(proc, "active command", timeout=3)
+        raise
     finally:
         if stdout is not None:
             stdout.close()
 
-    if result is not None and result.returncode != 0:
+    if result is not None and result != 0:
         raise RuntimeError(
-            f"Command failed with code {result.returncode}: {' '.join(cmd)}"
+            f"Command failed with code {result}: {' '.join(cmd)}"
         )
 
 
@@ -259,6 +346,10 @@ def run_selfplay_game(game_idx, loop_idx):
 
 def train_model(loop_idx):
     print(f"\n=== TRAINING MODEL (LOOP {loop_idx}) ===")
+    if DROP_ORPHAN_CAPTURES_BEFORE_TRAIN:
+        deleted = delete_orphan_captures()
+        if deleted > 0:
+            print(f"Deleted {deleted} capture files without matching result files.")
 
     run_command(
         [
@@ -309,6 +400,42 @@ def count_result_files():
     return len(list(results_dir.glob("result_*.json")))
 
 
+def result_keys():
+    keys = set()
+    for path in (PY_API / "results").glob("result_*.json"):
+        try:
+            with path.open("r", encoding="utf-8") as handle:
+                payload = json.load(handle)
+            keys.add((int(payload["game_seed"]), int(payload["player_id"])))
+        except Exception as exc:
+            print(f"Skipping unreadable result file {path}: {exc}")
+    return keys
+
+
+def delete_orphan_captures():
+    keys = result_keys()
+    if not keys:
+        return 0
+
+    deleted = 0
+    for path in (PY_API / "captures").glob("mcts_*.json"):
+        try:
+            with path.open("r", encoding="utf-8") as handle:
+                payload = json.load(handle)
+            key = (int(payload["game_seed"]), int(payload["player_id"]))
+        except Exception as exc:
+            print(f"Deleting unreadable capture file {path}: {exc}")
+            path.unlink(missing_ok=True)
+            deleted += 1
+            continue
+
+        if key not in keys:
+            path.unlink(missing_ok=True)
+            deleted += 1
+
+    return deleted
+
+
 def print_status():
     print("\n=== DATASET STATUS ===")
     print(f"MCTS captures: {count_capture_files()}")
@@ -333,6 +460,7 @@ def main():
     print_config()
 
     server = FastAPIServer()
+    checkpoint_manager = CheckpointManager(CHECKPOINT_INTERVAL_SECONDS)
 
     try:
         compile_java()
@@ -351,6 +479,7 @@ def main():
             # --------------------------------------------------
             for game_idx in range(1, SELFPLAY_GAMES_PER_LOOP + 1):
                 run_selfplay_game(game_idx, loop_idx)
+                checkpoint_manager.maybe_save("after self-play game")
 
             print_status()
 
@@ -358,16 +487,19 @@ def main():
             # TRAIN
             # --------------------------------------------------
             train_model(loop_idx)
+            checkpoint_manager.maybe_save("after training")
 
             # --------------------------------------------------
             # RESTART SERVER TO LOAD NEW WEIGHTS
             # --------------------------------------------------
             server.restart()
+            checkpoint_manager.maybe_save("after server restart")
 
             print(f"\nLOOP {loop_idx} COMPLETE")
 
     except KeyboardInterrupt:
         print("\nInterrupted by user")
+        checkpoint_manager.save("interrupt")
 
     except Exception as e:
         print(f"\nFATAL ERROR: {e}")

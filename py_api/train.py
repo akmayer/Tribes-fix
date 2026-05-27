@@ -4,7 +4,7 @@ Training script for Tribes policy/value model.
 This script:
 1. Loads game captures (state, available actions, game outcomes)
 2. Trains the model using supervised learning on policy labels
-3. Saves checkpoints
+3. Saves model weights
 4. Logs training metrics
 
 For now, this is a basic supervised learning setup. In the future, you can integrate
@@ -383,25 +383,6 @@ class PolicyValueTrainer:
         self.train_log.append(metrics)
         return metrics
     
-    def save_checkpoint(self, path: str, epoch: int, metrics: Dict):
-        """Save model checkpoint."""
-        checkpoint = {
-            "epoch": epoch,
-            "model_state_dict": self.model.state_dict(),
-            "optimizer_state_dict": self.optimizer.state_dict(),
-            "metrics": metrics,
-        }
-        torch.save(checkpoint, path)
-        print(f"Saved checkpoint to {path}")
-    
-    def load_checkpoint(self, path: str):
-        """Load model checkpoint."""
-        checkpoint = torch.load(path, map_location=self.device)
-        self.model.load_state_dict(checkpoint["model_state_dict"])
-        self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
-        print(f"Loaded checkpoint from {path}")
-        return checkpoint["epoch"]
-
 
 def main():
     parser = argparse.ArgumentParser(description="Train Tribes policy/value model")
@@ -419,10 +400,6 @@ def main():
                         help="Weight for value loss")
     parser.add_argument("--model-path", type=str, default="model_weights.pth",
                         help="Path to save model weights")
-    parser.add_argument("--checkpoint-dir", type=str, default="checkpoints",
-                        help="Directory to save training checkpoints")
-    parser.add_argument("--resume-from", type=str, default=None,
-                        help="Path to checkpoint to resume from")
     parser.add_argument("--max-samples", type=int, default=None,
                         help="Max number of samples to load (for testing)")
     parser.add_argument("--include-unlabeled", action="store_true",
@@ -440,8 +417,6 @@ def main():
     
     # Setup
     device = torch.device(args.device)
-    checkpoint_dir = Path(args.checkpoint_dir)
-    checkpoint_dir.mkdir(parents=True, exist_ok=True)
     
     print(f"Device: {device}")
     print(f"Loading data from: {args.capture_dir}")
@@ -483,11 +458,6 @@ def main():
         value_loss_weight=args.value_loss_weight,
     )
     
-    # Resume from checkpoint if provided
-    start_epoch = 0
-    if args.resume_from and Path(args.resume_from).exists():
-        start_epoch = trainer.load_checkpoint(args.resume_from)
-    
     # Training loop
     print(f"\nStarting training for {args.epochs} epochs")
     print(f"Dataset size: {len(dataset)}")
@@ -495,7 +465,7 @@ def main():
     print(f"Final-value samples: {dataset.value_samples}")
     print(f"Batches per epoch: {len(train_loader)}")
     
-    for epoch in range(start_epoch, args.epochs):
+    for epoch in range(args.epochs):
         print(f"\nEpoch {epoch+1}/{args.epochs}")
         metrics = trainer.train_epoch(train_loader, epoch=epoch)
         
@@ -503,9 +473,8 @@ def main():
         print(f"  Avg policy loss: {metrics['avg_policy_loss']:.4f}")
         print(f"  Avg value loss: {metrics['avg_value_loss']:.4f}")
         
-        # Save checkpoint
-        checkpoint_path = checkpoint_dir / f"checkpoint_epoch_{epoch+1}.pth"
-        trainer.save_checkpoint(str(checkpoint_path), epoch+1, metrics)
+        model.save(args.model_path)
+        print(f"Updated model weights at {args.model_path}")
     
     # Save final model weights
     print(f"\nSaving final model weights to {args.model_path}")
@@ -515,7 +484,6 @@ def main():
     print("\n--- Training Summary ---")
     print(f"Epochs trained: {args.epochs}")
     print(f"Final loss: {metrics['avg_loss']:.4f}")
-    print(f"Checkpoint dir: {checkpoint_dir}")
     print(f"Model weights: {args.model_path}")
     
     # Note about training data quality

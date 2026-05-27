@@ -62,6 +62,13 @@ else:
 model = model.to(device)
 
 
+def write_json_atomic(output_path: Path, payload: dict) -> None:
+    temp_path = output_path.with_suffix(output_path.suffix + ".tmp")
+    with temp_path.open("w", encoding="utf-8") as file_handle:
+        json.dump(payload, file_handle, indent=2, sort_keys=True)
+    temp_path.replace(output_path)
+
+
 @app.get("/hello")
 async def hello():
     return {"message": "hello from python"}
@@ -78,8 +85,7 @@ async def capture(req: Request):
     filename = f"{policy_type}_tick{tick}_actions{action_count}_{timestamp}.json"
     output_path = CAPTURE_DIR / filename
 
-    with output_path.open("w", encoding="utf-8") as file_handle:
-        json.dump(payload, file_handle, indent=2, sort_keys=True)
+    write_json_atomic(output_path, payload)
 
     return {
         "status": "captured",
@@ -99,8 +105,7 @@ async def result(req: Request):
     filename = f"result_game{game_seed}_player{player_id}_{timestamp}.json"
     output_path = RESULTS_DIR / filename
 
-    with output_path.open("w", encoding="utf-8") as file_handle:
-        json.dump(payload, file_handle, indent=2, sort_keys=True)
+    write_json_atomic(output_path, payload)
 
     return {
         "status": "saved",
