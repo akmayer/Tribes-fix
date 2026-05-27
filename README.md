@@ -101,7 +101,7 @@ This work is supported by UK EPSRC research grants EP/T008962/1 and [IGGI CDT](h
 
 ## Python bridge (FastAPI) and quick run instructions
 
-This repository includes a small Python FastAPI bridge located in the `py_api/` directory. The bridge exposes a minimal HTTP API that Java agents can call at simulation time. For a quick proof-of-concept you can run the FastAPI server locally and then run the Java game which will POST a small JSON message to the service when `RandomAgent` is active.
+This repository includes a small Python FastAPI bridge located in the `py_api/` directory. The bridge exposes a minimal HTTP API that Java agents can call at simulation time.
 
 Prerequisites: Python 3.x and the `uv` tool installed.
 
