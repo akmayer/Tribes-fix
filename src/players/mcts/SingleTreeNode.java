@@ -120,9 +120,32 @@ class SingleTreeNode
 
         while (!cur.state.isGameOver() /*&& state.getAllAvailableActions().size() > 1 */ && cur.m_depth < params.ROLLOUT_LENGTH)
         {
-            if (cur.notFullyExpanded()) {
-                return cur.expand();
+            ArrayList<Action> availableActions = cur.getAvailableActionsForNode();
+            if (availableActions == null || availableActions.isEmpty()) {
+                return cur;
+            }
 
+            int forcedEndTurn = cur.forcedEndTurnAction(availableActions);
+            if (forcedEndTurn != -1) {
+                if (cur.children[forcedEndTurn] == null) {
+                    return cur.expandAction(forcedEndTurn, availableActions);
+                }
+                cur = cur.children[forcedEndTurn];
+                continue;
+            }
+
+            if (params.NEURAL_PRIORS) {
+                cur.ensureNeuralEvaluated(availableActions);
+                int actionIdx = cur.selectPuctAction(availableActions);
+                if (actionIdx < 0) {
+                    return cur;
+                }
+                if (cur.children[actionIdx] == null) {
+                    return cur.expandAction(actionIdx, availableActions);
+                }
+                cur = cur.children[actionIdx];
+            } else if (cur.notFullyExpanded()) {
+                return cur.expand();
             } else {
                 cur = cur.uct();
             }
@@ -131,8 +154,13 @@ class SingleTreeNode
         return cur;
     }
 
-    private int tryForceEnd(GameState state, ArrayList<Action> availableActions, EndTurn endTurn, int depth)
+    private int forcedEndTurnAction(ArrayList<Action> availableActions)
     {
+        if (!params.FORCE_END_TURN_IN_SEARCH || params.FORCE_TURN_END <= 0) {
+            return -1;
+        }
+        EndTurn endTurn = new EndTurn(state.getActiveTribeID());
+        int depth = this.m_depth;
         boolean willForceEnd = (depth > 0 && (depth % params.FORCE_TURN_END) == 0) && endTurn.isFeasible(state);
         if(!willForceEnd)
             return -1; //Not the time, or not available.
@@ -150,52 +178,25 @@ class SingleTreeNode
         //This should not happen, but EndTurn is not available here.
         return -1;
     }
-    
+
+    private SingleTreeNode expandAction(int actionIdx, ArrayList<Action> availableActions) {
+        GameState nextState = state.copy();
+        ArrayList<Action> nextActions = advance(nextState, availableActions.get(actionIdx), true);
+        SingleTreeNode tn = new SingleTreeNode(params, this, this.m_rnd, nextActions.size(),
+                nextActions, rootStateHeuristic, this.playerID, this.m_depth == 0 ? this : this.root, nextState);
+        children[actionIdx] = tn;
+        return tn;
+    }
 
     private SingleTreeNode expand() {
 
         ArrayList<Action> availableActions = getAvailableActionsForNode();
-
-        int bestAction = tryForceEnd(state, availableActions, new EndTurn(state.getActiveTribeID()), this.m_depth);
-        if(bestAction == -1)
-        {
-            //No turn end, expand
-            if (params.NEURAL_PRIORS) {
-                ensureNeuralEvaluated(availableActions);
-            }
-
-            // Pick an unexpanded action (prefer highest prior if available)
-            double bestScore = -Double.MAX_VALUE;
-            int picked = -1;
-            for (int i = 0; i < children.length; i++) {
-                if (children[i] != null) {
-                    continue;
-                }
-                double score;
-                if (nnPriors != null && i < nnPriors.length) {
-                    score = nnPriors[i];
-                } else {
-                    score = m_rnd.nextDouble();
-                }
-                score = noise(score, params.epsilon, this.m_rnd.nextDouble());
-                if (score > bestScore) {
-                    bestScore = score;
-                    picked = i;
-                }
-            }
-            if (picked == -1) {
-                picked = 0;
-            }
-            bestAction = picked;
+        int bestAction = forcedEndTurnAction(availableActions);
+        if(bestAction == -1) {
+            bestAction = selectUnexpandedAction(availableActions);
         }
 
-        //Roll the state, create a new node and assign it.
-        GameState nextState = state.copy();
-        ArrayList<Action> nextActions = advance(nextState, availableActions.get(bestAction), true);
-        SingleTreeNode tn = new SingleTreeNode(params, this, this.m_rnd, nextActions.size(),
-                nextActions, rootStateHeuristic, this.playerID, this.m_depth == 0 ? this : this.root, nextState);
-        children[bestAction] = tn;
-        return tn;
+        return expandAction(bestAction, availableActions);
     }
 
 
@@ -207,13 +208,76 @@ class SingleTreeNode
         return gs.getAllAvailableActions();
     }
 
+    private int selectPuctAction(ArrayList<Action> availableActions) {
+        boolean rootPlayerToMove = (state.getActiveTribeID() == this.playerID);
+        double bestValue = rootPlayerToMove ? -Double.MAX_VALUE : Double.MAX_VALUE;
+        int selected = -1;
+        double parentVisits = Math.max(1.0, this.nVisits);
+
+        for (int i = 0; i < this.children.length; ++i) {
+            SingleTreeNode child = children[i];
+            int childVisits = child == null ? 0 : child.nVisits;
+            double q = (child == null || childVisits == 0)
+                    ? 0.0
+                    : child.totValue / (childVisits + params.epsilon);
+            double prior = priorForAction(i, availableActions.size());
+            double u = params.CPUCT * prior * Math.sqrt(parentVisits) / (1.0 + childVisits);
+            double score = rootPlayerToMove ? (q + u) : (q - u);
+            score = noise(score, params.epsilon, this.m_rnd.nextDouble());
+
+            if ((rootPlayerToMove && score > bestValue) || (!rootPlayerToMove && score < bestValue)) {
+                selected = i;
+                bestValue = score;
+            }
+        }
+
+        return selected;
+    }
+
+    private double priorForAction(int actionIdx, int numActions) {
+        if (nnPriors != null && actionIdx >= 0 && actionIdx < nnPriors.length) {
+            double prior = nnPriors[actionIdx];
+            if (Double.isFinite(prior) && prior > 0.0) {
+                return prior;
+            }
+        }
+        if (numActions <= 0) {
+            return 0.0;
+        }
+        return 1.0 / numActions;
+    }
+
+    private int selectUnexpandedAction(ArrayList<Action> availableActions) {
+        if (params.NEURAL_PRIORS) {
+            ensureNeuralEvaluated(availableActions);
+        }
+
+        double bestScore = -Double.MAX_VALUE;
+        int picked = -1;
+        for (int i = 0; i < children.length; i++) {
+            if (children[i] != null) {
+                continue;
+            }
+            double score = priorForAction(i, availableActions.size());
+            score = noise(score, params.epsilon, this.m_rnd.nextDouble());
+            if (score > bestScore) {
+                bestScore = score;
+                picked = i;
+            }
+        }
+        if (picked == -1) {
+            picked = 0;
+        }
+        return picked;
+    }
+
 
     private SingleTreeNode uct() {
 
         SingleTreeNode selected;
         boolean IamMoving = (state.getActiveTribeID() == this.playerID);
         ArrayList<Action> availableActions = getAvailableActionsForNode();
-        int bestAction = tryForceEnd(state, availableActions, new EndTurn(state.getActiveTribeID()), this.m_depth);
+        int bestAction = forcedEndTurnAction(availableActions);
         if(bestAction == -1)
         {
             //No end turn, use uct.
@@ -277,8 +341,6 @@ class SingleTreeNode
         // runs over the same tree node would have different outcomes (i.e Examine ruins).
         //advance(state, actions.get(selected.childIdx), true);
 
-        root.fmCallsCount++;
-
         return selected;
     }
 
@@ -309,10 +371,9 @@ class SingleTreeNode
             GameState rolloutState = state.copy();
             int thisDepth = this.m_depth;
             while (!finishRollout(rolloutState, thisDepth)) {
-                EndTurn endTurn = new EndTurn(rolloutState.getActiveTribeID());
                 ArrayList<Action> rolloutActions = rolloutState.getAllAvailableActions();
-                int bestAction = tryForceEnd(rolloutState, rolloutActions, endTurn, thisDepth);
-                Action next = (bestAction != -1) ? endTurn : rolloutActions.get(m_rnd.nextInt(rolloutActions.size()));
+                int bestAction = forcedEndTurnActionForRollout(rolloutState, rolloutActions, thisDepth);
+                Action next = (bestAction != -1) ? rolloutActions.get(bestAction) : rolloutActions.get(m_rnd.nextInt(rolloutActions.size()));
                 advance(rolloutState, next, true);
                 thisDepth++;
             }
@@ -327,6 +388,25 @@ class SingleTreeNode
             return actions;
         }
         return state.getAllAvailableActions();
+    }
+
+    private int forcedEndTurnActionForRollout(GameState rolloutState, ArrayList<Action> availableActions, int depth) {
+        if (!params.FORCE_END_TURN_IN_SEARCH || params.FORCE_TURN_END <= 0) {
+            return -1;
+        }
+        EndTurn endTurn = new EndTurn(rolloutState.getActiveTribeID());
+        boolean willForceEnd = (depth > 0 && (depth % params.FORCE_TURN_END) == 0) && endTurn.isFeasible(rolloutState);
+        if (!willForceEnd) {
+            return -1;
+        }
+
+        for (int actionIdx = 0; actionIdx < availableActions.size(); actionIdx++) {
+            Action act = availableActions.get(actionIdx);
+            if (act.getActionType() == END_TURN) {
+                return actionIdx;
+            }
+        }
+        return -1;
     }
 
     private void ensureNeuralEvaluated(ArrayList<Action> availableActions) {

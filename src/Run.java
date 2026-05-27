@@ -176,15 +176,19 @@ class Run {
                 azParams.PRIORITIZE_ROOT = false;
                 azParams.ROLLOUT_LENGTH = MAX_LENGTH;
                 azParams.FORCE_TURN_END = FORCE_TURN_END ? 5 : azParams.ROLLOUT_LENGTH + 1;
-                azParams.ROLOUTS_ENABLED = MCTS_ROLLOUTS;
+                azParams.ROLOUTS_ENABLED = false;
                 azParams.CAPTURE_MCTS = true;
-                azParams.NEURAL_PRIORS = false;
-                azParams.NEURAL_VALUE = false;
+                azParams.NEURAL_PRIORS = true;
+                azParams.NEURAL_VALUE = true;
                 azParams.CPUCT = 1.5;
-                // Early-training exploration: mix a little uniform prior into NN priors.
-                // UNIFORM_PRIOR_WEIGHT in [0,1] is the mix coefficient (1.0 = pure uniform).
+                // Early-training smoothing. The Java bridge composes logits over legal actions,
+                // so random weights no longer structurally favor END_TURN.
                 azParams.USE_UNIFORM_PRIORS = true;
-                azParams.UNIFORM_PRIOR_WEIGHT = 1.0;
+                azParams.UNIFORM_PRIOR_WEIGHT = 0.10;
+                azParams.DIRICHLET_ROOT_NOISE = true;
+                azParams.DIRICHLET_ALPHA = 0.30;
+                azParams.DIRICHLET_EPSILON = 0.25;
+                azParams.FORCE_END_TURN_IN_SEARCH = false;
                 return new MCTSPlayer(agentSeed, azParams);
             case PORTFOLIO_MCTS:
                 PortfolioMCTSParams portfolioMCTSParams = new PortfolioMCTSParams();

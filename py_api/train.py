@@ -76,13 +76,20 @@ class GameCaptureDataset(Dataset):
     Each capture contains: state, available actions, and their masks.
     """
     
-    def __init__(self, capture_dir: Path = Path("captures"), max_samples: Optional[int] = None):
+    def __init__(
+        self,
+        capture_dir: Path = Path("captures"),
+        max_samples: Optional[int] = None,
+        mcts_only: bool = True,
+    ):
         self.capture_dir = Path(capture_dir)
         self.state_encoder = StateEncoder()
         self.action_encoder = ActionSpaceEncoder()
         self.samples = []
         self.results = self._load_results(Path("results"))
         self.mcts_samples = 0
+        self.value_samples = 0
+        self.mcts_only = mcts_only
         
         # Load all capture files
         if self.capture_dir.exists():
@@ -92,12 +99,15 @@ class GameCaptureDataset(Dataset):
                 try:
                     with open(capture_file, "r") as f:
                         payload = json.load(f)
+                    if self.mcts_only and not self._has_mcts_policy(payload):
+                        continue
                     self.samples.append(payload)
                 except Exception as e:
                     print(f"Failed to load {capture_file}: {e}")
         
         print(f"Loaded {len(self.samples)} captures from {self.capture_dir}")
-        self.mcts_samples = sum(1 for sample in self.samples if sample.get("mcts", {}).get("visit_counts"))
+        self.mcts_samples = sum(1 for sample in self.samples if self._has_mcts_policy(sample))
+        self.value_samples = sum(1 for sample in self.samples if self._value_target(sample)[1])
     
     def __len__(self):
         return len(self.samples)
@@ -125,7 +135,7 @@ class GameCaptureDataset(Dataset):
             target_target_policy = self._uniform_masked_policy(masks["target_mask"])
             target_param_policy = self._uniform_masked_policy(masks["param_mask"])
 
-        value_target = self._value_target(payload)
+        value_target, has_value_target = self._value_target(payload)
         
         return {
             "state": state,
@@ -134,8 +144,12 @@ class GameCaptureDataset(Dataset):
             "target_policy": torch.from_numpy(target_target_policy).float(),
             "param_policy": torch.from_numpy(target_param_policy).float(),
             "value": torch.tensor(value_target, dtype=torch.float32),
+            "value_weight": torch.tensor(1.0 if has_value_target else 0.0, dtype=torch.float32),
             "masks": masks,
         }
+
+    def _has_mcts_policy(self, payload: Dict) -> bool:
+        return bool(payload.get("mcts", {}).get("visit_counts"))
 
     def _uniform_masked_policy(self, mask):
         """Create uniform distribution over legal actions."""
@@ -192,15 +206,15 @@ class GameCaptureDataset(Dataset):
         if game_seed is not None and player_id is not None:
             key = self._result_key(game_seed, player_id)
             if key is not None and key in self.results:
-                return self.results[key]
+                return self.results[key], True
 
         if "value_target" in payload:
             try:
-                return float(payload["value_target"])
+                return float(payload["value_target"]), True
             except (TypeError, ValueError):
                 pass
 
-        return 0.0
+        return 0.0, False
 
     def _load_results(self, results_dir: Path) -> Dict[Tuple[int, int], float]:
         results: Dict[Tuple[int, int], float] = {}
@@ -268,10 +282,15 @@ class PolicyValueTrainer:
         self.use_amp = device.startswith("cuda")
         self.scaler = torch.amp.GradScaler('cuda', enabled=self.use_amp)
 
-        self.policy_loss_fn = nn.KLDivLoss(reduction="batchmean")
-        self.value_loss_fn = nn.MSELoss()
-        
         self.train_log = []
+
+    def _masked_log_softmax(self, logits: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
+        mask = mask.to(device=logits.device, dtype=torch.bool)
+        masked_logits = logits.masked_fill(~mask, -1e9)
+        return torch.log_softmax(masked_logits, dim=-1)
+
+    def _policy_loss(self, log_probs: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        return -(target * log_probs).sum(dim=-1).mean()
     
     def train_epoch(self, train_loader: DataLoader, epoch: int) -> Dict[str, float]:
         """Run one training epoch."""
@@ -290,28 +309,36 @@ class PolicyValueTrainer:
             target_policy_target = batch["target_policy"].to(self.device)
             param_policy_target = batch["param_policy"].to(self.device)
             value_target = batch["value"].to(self.device)
-            with torch.cuda.amp.autocast(enabled=self.use_amp):
+            value_weight = batch["value_weight"].to(self.device)
+            masks = batch["masks"]
+            action_type_mask = masks["action_type_mask"].to(self.device)
+            source_mask = masks["source_mask"].to(self.device)
+            target_mask = masks["target_mask"].to(self.device)
+            param_mask = masks["param_mask"].to(self.device)
+
+            with torch.amp.autocast("cuda", enabled=self.use_amp):
 
                 # Forward pass
                 action_type_logits, source_logits, target_logits, param_logits, value_pred = self.model(state)
 
-                # Compute policy loss
-                action_type_log_probs = torch.log_softmax(action_type_logits, dim=-1)
-                source_log_probs = torch.log_softmax(source_logits, dim=-1)
-                target_log_probs = torch.log_softmax(target_logits, dim=-1)
-                param_log_probs = torch.log_softmax(param_logits, dim=-1)
+                # Match inference: normalize each policy head only over legal component indices.
+                action_type_log_probs = self._masked_log_softmax(action_type_logits, action_type_mask)
+                source_log_probs = self._masked_log_softmax(source_logits, source_mask)
+                target_log_probs = self._masked_log_softmax(target_logits, target_mask)
+                param_log_probs = self._masked_log_softmax(param_logits, param_mask)
 
                 policy_loss = (
-                    self.policy_loss_fn(action_type_log_probs, action_type_policy_target) +
-                    self.policy_loss_fn(source_log_probs, source_policy_target) +
-                    self.policy_loss_fn(target_log_probs, target_policy_target) +
-                    self.policy_loss_fn(param_log_probs, param_policy_target)
+                    self._policy_loss(action_type_log_probs, action_type_policy_target) +
+                    self._policy_loss(source_log_probs, source_policy_target) +
+                    self._policy_loss(target_log_probs, target_policy_target) +
+                    self._policy_loss(param_log_probs, param_policy_target)
                 ) / 4.0
 
-                value_loss = self.value_loss_fn(
-                    value_pred.squeeze(-1),
-                    value_target
-                )
+                value_error = (value_pred.squeeze(-1) - value_target).pow(2)
+                if torch.sum(value_weight) > 0:
+                    value_loss = torch.sum(value_error * value_weight) / torch.sum(value_weight)
+                else:
+                    value_loss = torch.zeros((), device=self.device)
 
                 loss = (
                     self.policy_loss_weight * policy_loss +
@@ -331,35 +358,6 @@ class PolicyValueTrainer:
 
             self.scaler.step(self.optimizer)
             self.scaler.update()
-            
-            '''# Forward pass
-            action_type_logits, source_logits, target_logits, param_logits, value_pred = self.model(state)
-            
-            # Compute policy loss (KL divergence)
-            # Convert logits to log-probabilities for KL divergence
-            action_type_log_probs = torch.log_softmax(action_type_logits, dim=-1)
-            source_log_probs = torch.log_softmax(source_logits, dim=-1)
-            target_log_probs = torch.log_softmax(target_logits, dim=-1)
-            param_log_probs = torch.log_softmax(param_logits, dim=-1)
-            
-            policy_loss = (
-                self.policy_loss_fn(action_type_log_probs, action_type_policy_target) +
-                self.policy_loss_fn(source_log_probs, source_policy_target) +
-                self.policy_loss_fn(target_log_probs, target_policy_target) +
-                self.policy_loss_fn(param_log_probs, param_policy_target)
-            ) / 4.0  # Average over 4 heads
-            
-            # Compute value loss
-            value_loss = self.value_loss_fn(value_pred.squeeze(-1), value_target)
-            
-            # Combined loss
-            loss = self.policy_loss_weight * policy_loss + self.value_loss_weight * value_loss
-            
-            # Backward pass
-            self.optimizer.zero_grad()
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
-            self.optimizer.step()'''
             
             # Accumulate metrics
             total_policy_loss += policy_loss.item()
@@ -422,6 +420,8 @@ def main():
                         help="Path to checkpoint to resume from")
     parser.add_argument("--max-samples", type=int, default=None,
                         help="Max number of samples to load (for testing)")
+    parser.add_argument("--include-unlabeled", action="store_true",
+                        help="Also train on captures without MCTS visit counts using uniform policy targets")
     parser.add_argument("--max-captures", type=int, default=10000,
                         help="Max number of capture files to keep (oldest deleted) before training; set 0 to disable")
     parser.add_argument(
@@ -446,10 +446,16 @@ def main():
         print(f"Pruned {deleted} old capture files (kept newest {args.max_captures}).")
     
     # Load dataset
-    dataset = GameCaptureDataset(capture_dir=args.capture_dir, max_samples=args.max_samples)
+    dataset = GameCaptureDataset(
+        capture_dir=args.capture_dir,
+        max_samples=args.max_samples,
+        mcts_only=not args.include_unlabeled,
+    )
     
     if len(dataset) == 0:
-        print("No captures found. Run the game with RandomAgent to generate captures first.")
+        print("No usable captures found. Run AZ_MCTS self-play to generate MCTS-labeled captures first.")
+        if not args.include_unlabeled:
+            print("Use --include-unlabeled only for debugging; uniform policy targets are not AlphaZero training data.")
         return
     
     train_loader = DataLoader(
@@ -479,6 +485,7 @@ def main():
     print(f"\nStarting training for {args.epochs} epochs")
     print(f"Dataset size: {len(dataset)}")
     print(f"MCTS-labeled samples: {dataset.mcts_samples}")
+    print(f"Final-value samples: {dataset.value_samples}")
     print(f"Batches per epoch: {len(train_loader)}")
     
     for epoch in range(start_epoch, args.epochs):
@@ -506,10 +513,12 @@ def main():
     
     # Note about training data quality
     if dataset.mcts_samples == 0:
-        print("\n⚠️  IMPORTANT: No MCTS visit counts were found; using uniform masked targets.")
+        print("\nIMPORTANT: No MCTS visit counts were found.")
         print("Generate captures via AZ_MCTS to use AlphaZero-style policy targets.")
     else:
         print("\nUsing MCTS visit counts for policy targets when available.")
+    if dataset.value_samples == 0:
+        print("No completed-game value targets were found; value loss was skipped.")
     print("Ensure fog-of-war is enforced in PythonBridge.java for valid data.")
 
 

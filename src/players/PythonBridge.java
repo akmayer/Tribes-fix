@@ -40,10 +40,21 @@ public class PythonBridge {
 
     /**
      * Compute a normalized joint prior over the provided available actions.
-     * Uses the factorized probabilities returned by the FastAPI /query endpoint.
+     * Prefer composing raw component logits and normalizing over the actual legal actions.
+     * Multiplying already-normalized component probabilities structurally favors actions
+     * with fewer components (especially END_TURN) at random initialization.
      */
     public static double[] actionPriorsFromPolicy(ArrayList<Action> allActions, GameState gs, JSONObject policyResponse) {
         double[] priors = new double[allActions.size()];
+
+        JSONArray actionTypeLogits = policyResponse.optJSONArray("action_type_logits");
+        JSONArray sourceLogits = policyResponse.optJSONArray("source_logits");
+        JSONArray targetLogits = policyResponse.optJSONArray("target_logits");
+        JSONArray paramLogits = policyResponse.optJSONArray("param_logits");
+
+        if (actionTypeLogits != null && sourceLogits != null && targetLogits != null && paramLogits != null) {
+            return actionPriorsFromLogits(allActions, gs, actionTypeLogits, sourceLogits, targetLogits, paramLogits);
+        }
 
         JSONArray actionTypeProbs = policyResponse.optJSONArray("action_type_probs");
         JSONArray sourceProbs = policyResponse.optJSONArray("source_probs");
@@ -71,6 +82,133 @@ public class PythonBridge {
             priors[i] = priors[i] / sum;
         }
         return priors;
+    }
+
+    private static double[] actionPriorsFromLogits(ArrayList<Action> allActions, GameState gs, JSONArray actionTypeLogits,
+                                                   JSONArray sourceLogits, JSONArray targetLogits, JSONArray paramLogits) {
+        double[] scores = new double[allActions.size()];
+        if (scores.length == 0) {
+            return scores;
+        }
+
+        for (int i = 0; i < allActions.size(); i++) {
+            Action action = allActions.get(i);
+            JSONObject components = encodeActionComponents(action, gs);
+            scores[i] = jointLogitScore(action, components, actionTypeLogits, sourceLogits, targetLogits, paramLogits);
+        }
+
+        return softmax(scores);
+    }
+
+    private static double jointLogitScore(Action action, JSONObject components, JSONArray actionTypeLogits,
+                                          JSONArray sourceLogits, JSONArray targetLogits, JSONArray paramLogits) {
+        if (action == null) {
+            return 0.0;
+        }
+        Types.ACTION type = action.getActionType();
+        double score = probAt(actionTypeLogits, components.optInt("action_type_index", 0));
+        if (type == null) {
+            return score;
+        }
+
+        switch (type) {
+            case END_TURN:
+                return score;
+
+            case MOVE:
+            case ATTACK:
+            case CAPTURE:
+            case CONVERT:
+                score += probAt(sourceLogits, components.optInt("source_actor_index", 0));
+                score += probAt(targetLogits, components.optInt("target_actor_index", 0));
+                return score;
+
+            case BUILD_ROAD:
+            case DECLARE_WAR:
+                score += probAt(targetLogits, components.optInt("target_actor_index", 0));
+                return score;
+
+            case SEND_STARS:
+                score += probAt(targetLogits, components.optInt("target_actor_index", 0));
+                score += probAt(paramLogits, components.optInt("param_index", 0));
+                return score;
+
+            case RESEARCH_TECH:
+                score += probAt(paramLogits, components.optInt("param_index", 0));
+                return score;
+
+            case BUILD:
+                score += probAt(sourceLogits, components.optInt("source_actor_index", 0));
+                score += probAt(targetLogits, components.optInt("target_actor_index", 0));
+                score += probAt(paramLogits, components.optInt("param_index", 0));
+                return score;
+
+            case SPAWN:
+                score += probAt(sourceLogits, components.optInt("source_actor_index", 0));
+                score += probAt(paramLogits, components.optInt("param_index", 0));
+                return score;
+
+            case BURN_FOREST:
+            case CLEAR_FOREST:
+            case DESTROY:
+            case GROW_FOREST:
+                score += probAt(sourceLogits, components.optInt("source_actor_index", 0));
+                score += probAt(targetLogits, components.optInt("target_actor_index", 0));
+                return score;
+
+            case LEVEL_UP:
+                score += probAt(sourceLogits, components.optInt("source_actor_index", 0));
+                score += probAt(paramLogits, components.optInt("param_index", 0));
+                return score;
+
+            case RESOURCE_GATHERING:
+                score += probAt(sourceLogits, components.optInt("source_actor_index", 0));
+                return score;
+
+            case DISBAND:
+            case EXAMINE:
+            case HEAL_OTHERS:
+            case MAKE_VETERAN:
+            case RECOVER:
+            case CLIMB_MOUNTAIN:
+            case UPGRADE_BOAT:
+            case UPGRADE_SHIP:
+                score += probAt(sourceLogits, components.optInt("source_actor_index", 0));
+                return score;
+
+            default:
+                return score;
+        }
+    }
+
+    private static double[] softmax(double[] scores) {
+        double[] out = new double[scores.length];
+        if (scores.length == 0) {
+            return out;
+        }
+
+        double max = -Double.MAX_VALUE;
+        for (double score : scores) {
+            if (Double.isFinite(score) && score > max) {
+                max = score;
+            }
+        }
+        if (max == -Double.MAX_VALUE) {
+            return uniform(scores.length);
+        }
+
+        double sum = 0.0;
+        for (int i = 0; i < scores.length; i++) {
+            out[i] = Math.exp(scores[i] - max);
+            sum += out[i];
+        }
+        if (sum <= 0.0 || !Double.isFinite(sum)) {
+            return uniform(scores.length);
+        }
+        for (int i = 0; i < out.length; i++) {
+            out[i] /= sum;
+        }
+        return out;
     }
 
     private static double jointProbability(Action action, JSONObject components, JSONArray actionTypeProbs, JSONArray sourceProbs, JSONArray targetProbs, JSONArray paramProbs) {

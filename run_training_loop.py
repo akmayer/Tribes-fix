@@ -31,14 +31,15 @@ MODEL_PATH = PY_API / "model_weights.pth"
 class FastAPIServer:
     def __init__(self):
         self.proc = None
+        self.log_file = None
 
     def start(self):
         kill_port(FASTAPI_PORT)
         time.sleep(1)
         print("\n=== STARTING FASTAPI SERVER ===")
 
-        log_file = open(
-            LOG_DIR / f"fastapi_{timestamp()}.log",
+        self.log_file = open(
+            LOG_DIR / f"fastapi_errors_{timestamp()}.log",
             "a",
             buffering=1,
         )
@@ -53,9 +54,12 @@ class FastAPIServer:
                 FASTAPI_HOST,
                 "--port",
                 str(FASTAPI_PORT),
+                "--no-access-log",
+                "--log-level",
+                "warning",
             ],
             cwd=PY_API,
-            stdout=log_file,
+            stdout=self.log_file,
             stderr=subprocess.STDOUT,
         )
 
@@ -79,6 +83,10 @@ class FastAPIServer:
             print("FastAPI did not exit cleanly, killing...")
             self.proc.kill()
             self.proc.wait()
+
+        if self.log_file is not None:
+            self.log_file.close()
+            self.log_file = None
 
         print("FastAPI stopped")
         self.proc = None
