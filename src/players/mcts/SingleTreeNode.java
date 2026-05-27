@@ -354,7 +354,7 @@ class SingleTreeNode
 
                 nnPriors = applyPriorSchedule(nnPriors);
 
-                if (m_depth == 0 && !rootNoiseApplied) {
+                if (params.DIRICHLET_ROOT_NOISE && m_depth == 0 && !rootNoiseApplied) {
                     nnPriors = applyRootDirichlet(nnPriors);
                     rootNoiseApplied = true;
                 }
@@ -381,11 +381,26 @@ class SingleTreeNode
         if (priors == null) return null;
 
         if (params.USE_UNIFORM_PRIORS) {
+            // Mix NN priors with a uniform prior:
+            //   out = (1-w) * priors + w * uniform
+            // where w in [0, 1].
+            double w = params.UNIFORM_PRIOR_WEIGHT;
+            if (Double.isNaN(w) || Double.isInfinite(w)) {
+                w = 0.0;
+            }
+            if (w <= 0.0) {
+                return priors;
+            }
+            if (w >= 1.0) {
+                w = 1.0;
+            }
+
             double[] out = new double[priors.length];
             double uniform = 1.0 / priors.length;
 
+            double inv = 1.0 - w;
             for (int i = 0; i < priors.length; i++) {
-                out[i] = params.UNIFORM_PRIOR_WEIGHT * uniform;
+                out[i] = inv * priors[i] + w * uniform;
             }
             return out;
         }
@@ -544,7 +559,7 @@ class SingleTreeNode
     private double sampleGamma(double shape, double scale) {
         // Marsaglia & Tsang approximation (good enough for MCTS noise)
         if (shape < 1.0) {
-            return sampleGamma(1.0 + shape, scale) * Math.pow(Math.random(), 1.0 / shape);
+            return sampleGamma(1.0 + shape, scale) * Math.pow(m_rnd.nextDouble(), 1.0 / shape);
         }
 
         double d = shape - 1.0 / 3.0;
@@ -556,7 +571,7 @@ class SingleTreeNode
             if (v <= 0) continue;
 
             v = v * v * v;
-            double u = Math.random();
+            double u = m_rnd.nextDouble();
 
             if (u < 1.0 - 0.0331 * x * x * x * x) return d * v * scale;
             if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v * scale;
@@ -564,7 +579,8 @@ class SingleTreeNode
     }
 
     private double gaussian() {
-        return Math.random() * 2 - 1; // or replace with Box-Muller if you want cleaner
+        // Use a true Gaussian for the Gamma sampler.
+        return m_rnd.nextGaussian();
     }
 
     private double[] applyRootDirichlet(double[] priors) {

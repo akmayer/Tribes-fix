@@ -25,6 +25,13 @@ import argparse
 from model import TribesModel, StateEncoder, encode_state, TribesTransformerModel
 from action_encoding import ActionSpaceEncoder
 
+torch.backends.cudnn.benchmark = True
+
+def get_device():
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    return torch.device("cpu")
+
 
 def prune_capture_files(capture_dir: Path, max_files: int, patterns: Optional[List[str]] = None) -> int:
     """Delete oldest capture files so at most `max_files` remain.
@@ -256,7 +263,11 @@ class PolicyValueTrainer:
         self.policy_loss_weight = policy_loss_weight
         self.value_loss_weight = value_loss_weight
         
-        self.optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+        self.optimizer = optim.AdamW(model.parameters(), lr=learning_rate)
+
+        self.use_amp = device.startswith("cuda")
+        self.scaler = torch.amp.GradScaler('cuda', enabled=self.use_amp)
+
         self.policy_loss_fn = nn.KLDivLoss(reduction="batchmean")
         self.value_loss_fn = nn.MSELoss()
         
@@ -279,8 +290,49 @@ class PolicyValueTrainer:
             target_policy_target = batch["target_policy"].to(self.device)
             param_policy_target = batch["param_policy"].to(self.device)
             value_target = batch["value"].to(self.device)
+            with torch.cuda.amp.autocast(enabled=self.use_amp):
+
+                # Forward pass
+                action_type_logits, source_logits, target_logits, param_logits, value_pred = self.model(state)
+
+                # Compute policy loss
+                action_type_log_probs = torch.log_softmax(action_type_logits, dim=-1)
+                source_log_probs = torch.log_softmax(source_logits, dim=-1)
+                target_log_probs = torch.log_softmax(target_logits, dim=-1)
+                param_log_probs = torch.log_softmax(param_logits, dim=-1)
+
+                policy_loss = (
+                    self.policy_loss_fn(action_type_log_probs, action_type_policy_target) +
+                    self.policy_loss_fn(source_log_probs, source_policy_target) +
+                    self.policy_loss_fn(target_log_probs, target_policy_target) +
+                    self.policy_loss_fn(param_log_probs, param_policy_target)
+                ) / 4.0
+
+                value_loss = self.value_loss_fn(
+                    value_pred.squeeze(-1),
+                    value_target
+                )
+
+                loss = (
+                    self.policy_loss_weight * policy_loss +
+                    self.value_loss_weight * value_loss
+                )
+
+            # Backward pass
+            self.optimizer.zero_grad()
+
+            self.scaler.scale(loss).backward()
+
+            self.scaler.unscale_(self.optimizer)
+            torch.nn.utils.clip_grad_norm_(
+                self.model.parameters(),
+                max_norm=1.0
+            )
+
+            self.scaler.step(self.optimizer)
+            self.scaler.update()
             
-            # Forward pass
+            '''# Forward pass
             action_type_logits, source_logits, target_logits, param_logits, value_pred = self.model(state)
             
             # Compute policy loss (KL divergence)
@@ -307,7 +359,7 @@ class PolicyValueTrainer:
             self.optimizer.zero_grad()
             loss.backward()
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
-            self.optimizer.step()
+            self.optimizer.step()'''
             
             # Accumulate metrics
             total_policy_loss += policy_loss.item()
@@ -372,8 +424,12 @@ def main():
                         help="Max number of samples to load (for testing)")
     parser.add_argument("--max-captures", type=int, default=10000,
                         help="Max number of capture files to keep (oldest deleted) before training; set 0 to disable")
-    parser.add_argument("--device", type=str, default="cpu",
-                        help="Device to use (cpu or cuda)")
+    parser.add_argument(
+        "--device",
+        type=str,
+        default="cuda" if torch.cuda.is_available() else "cpu",
+        help="Device to use (cpu or cuda)"
+    )
     
     args = parser.parse_args()
     

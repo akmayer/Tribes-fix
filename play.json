@@ -13,7 +13,7 @@
   "Force End" : false,
   "Population Size" : 1,
   "Players" : ["AZ_MCTS", "AZ_MCTS"],
-  "Tribes" : ["Imperius", "Imperius"],
+  "Tribes" : ["Xin Xi", "Imperius"],
   "Verbose" : false,
   "Replay File Name" : "save/1590072023986/0_0/game.json",
   "Level File" : "levels/SampleLevel.csv",

@@ -12,7 +12,7 @@ public class MCTSParams extends AlgParams {
     // Parameters
     public double K = Math.sqrt(2);
     public int ROLLOUT_LENGTH = 10;//10;
-    public boolean ROLOUTS_ENABLED = true;
+    public boolean ROLOUTS_ENABLED = false;
     public boolean CAPTURE_MCTS = false;
 
     // AlphaZero-style neural MCTS (PUCT)
@@ -24,8 +24,8 @@ public class MCTSParams extends AlgParams {
     public double UNIFORM_PRIOR_WEIGHT = 1.0;
 
     public boolean DIRICHLET_ROOT_NOISE = true;
-    public double DIRICHLET_ALPHA = 0.3;
-    public double DIRICHLET_EPSILON = 0.25;
+    public double DIRICHLET_ALPHA = 1.0;
+    public double DIRICHLET_EPSILON = 1.0;
 
     public void setParameterValue(String param, Object value) {
         switch(param) {

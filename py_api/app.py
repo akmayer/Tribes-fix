@@ -27,11 +27,25 @@ if SAVE_INFERENCE_REQUESTS:
 # Load the action space encoder
 encoder = ActionSpaceEncoder()
 
+def get_device():
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    return torch.device("cpu")
+
 # Load the PyTorch model
 state_encoder = StateEncoder()
-model = TribesTransformerModel(state_size=state_encoder.total_state_size)
+device = torch.device(
+    "cuda" if torch.cuda.is_available() else "cpu"
+)
+
+torch.backends.cudnn.benchmark = True
+
+
+model = TribesTransformerModel(state_size=state_encoder.total_state_size).to(device)
+
 model.eval()
-device = torch.device("cpu")
+
+
 
 # Try to load model weights if they exist
 MODEL_PATH = Path("model_weights.pth")
@@ -131,7 +145,7 @@ async def query(req: Request):
         # Encode the state and get model predictions
         state_tensor = encode_state(payload, state_encoder)
         
-        with torch.no_grad():
+        with torch.inference_mode():
             state_batch = state_tensor.unsqueeze(0).to(device)  # Add batch dimension
             action_type_logits, source_logits, target_logits, param_logits, value_pred = model(state_batch)
             

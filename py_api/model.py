@@ -541,6 +541,26 @@ class TribesTransformerModel(nn.Module):
         value = self.value_head(global_vec)
 
         return action_type_logits, source_logits, target_logits, param_logits, value
+    def save(self, path: str) -> None:
+        """Save model weights to disk."""
+        torch.save(self.state_dict(), path)
+
+    def load(self, path: str, device: str = "cpu") -> None:
+        """Load model weights from disk."""
+        self.load_state_dict(torch.load(path, map_location=device))
+
+    @staticmethod
+    def create_or_load(
+        model_path: Optional[str] = None,
+        device: str = "cpu"
+    ) -> "TribesTransformerModel":
+        """Factory method to create or load model."""
+        model = TribesTransformerModel()
+
+        if model_path and Path(model_path).exists():
+            model.load(model_path, device=device)
+
+        return model.to(device)
 
 
 def encode_state(payload: Dict, encoder: Optional[StateEncoder] = None) -> torch.Tensor:

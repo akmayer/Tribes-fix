@@ -17,3 +17,6 @@ map_elites_*
 py_api/captures/
 .github/
 py_api/.venv/
+
+training_logs/*
+py_api/results/*

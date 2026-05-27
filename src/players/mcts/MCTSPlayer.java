@@ -5,6 +5,7 @@ import core.actions.tribeactions.EndTurn;
 import core.game.Game;
 import core.game.GameState;
 import core.Types;
+import core.Constants;
 import players.Agent;
 import players.PythonBridge;
 import utils.ElapsedCpuTimer;
@@ -55,30 +56,32 @@ public class MCTSPlayer extends Agent {
         }
         Action chosen = rootActions.get(m_root.mostVisitedAction());
 
-        System.out.println("\n===== MCTS DECISION =====");
-        System.out.println("Player: " + playerID);
-        System.out.println("Available actions: " + rootActions.size());
-        System.out.println("Chosen action: " + chosen);
+        if (true) {
+            System.out.println("\n===== MCTS DECISION =====");
+            System.out.println("Player: " + playerID);
+            System.out.println("Available actions: " + rootActions.size());
+            System.out.println("Chosen action: " + chosen);
 
-        int[] rootVisits = m_root.getVisitCounts();
-        int[] visitCounts = alignVisitCounts(allActions, rootActions, rootVisits);
+            int[] rootVisits = m_root.getVisitCounts();
+            int[] visitCounts = alignVisitCounts(allActions, rootActions, rootVisits);
 
-        System.out.println("---- Visit counts ----");
-        for (int i = 0; i < allActions.size(); i++) {
-            Action a = allActions.get(i);
-            int v = visitCounts[i];
+            System.out.println("---- Visit counts ----");
+            for (int i = 0; i < allActions.size(); i++) {
+                Action a = allActions.get(i);
+                int v = visitCounts[i];
 
-            // highlight chosen action
-            boolean isChosen = a == chosen;
+                // highlight chosen action
+                boolean isChosen = a == chosen;
 
-            System.out.println(
-                (isChosen ? ">> " : "   ") +
-                "[" + i + "] " + a +
-                " | visits=" + v
-            );
+                System.out.println(
+                    (isChosen ? ">> " : "   ") +
+                    "[" + i + "] " + a +
+                    " | visits=" + v
+                );
+            }
+
+            System.out.println("========================\n");
         }
-
-        System.out.println("========================\n");
 
         return chosen;
 

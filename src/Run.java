@@ -178,9 +178,13 @@ class Run {
                 azParams.FORCE_TURN_END = FORCE_TURN_END ? 5 : azParams.ROLLOUT_LENGTH + 1;
                 azParams.ROLOUTS_ENABLED = MCTS_ROLLOUTS;
                 azParams.CAPTURE_MCTS = true;
-                azParams.NEURAL_PRIORS = true;
-                azParams.NEURAL_VALUE = true;
+                azParams.NEURAL_PRIORS = false;
+                azParams.NEURAL_VALUE = false;
                 azParams.CPUCT = 1.5;
+                // Early-training exploration: mix a little uniform prior into NN priors.
+                // UNIFORM_PRIOR_WEIGHT in [0,1] is the mix coefficient (1.0 = pure uniform).
+                azParams.USE_UNIFORM_PRIORS = true;
+                azParams.UNIFORM_PRIOR_WEIGHT = 1.0;
                 return new MCTSPlayer(agentSeed, azParams);
             case PORTFOLIO_MCTS:
                 PortfolioMCTSParams portfolioMCTSParams = new PortfolioMCTSParams();
