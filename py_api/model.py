@@ -212,9 +212,12 @@ class StateEncoder:
             
             # Tech tree (simplified: just use first 50 elements if available)
             tech_data = tribe_dict.get("technology", {})
-            if isinstance(tech_data, dict) and "researched_techs" in tech_data:
-                # Binary encoding of researched techs
-                for i, tech_researched in enumerate(tech_data.get("researched_techs", [])[:self.tech_features]):
+            researched_flags = []
+            if isinstance(tech_data, dict):
+                researched_flags = tech_data.get("researched_flags", tech_data.get("researched_techs", []))
+            if researched_flags:
+                # Binary encoding of researched techs. Java sends researched_flags.
+                for i, tech_researched in enumerate(researched_flags[:self.tech_features]):
                     features[i] = 1.0 if tech_researched else 0.0
             
             # Tribe stats (stars, score, etc.)

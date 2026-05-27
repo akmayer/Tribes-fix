@@ -21,7 +21,7 @@ public class AlgParams
 
     // Budget settings
     public int stop_type = STOP_ITERATIONS;
-    public int num_iterations = 100;
+    public int num_iterations = 10;
     public int num_fmcalls = 2000;
     public int num_time = 40;
     public int FORCE_TURN_END = 5;
