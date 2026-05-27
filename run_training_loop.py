@@ -8,17 +8,43 @@ from datetime import datetime
 
 import torch
 
-ROOT = Path("/home/akmayer/Tribes")
+ROOT = Path(__file__).resolve().parent
 PY_API = ROOT / "py_api"
 VENV_PYTHON = PY_API / ".venv/bin/python"
 
 FASTAPI_HOST = "127.0.0.1"
 FASTAPI_PORT = 8000
 
+# Training loop knobs. These are intentionally hardcoded here instead of hidden
+# in Run.java/train.py defaults, so an overnight run is reproducible from this file.
+#
+# Reasonable presets:
+# - Bootstrap/debug: 2-5 games, 64-96 MCTS sims, 20k-30k captures, 1-2 epochs.
+# - Early real training: 5-8 games, 96-160 MCTS sims, 40k-60k captures, 1-2 epochs.
+# - Stronger later runs: 8-12 games, 192-400 MCTS sims, 80k-150k captures, 1 epoch.
+#
+# With roughly 600+ captured states per game, 50k captures is about 80 games at
+# the current game length. If games get longer, increase MAX_CAPTURES before
+# increasing TRAIN_EPOCHS, otherwise the model will overfit stale recent games.
 SELFPLAY_GAMES_PER_LOOP = 5
-TRAIN_EPOCHS = 2
-MAX_CAPTURES = 20000
+MAX_CAPTURES = 50000
 NUM_LOOPS = 1000  # effectively overnight/until stopped
+
+TRAIN_EPOCHS = 2
+TRAIN_BATCH_SIZE = 128
+TRAIN_LEARNING_RATE = 3e-4
+POLICY_LOSS_WEIGHT = 1.0
+VALUE_LOSS_WEIGHT = 0.25
+
+# MCTS budget. With 20-60 legal actions, 100 visits is only a rough bootstrap
+# policy. 128 is still cheap enough to iterate, while giving PUCT more than one
+# look at high-prior moves. Raise this as the value net becomes useful.
+AZ_MCTS_SIMULATIONS = 128
+AZ_MCTS_CPUCT = 1.5
+AZ_UNIFORM_PRIOR_WEIGHT = 0.10
+AZ_DIRICHLET_ALPHA = 0.30
+AZ_DIRICHLET_EPSILON = 0.25
+AZ_FORCE_END_TURN_IN_SEARCH = False
 
 SLEEP_AFTER_SERVER_START = 5
 
@@ -26,6 +52,41 @@ LOG_DIR = ROOT / "training_logs"
 LOG_DIR.mkdir(exist_ok=True)
 
 MODEL_PATH = PY_API / "model_weights.pth"
+
+
+def validate_paths():
+    missing = []
+    if not VENV_PYTHON.exists():
+        missing.append(str(VENV_PYTHON))
+    if not (ROOT / "play.json").exists():
+        missing.append(str(ROOT / "play.json"))
+    if not (PY_API / "train.py").exists():
+        missing.append(str(PY_API / "train.py"))
+
+    if missing:
+        raise FileNotFoundError("Missing required training file(s): " + ", ".join(missing))
+
+
+def print_config():
+    print(f"Root: {ROOT}")
+    print(f"Python API: {PY_API}")
+    print(f"Device: {'cuda' if torch.cuda.is_available() else 'cpu'}")
+    print(
+        "Loop config: "
+        f"games={SELFPLAY_GAMES_PER_LOOP}, "
+        f"captures={MAX_CAPTURES}, "
+        f"epochs={TRAIN_EPOCHS}, "
+        f"batch={TRAIN_BATCH_SIZE}, "
+        f"lr={TRAIN_LEARNING_RATE}"
+    )
+    print(
+        "AZ MCTS config: "
+        f"sims={AZ_MCTS_SIMULATIONS}, "
+        f"cpuct={AZ_MCTS_CPUCT}, "
+        f"uniform_prior={AZ_UNIFORM_PRIOR_WEIGHT}, "
+        f"dirichlet_alpha={AZ_DIRICHLET_ALPHA}, "
+        f"dirichlet_epsilon={AZ_DIRICHLET_EPSILON}"
+    )
 
 
 class FastAPIServer:
@@ -152,15 +213,20 @@ def run_command(cmd, cwd=None, env=None, log_name=None):
     if log_name:
         stdout = open(LOG_DIR / log_name, "a", buffering=1)
 
-    result = subprocess.run(
-        cmd,
-        cwd=cwd,
-        env=env,
-        stdout=stdout if stdout else None,
-        stderr=subprocess.STDOUT,
-    )
+    result = None
+    try:
+        result = subprocess.run(
+            cmd,
+            cwd=cwd,
+            env=env,
+            stdout=stdout if stdout else None,
+            stderr=subprocess.STDOUT,
+        )
+    finally:
+        if stdout is not None:
+            stdout.close()
 
-    if result.returncode != 0:
+    if result is not None and result.returncode != 0:
         raise RuntimeError(
             f"Command failed with code {result.returncode}: {' '.join(cmd)}"
         )
@@ -186,6 +252,7 @@ def run_selfplay_game(game_idx, loop_idx):
     run_command(
         ["java", "-cp", ".:src:lib/json.jar", "Play"],
         cwd=ROOT,
+        env=java_training_env(),
         log_name=f"selfplay_loop{loop_idx}_game{game_idx}.log",
     )
 
@@ -199,6 +266,14 @@ def train_model(loop_idx):
             "train.py",
             "--epochs",
             str(TRAIN_EPOCHS),
+            "--batch-size",
+            str(TRAIN_BATCH_SIZE),
+            "--learning-rate",
+            str(TRAIN_LEARNING_RATE),
+            "--policy-loss-weight",
+            str(POLICY_LOSS_WEIGHT),
+            "--value-loss-weight",
+            str(VALUE_LOSS_WEIGHT),
             "--max-captures",
             str(MAX_CAPTURES),
             "--device",
@@ -207,6 +282,21 @@ def train_model(loop_idx):
         cwd=PY_API,
         log_name=f"train_loop{loop_idx}.log",
     )
+
+
+def java_training_env():
+    env = os.environ.copy()
+    env.update(
+        {
+            "TRIBES_AZ_MCTS_SIMULATIONS": str(AZ_MCTS_SIMULATIONS),
+            "TRIBES_AZ_MCTS_CPUCT": str(AZ_MCTS_CPUCT),
+            "TRIBES_AZ_UNIFORM_PRIOR_WEIGHT": str(AZ_UNIFORM_PRIOR_WEIGHT),
+            "TRIBES_AZ_DIRICHLET_ALPHA": str(AZ_DIRICHLET_ALPHA),
+            "TRIBES_AZ_DIRICHLET_EPSILON": str(AZ_DIRICHLET_EPSILON),
+            "TRIBES_AZ_FORCE_END_TURN_IN_SEARCH": str(AZ_FORCE_END_TURN_IN_SEARCH).lower(),
+        }
+    )
+    return env
 
 
 def count_capture_files():
@@ -239,6 +329,8 @@ def main():
     print("=" * 60)
     print("ALPHAZERO TRAINING LOOP")
     print("=" * 60)
+    validate_paths()
+    print_config()
 
     server = FastAPIServer()
 

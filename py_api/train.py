@@ -334,7 +334,8 @@ class PolicyValueTrainer:
                     self._policy_loss(param_log_probs, param_policy_target)
                 ) / 4.0
 
-                value_error = (value_pred.squeeze(-1) - value_target).pow(2)
+                value_prediction = torch.tanh(value_pred.squeeze(-1))
+                value_error = (value_prediction - value_target).pow(2)
                 if torch.sum(value_weight) > 0:
                     value_loss = torch.sum(value_error * value_weight) / torch.sum(value_weight)
                 else:
@@ -412,6 +413,10 @@ def main():
                         help="Batch size for training")
     parser.add_argument("--learning-rate", type=float, default=1e-3,
                         help="Learning rate")
+    parser.add_argument("--policy-loss-weight", type=float, default=1.0,
+                        help="Weight for policy loss")
+    parser.add_argument("--value-loss-weight", type=float, default=0.1,
+                        help="Weight for value loss")
     parser.add_argument("--model-path", type=str, default="model_weights.pth",
                         help="Path to save model weights")
     parser.add_argument("--checkpoint-dir", type=str, default="checkpoints",
@@ -474,6 +479,8 @@ def main():
         model=model,
         device=str(device),
         learning_rate=args.learning_rate,
+        policy_loss_weight=args.policy_loss_weight,
+        value_loss_weight=args.value_loss_weight,
     )
     
     # Resume from checkpoint if provided

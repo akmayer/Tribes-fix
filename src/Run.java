@@ -140,6 +140,40 @@ class Run {
         return weights;
     }
 
+    private static int envInt(String name, int defaultValue) {
+        String value = System.getenv(name);
+        if (value == null || value.isEmpty()) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid integer env " + name + "=" + value + "; using " + defaultValue);
+            return defaultValue;
+        }
+    }
+
+    private static double envDouble(String name, double defaultValue) {
+        String value = System.getenv(name);
+        if (value == null || value.isEmpty()) {
+            return defaultValue;
+        }
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid double env " + name + "=" + value + "; using " + defaultValue);
+            return defaultValue;
+        }
+    }
+
+    private static boolean envBoolean(String name, boolean defaultValue) {
+        String value = System.getenv(name);
+        if (value == null || value.isEmpty()) {
+            return defaultValue;
+        }
+        return value.equalsIgnoreCase("true") || value.equals("1") || value.equalsIgnoreCase("yes");
+    }
+
     public static Agent getAgent(Run.PlayerType playerType, long agentSeed)
     {
         switch (playerType)
@@ -180,15 +214,16 @@ class Run {
                 azParams.CAPTURE_MCTS = true;
                 azParams.NEURAL_PRIORS = true;
                 azParams.NEURAL_VALUE = true;
-                azParams.CPUCT = 1.5;
+                azParams.num_iterations = envInt("TRIBES_AZ_MCTS_SIMULATIONS", 128);
+                azParams.CPUCT = envDouble("TRIBES_AZ_MCTS_CPUCT", 1.5);
                 // Early-training smoothing. The Java bridge composes logits over legal actions,
                 // so random weights no longer structurally favor END_TURN.
                 azParams.USE_UNIFORM_PRIORS = true;
-                azParams.UNIFORM_PRIOR_WEIGHT = 0.10;
+                azParams.UNIFORM_PRIOR_WEIGHT = envDouble("TRIBES_AZ_UNIFORM_PRIOR_WEIGHT", 0.10);
                 azParams.DIRICHLET_ROOT_NOISE = true;
-                azParams.DIRICHLET_ALPHA = 0.30;
-                azParams.DIRICHLET_EPSILON = 0.25;
-                azParams.FORCE_END_TURN_IN_SEARCH = false;
+                azParams.DIRICHLET_ALPHA = envDouble("TRIBES_AZ_DIRICHLET_ALPHA", 0.30);
+                azParams.DIRICHLET_EPSILON = envDouble("TRIBES_AZ_DIRICHLET_EPSILON", 0.25);
+                azParams.FORCE_END_TURN_IN_SEARCH = envBoolean("TRIBES_AZ_FORCE_END_TURN_IN_SEARCH", false);
                 return new MCTSPlayer(agentSeed, azParams);
             case PORTFOLIO_MCTS:
                 PortfolioMCTSParams portfolioMCTSParams = new PortfolioMCTSParams();
