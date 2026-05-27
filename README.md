@@ -111,6 +111,7 @@ Create an environment (using `uv`) inside `py_api/`, activate it, and start the 
 cd py_api
 uv venv
 source .venv/bin/activate
+uv pip install -r requirements.txt
 bash ./run_py_api.sh
 ```
 
@@ -128,8 +129,24 @@ javac -cp .:lib/json.jar $(find src -name "*.java")
 java -cp .:src:lib/json.jar Play
 ```
 
-Notes:
-- The `RandomAgent` will attempt to POST to `http://127.0.0.1:8000/query` and will fall back to its original random behavior if the Python service is not available.
-- The FastAPI server writes each received payload to `py_api/captures/`, which is gitignored for easy inspection.
-- See an example payload at `examplePayload.json`, copied from the gitignore'd: `py_api/captures/capture_tick5_actions45_20260501T234552_607251Z.json`
-- On Windows adjust classpath separators (`;`) and activation commands accordingly.
+## Training the model
+
+AFTER you've created the environment and installed the dependencies, return to the root directory you (will probably) need to set up 3 folders:
+
+```bash
+mkdir py_api/captures
+mkdir py_api/results
+mkdir training_logs
+```
+
+training_logs should exist at the root level, as implied above.
+
+To start training, run 
+```python
+python run_training_loop.py
+```
+
+And it should just start working. You can analyze games and the bots choices in progress in the `training_logs/` or `py_api/captures` directories. At the end of each game, you can see the game and player results in the `py_api/results` directory.
+
+If running on a cpu or want to see quick results, games can simulate much faster if you go into `run_training_loop.py` and reduce `AZ_MCTS_SIMULATIONS = 128` to something like 10 or 20.
+
