@@ -336,7 +336,10 @@ class TribesModel(nn.Module):
     
     def save(self, path: str) -> None:
         """Save model weights to disk."""
-        torch.save(self.state_dict(), path)
+        output_path = Path(path)
+        temp_path = output_path.with_suffix(output_path.suffix + ".tmp")
+        torch.save(self.state_dict(), temp_path)
+        temp_path.replace(output_path)
     
     def load(self, path: str, device: str = "cpu") -> None:
         """Load model weights from disk."""
@@ -546,7 +549,10 @@ class TribesTransformerModel(nn.Module):
         return action_type_logits, source_logits, target_logits, param_logits, value
     def save(self, path: str) -> None:
         """Save model weights to disk."""
-        torch.save(self.state_dict(), path)
+        output_path = Path(path)
+        temp_path = output_path.with_suffix(output_path.suffix + ".tmp")
+        torch.save(self.state_dict(), temp_path)
+        temp_path.replace(output_path)
 
     def load(self, path: str, device: str = "cpu") -> None:
         """Load model weights from disk."""
