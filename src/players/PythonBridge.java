@@ -391,13 +391,14 @@ public class PythonBridge {
         payload.put("is_game_over", gs.isGameOver());
         payload.put("available_action_count", allActions.size());
         payload.put("available_actions", serializeActions(allActions, gs));
-        payload.put("board", serializeBoard(board));
+        payload.put("visibility", serializeVisibility(obsGrid));
+        payload.put("board", serializeBoard(board, obsGrid));
         payload.put("tribes", serializeTribes(board, obsGrid, activeTribeID));
 
         return payload;
     }
 
-    private static JSONObject serializeBoard(Board board) {
+    private static JSONObject serializeBoard(Board board, boolean[][] obsGrid) {
         JSONObject json = new JSONObject();
         int size = board.getSize();
 
@@ -411,13 +412,15 @@ public class PythonBridge {
             JSONArray row = new JSONArray();
             for (int y = 0; y < size; y++) {
                 JSONObject tile = new JSONObject();
+                boolean visible = isPositionVisible(obsGrid, x, y);
                 tile.put("x", x);
                 tile.put("y", y);
-                tile.put("terrain", enumName(board.getTerrainAt(x, y)));
-                tile.put("resource", enumName(board.getResourceAt(x, y)));
-                tile.put("building", enumName(board.getBuildingAt(x, y)));
-                tile.put("city_id", board.getCityIdAt(x, y));
-                int unitId = board.getUnits()[x][y];
+                tile.put("visible", visible);
+                tile.put("terrain", visible ? enumName(board.getTerrainAt(x, y)) : "UNKNOWN");
+                tile.put("resource", visible ? enumName(board.getResourceAt(x, y)) : null);
+                tile.put("building", visible ? enumName(board.getBuildingAt(x, y)) : null);
+                tile.put("city_id", visible ? board.getCityIdAt(x, y) : -1);
+                int unitId = visible ? board.getUnits()[x][y] : -1;
                 tile.put("unit_id", unitId);
                 if (unitId != -1) {
                     tile.put("unit", serializeUnit((Unit) board.getActor(unitId)));
@@ -431,30 +434,50 @@ public class PythonBridge {
         return json;
     }
 
+    private static JSONArray serializeVisibility(boolean[][] obsGrid) {
+        JSONArray rows = new JSONArray();
+        if (obsGrid == null) {
+            return rows;
+        }
+
+        for (int x = 0; x < obsGrid.length; x++) {
+            JSONArray row = new JSONArray();
+            for (int y = 0; y < obsGrid[x].length; y++) {
+                row.put(obsGrid[x][y]);
+            }
+            rows.put(row);
+        }
+        return rows;
+    }
+
     private static JSONArray serializeTribes(Board board, boolean[][] obsGrid, int activeTribeID) {
         JSONArray tribes = new JSONArray();
         for (Tribe tribe : board.getTribes()) {
+            boolean isActiveTribe = tribe.getTribeId() == activeTribeID;
             JSONObject t = new JSONObject();
             t.put("tribe_id", tribe.getTribeId());
+            t.put("relation", isActiveTribe ? "SELF" : "OPPONENT");
+            t.put("is_active_tribe", isActiveTribe);
             t.put("type", enumName(tribe.getType()));
             t.put("name", tribe.getName());
-            t.put("stars", tribe.getStars());
+            t.put("stars_known", isActiveTribe);
+            t.put("stars", isActiveTribe ? tribe.getStars() : 0);
             t.put("score", tribe.getScore());
             t.put("winner", enumName(tribe.getWinner()));
-            t.put("capital_id", tribe.getCapitalID());
+            t.put("capital_id", isActiveTribe ? tribe.getCapitalID() : -1);
             t.put("cities", serializeCities(board, tribe, obsGrid, activeTribeID));
             t.put("units", serializeTribeUnits(board, tribe, obsGrid, activeTribeID));
             t.put("extra_units", serializeUnitIds(board, tribe.getExtraUnits(), obsGrid, activeTribeID, tribe.getTribeId()));
-            t.put("connected_cities", toIntArray(tribe.getConnectedCities()));
-            t.put("tribes_met", toIntArray(tribe.getTribesMet()));
-            t.put("n_kills", tribe.getnKills());
-            t.put("n_pacifist_count", tribe.getnPacifistCount());
-            t.put("stars_sent", tribe.getStarsSent());
-            t.put("has_declared_war", tribe.getHasDeclaredWar());
-            t.put("n_wars_declared", tribe.getnWarsDeclared());
-            t.put("n_stars_sent", tribe.getnStarsSent());
-            t.put("technology", serializeTechnologyTree(tribe.getTechTree()));
-            t.put("monuments", serializeMonuments(tribe));
+            t.put("connected_cities", isActiveTribe ? toIntArray(tribe.getConnectedCities()) : new JSONArray());
+            t.put("tribes_met", isActiveTribe ? toIntArray(tribe.getTribesMet()) : new JSONArray());
+            t.put("n_kills", isActiveTribe ? tribe.getnKills() : 0);
+            t.put("n_pacifist_count", isActiveTribe ? tribe.getnPacifistCount() : 0);
+            t.put("stars_sent", isActiveTribe ? tribe.getStarsSent() : 0);
+            t.put("has_declared_war", isActiveTribe && tribe.getHasDeclaredWar());
+            t.put("n_wars_declared", isActiveTribe ? tribe.getnWarsDeclared() : 0);
+            t.put("n_stars_sent", isActiveTribe ? tribe.getnStarsSent() : 0);
+            t.put("technology", isActiveTribe ? serializeTechnologyTree(tribe.getTechTree()) : serializeHiddenTechnologyTree());
+            t.put("monuments", isActiveTribe ? serializeMonuments(tribe) : new JSONObject());
             tribes.put(t);
         }
         return tribes;
@@ -874,6 +897,23 @@ public class PythonBridge {
         json.put("researched_flags", researchedFlags);
         json.put("everything_researched", techTree.isEverythingResearched());
         json.put("num_researched", techTree.getNumResearched());
+        return json;
+    }
+
+    private static JSONObject serializeHiddenTechnologyTree() {
+        JSONObject json = new JSONObject();
+        JSONArray researchedTechs = new JSONArray();
+        JSONArray researchedFlags = new JSONArray();
+
+        for (Types.TECHNOLOGY ignored : Types.TECHNOLOGY.values()) {
+            researchedFlags.put(false);
+        }
+
+        json.put("researched", researchedTechs);
+        json.put("researched_flags", researchedFlags);
+        json.put("everything_researched", false);
+        json.put("num_researched", 0);
+        json.put("hidden", true);
         return json;
     }
 

@@ -127,6 +127,7 @@ class GameCaptureDataset(Dataset):
         visit_counts = mcts_policy.get("visit_counts")
 
         if visit_counts:
+            visit_counts = self._debiased_visit_counts(visit_counts)
             target_action_type_policy, target_source_policy, target_target_policy, target_param_policy = (
                 self._policy_from_visit_counts(visit_counts, available_actions, masks)
             )
@@ -160,6 +161,18 @@ class GameCaptureDataset(Dataset):
             return np.ones_like(mask_array, dtype=np.float32) / len(mask_array)
         policy = mask_array.astype(np.float32) / allowed
         return policy
+
+    def _debiased_visit_counts(self, visit_counts):
+        """Remove one exploratory visit per action before factorized aggregation.
+
+        With factorized policy heads, summing raw visits by component lets action
+        families with many variants create a large high-level target from shallow
+        one-off exploration. Excess visits better represent actions MCTS actually
+        returned to after first expansion.
+        """
+        counts = np.array([0.0 if count is None else float(count) for count in visit_counts], dtype=np.float32)
+        debiased = np.maximum(counts - (counts > 0).astype(np.float32), 0.0)
+        return debiased.tolist()
 
     def _policy_from_visit_counts(self, visit_counts, available_actions, masks):
         action_type_counts = np.zeros(self.action_encoder.action_type_size, dtype=np.float32)

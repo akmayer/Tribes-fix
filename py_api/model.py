@@ -60,11 +60,12 @@ class StateEncoder:
         self.max_cities = max_cities
         
         # Feature dimensions (will be flattened into state vector)
-        # Board: 11x11 with 4 channels (terrain one-hot, resource, building, unit presence)
+        # Board: 11x11 with visible terrain plus public/visible occupancy channels.
         # For simplicity, we'll flatten the board and unit/city features
-        self.board_features = board_size * board_size * 8  # 8 channels per tile
-        self.unit_features = max_units * 16  # 16 features per unit (type, health, position, etc.)
-        self.city_features = max_cities * 10  # 10 features per city (level, population, position, etc.)
+        self.board_channels = 16
+        self.board_features = board_size * board_size * self.board_channels
+        self.unit_features = max_units * 16
+        self.city_features = max_cities * 10
         self.tech_features = 50  # Technology tree (one-hot over ~50 techs)
         self.tribe_features = 10  # Tribe stats (stars, score, population, etc.)
         
@@ -76,58 +77,68 @@ class StateEncoder:
             self.tribe_features
         )
     
-    def encode_board(self, board_dict: Dict) -> np.ndarray:
+    def encode_board(self, board_dict: Dict, active_tribe_id: int, tribes_list: list) -> np.ndarray:
         """
         Encode board into tensor.
         
-        Each tile gets 8 channels:
-        - Terrain (one-hot over ~8 terrain types)
-        - Resource presence (binary)
-        - Building presence (binary)
-        - Unit presence (binary)
-        - Etc.
+        Each tile gets 16 channels:
+        - Terrain including UNKNOWN for hidden tiles
+        - Visibility
+        - Resource/building presence on visible tiles
+        - Visible unit/city ownership relative to the active tribe
         """
         size = board_dict.get("size", self.board_size)
-        board_tensor = np.zeros((size, size, 8), dtype=np.float32)
+        board_tensor = np.zeros((size, size, self.board_channels), dtype=np.float32)
         
-        # Terrain type mapping (simplistic; should match Types.java TERRAIN enum)
         terrain_map = {
-            "WATER": 0, "SHALLOW_WATER": 1, "GRASS": 2, "FOREST": 3,
-            "MOUNTAIN": 4, "SNOW": 5, "DESERT": 6, "CITY": 7
+            "UNKNOWN": 0, "WATER": 1, "SHALLOW_WATER": 2, "GRASS": 3,
+            "FOREST": 4, "MOUNTAIN": 5, "SNOW": 6, "DESERT": 7, "CITY": 8
         }
-        
-        resource_map = {
-            "STARS": 1, "CUSTOM": 2, None: 0
-        }
-        
-        building_map = {
-            "MONUMENT": 1, "TEMPLE": 2, "ROAD": 3, None: 0
-        }
+
+        city_owner = {}
+        for tribe_dict in tribes_list:
+            tribe_id = tribe_dict.get("tribe_id")
+            for city in tribe_dict.get("cities", []):
+                city_id = city.get("actor_id")
+                if city_id is not None:
+                    city_owner[int(city_id)] = tribe_id
         
         tiles = board_dict.get("tiles", [])
         for x_row in tiles:
             for y_tile in x_row:
                 x, y = y_tile.get("x"), y_tile.get("y")
                 if 0 <= x < size and 0 <= y < size:
-                    # One-hot terrain
-                    terrain_idx = terrain_map.get(y_tile.get("terrain", "GRASS"), 2)
+                    visible = bool(y_tile.get("visible", True))
+                    terrain_name = y_tile.get("terrain", "UNKNOWN" if not visible else "GRASS")
+                    terrain_idx = terrain_map.get(terrain_name, terrain_map["GRASS"])
                     board_tensor[x, y, terrain_idx] = 1.0
+                    board_tensor[x, y, 9] = 1.0 if visible else 0.0
+
+                    if not visible:
+                        continue
                     
-                    # Resource indicator
-                    resource = resource_map.get(y_tile.get("resource"), 0)
-                    board_tensor[x, y, 5] = float(resource > 0)
-                    
-                    # Building indicator
-                    building = building_map.get(y_tile.get("building"), 0)
-                    board_tensor[x, y, 6] = float(building > 0)
-                    
-                    # Unit present
-                    board_tensor[x, y, 7] = 1.0 if y_tile.get("unit_id", -1) != -1 else 0.0
+                    board_tensor[x, y, 10] = 1.0 if y_tile.get("resource") is not None else 0.0
+                    board_tensor[x, y, 11] = 1.0 if y_tile.get("building") is not None else 0.0
+
+                    unit = y_tile.get("unit")
+                    if unit:
+                        if unit.get("tribe_id") == active_tribe_id:
+                            board_tensor[x, y, 12] = 1.0
+                        else:
+                            board_tensor[x, y, 13] = 1.0
+
+                    city_id = y_tile.get("city_id", -1)
+                    owner = city_owner.get(city_id)
+                    if owner is not None:
+                        if owner == active_tribe_id:
+                            board_tensor[x, y, 14] = 1.0
+                        else:
+                            board_tensor[x, y, 15] = 1.0
         
         return board_tensor.flatten()
     
     def encode_units(self, active_tribe_id: int, tribes_list: list) -> np.ndarray:
-        """Encode unit features for active tribe."""
+        """Encode visible unit features, with ownership relative to the active tribe."""
         unit_tensor = np.zeros(self.max_units * 16, dtype=np.float32)
         
         unit_type_map = {
@@ -138,8 +149,7 @@ class StateEncoder:
         
         unit_idx = 0
         for tribe_dict in tribes_list:
-            if tribe_dict.get("tribe_id") != active_tribe_id:
-                continue
+            tribe_id = tribe_dict.get("tribe_id")
             
             for unit in tribe_dict.get("units", []):
                 if unit_idx >= self.max_units:
@@ -164,20 +174,24 @@ class StateEncoder:
                 unit_tensor[offset + 7] = 1.0 if unit.get("has_moved") else 0.0
                 unit_tensor[offset + 8] = 1.0 if unit.get("has_attacked") else 0.0
                 unit_tensor[offset + 9] = 1.0 if unit.get("is_veteran") else 0.0
-                unit_tensor[offset + 10:16] = 0.0  # Padding
+                unit_tensor[offset + 10] = 1.0 if tribe_id == active_tribe_id else 0.0
+                unit_tensor[offset + 11] = 1.0 if tribe_id != active_tribe_id else 0.0
+                unit_tensor[offset + 12] = float(tribe_id or 0) / 12.0
+                unit_tensor[offset + 13] = float(unit.get("city_id", 0) <= 0)
+                unit_tensor[offset + 14] = 1.0
+                unit_tensor[offset + 15] = 0.0
                 
                 unit_idx += 1
         
         return unit_tensor
     
     def encode_cities(self, active_tribe_id: int, tribes_list: list) -> np.ndarray:
-        """Encode city features for active tribe."""
+        """Encode visible city features, with ownership relative to the active tribe."""
         city_tensor = np.zeros(self.max_cities * 10, dtype=np.float32)
         
         city_idx = 0
         for tribe_dict in tribes_list:
-            if tribe_dict.get("tribe_id") != active_tribe_id:
-                continue
+            tribe_id = tribe_dict.get("tribe_id")
             
             for city in tribe_dict.get("cities", []):
                 if city_idx >= self.max_cities:
@@ -196,7 +210,10 @@ class StateEncoder:
                 city_tensor[offset + 3] = position[1]
                 city_tensor[offset + 4] = is_capital
                 city_tensor[offset + 5] = has_walls
-                city_tensor[offset + 6:10] = 0.0  # Padding
+                city_tensor[offset + 6] = 1.0 if tribe_id == active_tribe_id else 0.0
+                city_tensor[offset + 7] = 1.0 if tribe_id != active_tribe_id else 0.0
+                city_tensor[offset + 8] = float(tribe_id or 0) / 12.0
+                city_tensor[offset + 9] = 1.0
                 
                 city_idx += 1
         
@@ -220,15 +237,36 @@ class StateEncoder:
                 for i, tech_researched in enumerate(researched_flags[:self.tech_features]):
                     features[i] = 1.0 if tech_researched else 0.0
             
-            # Tribe stats (stars, score, etc.)
+            # Active-tribe private stats. Enemy star counts and tech are intentionally
+            # hidden by the Java payload and should stay zero here.
             stars = min(tribe_dict.get("stars", 0) / 100.0, 1.0)
             score = min(tribe_dict.get("score", 0) / 1000.0, 1.0)
             
             features[self.tech_features + 0] = stars
             features[self.tech_features + 1] = score
-            features[self.tech_features + 2:] = 0.0  # Padding
+            features[self.tech_features + 2] = min(tribe_dict.get("stars_sent", 0) / 30.0, 1.0)
+            features[self.tech_features + 3] = min(tribe_dict.get("n_kills", 0) / 20.0, 1.0)
+            features[self.tech_features + 4] = float(active_tribe_id or 0) / 12.0
             
             break
+
+        self_units = 0
+        enemy_units = 0
+        self_cities = 0
+        enemy_cities = 0
+        for tribe_dict in tribes_list:
+            if tribe_dict.get("tribe_id") == active_tribe_id:
+                self_units += len(tribe_dict.get("units", []))
+                self_cities += len(tribe_dict.get("cities", []))
+            else:
+                enemy_units += len(tribe_dict.get("units", []))
+                enemy_cities += len(tribe_dict.get("cities", []))
+
+        features[self.tech_features + 5] = min(self_units / max(self.max_units, 1), 1.0)
+        features[self.tech_features + 6] = min(enemy_units / max(self.max_units, 1), 1.0)
+        features[self.tech_features + 7] = min(self_cities / max(self.max_cities, 1), 1.0)
+        features[self.tech_features + 8] = min(enemy_cities / max(self.max_cities, 1), 1.0)
+        features[self.tech_features + 9] = 1.0 if enemy_units > 0 or enemy_cities > 0 else 0.0
         
         return features
     
@@ -247,10 +285,12 @@ class StateEncoder:
         Returns:
             State tensor of shape (state_size,)
         """
-        board_features = self.encode_board(payload.get("board", {}))
-        unit_features = self.encode_units(payload.get("active_tribe_id"), payload.get("tribes", []))
-        city_features = self.encode_cities(payload.get("active_tribe_id"), payload.get("tribes", []))
-        tech_tribe_features = self.encode_tech_and_tribe(payload.get("active_tribe_id"), payload.get("tribes", []))
+        active_tribe_id = payload.get("active_tribe_id")
+        tribes = payload.get("tribes", [])
+        board_features = self.encode_board(payload.get("board", {}), active_tribe_id, tribes)
+        unit_features = self.encode_units(active_tribe_id, tribes)
+        city_features = self.encode_cities(active_tribe_id, tribes)
+        tech_tribe_features = self.encode_tech_and_tribe(active_tribe_id, tribes)
         
         state = np.concatenate([
             board_features,
@@ -378,7 +418,7 @@ class TribesTransformerModel(nn.Module):
         # TOKEN SIZES (fixed layout from encoder)
         # -------------------------
         self.num_tiles = 11 * 11
-        self.tile_dim = 8
+        self.tile_dim = StateEncoder().board_channels
 
         self.num_units = 100
         self.unit_dim = 16
