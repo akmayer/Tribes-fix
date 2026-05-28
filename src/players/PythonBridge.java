@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -349,30 +350,38 @@ public class PythonBridge {
     private static String postJson(String jsonPayload, String urlString) throws IOException {
         URL url = new URL(urlString);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("POST");
-        conn.setRequestProperty("Content-Type", "application/json; utf-8");
-        conn.setRequestProperty("Accept", "application/json");
-        conn.setDoOutput(true);
+        try {
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(30000);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json; utf-8");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setDoOutput(true);
 
-        try (OutputStream os = conn.getOutputStream()) {
-            byte[] input = jsonPayload.getBytes("utf-8");
-            os.write(input, 0, input.length);
-        }
+            try (OutputStream os = conn.getOutputStream()) {
+                byte[] input = jsonPayload.getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
 
-        int code = conn.getResponseCode();
-        BufferedReader br;
-        if (code >= 200 && code < 300) {
-            br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
-        } else {
-            br = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
-        }
+            int code = conn.getResponseCode();
+            InputStream responseStream = (code >= 200 && code < 300)
+                    ? conn.getInputStream()
+                    : conn.getErrorStream();
+            if (responseStream == null) {
+                return "";
+            }
 
-        StringBuilder resp = new StringBuilder();
-        String responseLine = null;
-        while ((responseLine = br.readLine()) != null) {
-            resp.append(responseLine.trim());
+            StringBuilder resp = new StringBuilder();
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(responseStream, "utf-8"))) {
+                String responseLine;
+                while ((responseLine = br.readLine()) != null) {
+                    resp.append(responseLine.trim());
+                }
+            }
+            return resp.toString();
+        } finally {
+            conn.disconnect();
         }
-        return resp.toString();
     }
 
     private static JSONObject buildPayload(GameState gs, ArrayList<Action> allActions) {
@@ -392,20 +401,20 @@ public class PythonBridge {
         payload.put("available_action_count", allActions.size());
         payload.put("available_actions", serializeActions(allActions, gs));
         payload.put("visibility", serializeVisibility(obsGrid));
-        payload.put("board", serializeBoard(board, obsGrid));
+        payload.put("board", serializeBoard(board, obsGrid, activeTribeID));
         payload.put("tribes", serializeTribes(board, obsGrid, activeTribeID));
 
         return payload;
     }
 
-    private static JSONObject serializeBoard(Board board, boolean[][] obsGrid) {
+    private static JSONObject serializeBoard(Board board, boolean[][] obsGrid, int activeTribeID) {
         JSONObject json = new JSONObject();
         int size = board.getSize();
 
         json.put("size", size);
         json.put("active_tribe_id", board.getActiveTribeID());
-        json.put("actor_id_counter", board.getActorIDcounter());
-        json.put("capital_ids", toIntArray(board.getCapitalIDs()));
+        json.put("actor_id_counter", 0);
+        json.put("capital_ids", serializeKnownCapitalIds(board, obsGrid, activeTribeID));
 
         JSONArray tiles = new JSONArray();
         for (int x = 0; x < size; x++) {
@@ -432,6 +441,29 @@ public class PythonBridge {
         json.put("tiles", tiles);
 
         return json;
+    }
+
+    private static JSONArray serializeKnownCapitalIds(Board board, boolean[][] obsGrid, int activeTribeID) {
+        JSONArray capitalIds = new JSONArray();
+        for (Tribe tribe : board.getTribes()) {
+            int capitalId = tribe.getCapitalID();
+            if (capitalId < 0) {
+                continue;
+            }
+            if (tribe.getTribeId() == activeTribeID) {
+                capitalIds.put(capitalId);
+                continue;
+            }
+
+            Object capital = board.getActor(capitalId);
+            if (capital instanceof City) {
+                City city = (City) capital;
+                if (isPositionVisible(obsGrid, city.getPosition().x, city.getPosition().y)) {
+                    capitalIds.put(capitalId);
+                }
+            }
+        }
+        return capitalIds;
     }
 
     private static JSONArray serializeVisibility(boolean[][] obsGrid) {
@@ -579,16 +611,19 @@ public class PythonBridge {
             c.put("has_walls", city.hasWalls());
             c.put("bound", city.getBound());
             c.put("points_worth", city.getPointsWorth());
-            c.put("unit_ids", toIntArray(city.getUnitsID()));
-            c.put("buildings", serializeBuildings(city));
+            c.put("unit_ids", serializeVisibleUnitIds(board, city.getUnitsID(), obsGrid, activeTribeID, tribe.getTribeId()));
+            c.put("buildings", serializeBuildings(city, obsGrid, tribe.getTribeId() == activeTribeID));
             cities.put(c);
         }
         return cities;
     }
 
-    private static JSONArray serializeBuildings(City city) {
+    private static JSONArray serializeBuildings(City city, boolean[][] obsGrid, boolean includeAll) {
         JSONArray buildings = new JSONArray();
         for (Building building : city.getBuildings()) {
+            if (!includeAll && !isPositionVisible(obsGrid, building.position.x, building.position.y)) {
+                continue;
+            }
             JSONObject b = new JSONObject();
             b.put("x", building.position.x);
             b.put("y", building.position.y);
@@ -602,6 +637,26 @@ public class PythonBridge {
             buildings.put(b);
         }
         return buildings;
+    }
+
+    private static JSONArray serializeVisibleUnitIds(Board board, ArrayList<Integer> unitIds, boolean[][] obsGrid, int activeTribeID, int tribeId) {
+        JSONArray ids = new JSONArray();
+        Set<Integer> seen = new HashSet<>();
+        for (Integer unitId : unitIds) {
+            if (unitId == null || seen.contains(unitId)) {
+                continue;
+            }
+            seen.add(unitId);
+            Unit unit = (Unit) board.getActor(unitId);
+            if (unit == null) {
+                continue;
+            }
+            if (tribeId != activeTribeID && !isPositionVisible(obsGrid, unit.getPosition().x, unit.getPosition().y)) {
+                continue;
+            }
+            ids.put(unitId);
+        }
+        return ids;
     }
 
     private static JSONObject serializeUnit(Unit unit) {

@@ -24,6 +24,7 @@ import argparse
 import torch.nn.functional as F
 
 from model import TribesModel, StateEncoder, encode_state, TribesTransformerModel
+from action_encoding import ActionSpaceEncoder
 
 torch.backends.cudnn.benchmark = True
 
@@ -84,8 +85,9 @@ class GameCaptureDataset(Dataset):
     ):
         self.capture_dir = Path(capture_dir)
         self.state_encoder = StateEncoder()
+        self.action_encoder = ActionSpaceEncoder()
         self.samples = []
-        self.results = self._load_results(Path("results"))
+        self.results = self._load_results(self.capture_dir.parent / "results")
         self.mcts_samples = 0
         self.value_samples = 0
         self.mcts_only = mcts_only
@@ -118,100 +120,85 @@ class GameCaptureDataset(Dataset):
         state = encode_state(payload, self.state_encoder)
         
         available_actions = payload.get("available_actions", [])
+        masks = self.action_encoder.mask_available_actions(available_actions)
         
         mcts_policy = payload.get("mcts", {})
         visit_counts = mcts_policy.get("visit_counts")
 
         if visit_counts:
-            legal_action_policy = self._legal_action_policy(visit_counts, available_actions)
+            target_action_type_policy, target_source_policy, target_target_policy, target_param_policy = (
+                self._policy_from_visit_counts(visit_counts, available_actions, masks)
+            )
         else:
-            legal_action_policy = self._uniform_legal_action_policy(available_actions)
-
-        action_components, component_mask = self._legal_action_components(available_actions)
+            target_action_type_policy = self._uniform_masked_policy(masks["action_type_mask"])
+            target_source_policy = self._uniform_masked_policy(masks["source_mask"])
+            target_target_policy = self._uniform_masked_policy(masks["target_mask"])
+            target_param_policy = self._uniform_masked_policy(masks["param_mask"])
 
         value_target, has_value_target = self._value_target(payload)
         
         return {
             "state": state,
-            "action_components": torch.from_numpy(action_components).long(),
-            "action_component_mask": torch.from_numpy(component_mask).float(),
-            "legal_action_policy": torch.from_numpy(legal_action_policy).float(),
+            "action_type_policy": torch.from_numpy(target_action_type_policy).float(),
+            "source_policy": torch.from_numpy(target_source_policy).float(),
+            "target_policy": torch.from_numpy(target_target_policy).float(),
+            "param_policy": torch.from_numpy(target_param_policy).float(),
             "value": torch.tensor(value_target, dtype=torch.float32),
             "value_weight": torch.tensor(1.0 if has_value_target else 0.0, dtype=torch.float32),
+            "masks": masks,
         }
 
     def _has_mcts_policy(self, payload: Dict) -> bool:
         return bool(payload.get("mcts", {}).get("visit_counts"))
 
-    def _legal_action_policy(self, visit_counts, available_actions):
-        counts = np.zeros(len(available_actions), dtype=np.float32)
+    def _uniform_masked_policy(self, mask):
+        mask_array = np.array(mask, dtype=np.float32)
+        allowed = np.sum(mask_array > 0)
+        if allowed == 0:
+            return np.ones_like(mask_array, dtype=np.float32) / len(mask_array)
+        return mask_array / allowed
+
+    def _policy_from_visit_counts(self, visit_counts, available_actions, masks):
+        action_type_counts = np.zeros(self.action_encoder.action_type_size, dtype=np.float32)
+        source_counts = np.zeros(self.action_encoder.source_actor_size, dtype=np.float32)
+        target_counts = np.zeros(self.action_encoder.target_actor_size, dtype=np.float32)
+        param_counts = np.zeros(self.action_encoder.param_size, dtype=np.float32)
+
         limit = min(len(visit_counts), len(available_actions))
         for idx in range(limit):
             count = visit_counts[idx]
-            if count is not None and count > 0:
-                counts[idx] = float(count)
+            if count is None or count <= 0:
+                continue
 
-        total = float(np.sum(counts))
+            action = available_actions[idx]
+            components = action.get("encoded_components", {})
+            action_type_idx = components.get("action_type_index", components.get("action_type", 0))
+            source_idx = components.get("source_actor_index", components.get("source_actor", 0))
+            target_idx = components.get("target_actor_index", components.get("target_actor", 0))
+            param_idx = components.get("param_index", components.get("param", 0))
+
+            if 0 <= action_type_idx < action_type_counts.shape[0]:
+                action_type_counts[action_type_idx] += count
+            if 0 <= source_idx < source_counts.shape[0]:
+                source_counts[source_idx] += count
+            if 0 <= target_idx < target_counts.shape[0]:
+                target_counts[target_idx] += count
+            if 0 <= param_idx < param_counts.shape[0]:
+                param_counts[param_idx] += count
+
+        return (
+            self._normalize_counts(action_type_counts, masks["action_type_mask"]),
+            self._normalize_counts(source_counts, masks["source_mask"]),
+            self._normalize_counts(target_counts, masks["target_mask"]),
+            self._normalize_counts(param_counts, masks["param_mask"]),
+        )
+
+    def _normalize_counts(self, counts, mask):
+        masked = counts * np.array(mask, dtype=np.float32)
+        total = float(np.sum(masked))
         if total <= 0.0:
-            return self._uniform_legal_action_policy(available_actions)
-        return counts / total
-
-    def _uniform_legal_action_policy(self, available_actions):
-        n_actions = len(available_actions)
-        if n_actions <= 0:
-            return np.zeros(0, dtype=np.float32)
-        return np.ones(n_actions, dtype=np.float32) / n_actions
-
-    def _legal_action_components(self, available_actions):
-        components = np.zeros((len(available_actions), 4), dtype=np.int64)
-        component_mask = np.zeros((len(available_actions), 4), dtype=np.float32)
-
-        for idx, action in enumerate(available_actions):
-            encoded = action.get("encoded_components", {})
-            components[idx, 0] = encoded.get("action_type_index", encoded.get("action_type", 0))
-            components[idx, 1] = encoded.get("source_actor_index", encoded.get("source_actor", 0))
-            components[idx, 2] = encoded.get("target_actor_index", encoded.get("target_actor", 0))
-            components[idx, 3] = encoded.get("param_index", encoded.get("param", 0))
-            component_mask[idx] = self._component_mask_for_action(action.get("action_type"))
-
-        return components, component_mask
-
-    def _component_mask_for_action(self, action_type):
-        mask = np.zeros(4, dtype=np.float32)
-        mask[0] = 1.0
-
-        if action_type in {"MOVE", "ATTACK", "CAPTURE", "CONVERT"}:
-            mask[1] = 1.0
-            mask[2] = 1.0
-        elif action_type in {"BUILD_ROAD", "DECLARE_WAR"}:
-            mask[2] = 1.0
-        elif action_type == "SEND_STARS":
-            mask[2] = 1.0
-            mask[3] = 1.0
-        elif action_type == "RESEARCH_TECH":
-            mask[3] = 1.0
-        elif action_type == "BUILD":
-            mask[1] = 1.0
-            mask[2] = 1.0
-            mask[3] = 1.0
-        elif action_type == "SPAWN":
-            mask[1] = 1.0
-            mask[3] = 1.0
-        elif action_type in {"BURN_FOREST", "CLEAR_FOREST", "DESTROY", "GROW_FOREST"}:
-            mask[1] = 1.0
-            mask[2] = 1.0
-        elif action_type == "LEVEL_UP":
-            mask[1] = 1.0
-            mask[3] = 1.0
-        elif action_type == "RESOURCE_GATHERING":
-            mask[1] = 1.0
-        elif action_type in {
-            "DISBAND", "EXAMINE", "HEAL_OTHERS", "MAKE_VETERAN", "RECOVER",
-            "CLIMB_MOUNTAIN", "UPGRADE_BOAT", "UPGRADE_SHIP",
-        }:
-            mask[1] = 1.0
-
-        return mask
+            return self._uniform_masked_policy(mask)
+        return masked / total
 
     def _value_target(self, payload):
         game_seed = payload.get("game_seed")
@@ -274,39 +261,6 @@ class GameCaptureDataset(Dataset):
             return 0.0
 
 
-def collate_game_captures(batch: List[Dict]) -> Dict:
-    states = torch.stack([item["state"] for item in batch])
-    values = torch.stack([item["value"] for item in batch])
-    value_weights = torch.stack([item["value_weight"] for item in batch])
-
-    max_actions = max(item["action_components"].shape[0] for item in batch)
-    batch_size = len(batch)
-
-    action_components = torch.zeros((batch_size, max_actions, 4), dtype=torch.long)
-    action_component_mask = torch.zeros((batch_size, max_actions, 4), dtype=torch.float32)
-    legal_action_policy = torch.zeros((batch_size, max_actions), dtype=torch.float32)
-    legal_action_mask = torch.zeros((batch_size, max_actions), dtype=torch.bool)
-
-    for idx, item in enumerate(batch):
-        n_actions = item["action_components"].shape[0]
-        if n_actions <= 0:
-            continue
-        action_components[idx, :n_actions] = item["action_components"]
-        action_component_mask[idx, :n_actions] = item["action_component_mask"]
-        legal_action_policy[idx, :n_actions] = item["legal_action_policy"]
-        legal_action_mask[idx, :n_actions] = True
-
-    return {
-        "state": states,
-        "action_components": action_components,
-        "action_component_mask": action_component_mask,
-        "legal_action_policy": legal_action_policy,
-        "legal_action_mask": legal_action_mask,
-        "value": values,
-        "value_weight": value_weights,
-    }
-
-
 class PolicyValueTrainer:
     """Handles training loop for policy and value heads."""
     
@@ -330,49 +284,16 @@ class PolicyValueTrainer:
 
         self.train_log = []
 
-    def _legal_action_scores(
-        self,
-        action_type_logits: torch.Tensor,
-        source_logits: torch.Tensor,
-        target_logits: torch.Tensor,
-        param_logits: torch.Tensor,
-        action_components: torch.Tensor,
-        component_mask: torch.Tensor,
-    ) -> torch.Tensor:
-        action_type_idx = action_components[:, :, 0]
-        source_idx = action_components[:, :, 1]
-        target_idx = action_components[:, :, 2]
-        param_idx = action_components[:, :, 3]
+    def _masked_log_softmax(self, logits, mask):
+        mask = mask.bool()
+        valid_rows = mask.any(dim=-1, keepdim=True)
+        safe_mask = torch.where(valid_rows, mask, torch.ones_like(mask))
+        mask_value = -1e4 if logits.dtype == torch.float16 else -1e9
+        masked_logits = logits.masked_fill(~safe_mask, mask_value)
+        return F.log_softmax(masked_logits, dim=-1)
 
-        score = torch.gather(action_type_logits, 1, action_type_idx)
-        score = score + torch.gather(source_logits, 1, source_idx) * component_mask[:, :, 1]
-        score = score + torch.gather(target_logits, 1, target_idx) * component_mask[:, :, 2]
-        score = score + torch.gather(param_logits, 1, param_idx) * component_mask[:, :, 3]
-        return score
-
-    def _policy_loss(
-        self,
-        action_type_logits: torch.Tensor,
-        source_logits: torch.Tensor,
-        target_logits: torch.Tensor,
-        param_logits: torch.Tensor,
-        action_components: torch.Tensor,
-        component_mask: torch.Tensor,
-        legal_action_mask: torch.Tensor,
-        target_policy: torch.Tensor,
-    ) -> torch.Tensor:
-        scores = self._legal_action_scores(
-            action_type_logits,
-            source_logits,
-            target_logits,
-            param_logits,
-            action_components,
-            component_mask,
-        )
-        mask_value = -1e4 if scores.dtype == torch.float16 else -1e9
-        scores = scores.masked_fill(~legal_action_mask, mask_value)
-        log_probs = F.log_softmax(scores, dim=-1)
-        return -(target_policy * log_probs).sum(dim=-1).mean()
+    def _policy_loss(self, log_probs: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        return -(target * log_probs).sum(dim=-1).mean()
     
     def train_epoch(self, train_loader: DataLoader, epoch: int) -> Dict[str, float]:
         """Run one training epoch."""
@@ -386,28 +307,34 @@ class PolicyValueTrainer:
         for batch_idx, batch in enumerate(train_loader):
             # Move batch to device
             state = batch["state"].to(self.device)
-            action_components = batch["action_components"].to(self.device)
-            action_component_mask = batch["action_component_mask"].to(self.device)
-            legal_action_policy = batch["legal_action_policy"].to(self.device)
-            legal_action_mask = batch["legal_action_mask"].to(self.device)
+            action_type_policy_target = batch["action_type_policy"].to(self.device)
+            source_policy_target = batch["source_policy"].to(self.device)
+            target_policy_target = batch["target_policy"].to(self.device)
+            param_policy_target = batch["param_policy"].to(self.device)
             value_target = batch["value"].to(self.device)
             value_weight = batch["value_weight"].to(self.device)
+            masks = batch["masks"]
+            action_type_mask = masks["action_type_mask"].to(self.device).bool()
+            source_mask = masks["source_mask"].to(self.device).bool()
+            target_mask = masks["target_mask"].to(self.device).bool()
+            param_mask = masks["param_mask"].to(self.device).bool()
 
             with torch.amp.autocast("cuda", enabled=self.use_amp):
 
                 # Forward pass
                 action_type_logits, source_logits, target_logits, param_logits, value_pred = self.model(state)
 
-                policy_loss = self._policy_loss(
-                    action_type_logits,
-                    source_logits,
-                    target_logits,
-                    param_logits,
-                    action_components,
-                    action_component_mask,
-                    legal_action_mask,
-                    legal_action_policy,
-                )
+                action_type_log_probs = self._masked_log_softmax(action_type_logits, action_type_mask)
+                source_log_probs = self._masked_log_softmax(source_logits, source_mask)
+                target_log_probs = self._masked_log_softmax(target_logits, target_mask)
+                param_log_probs = self._masked_log_softmax(param_logits, param_mask)
+
+                policy_loss = (
+                    self._policy_loss(action_type_log_probs, action_type_policy_target) +
+                    self._policy_loss(source_log_probs, source_policy_target) +
+                    self._policy_loss(target_log_probs, target_policy_target) +
+                    self._policy_loss(param_log_probs, param_policy_target)
+                ) / 4.0
 
                 value_prediction = torch.tanh(value_pred.float().squeeze(-1))
                 value_target = value_target.float()
@@ -453,6 +380,9 @@ class PolicyValueTrainer:
                     f"value_loss={value_loss.item():.4f}"
                 )
         
+        if num_batches == 0:
+            raise RuntimeError("No finite training batches completed in this epoch.")
+
         metrics = {
             "epoch": epoch,
             "avg_loss": total_loss / num_batches,
@@ -523,12 +453,20 @@ def main():
         batch_size=args.batch_size,
         shuffle=True,
         num_workers=0,
-        collate_fn=collate_game_captures,
     )
     
-    # Create model
+    # Resume from the current self-play model so each loop continues training
+    # instead of starting from a fresh random initialization.
     state_encoder = StateEncoder()
     model = TribesTransformerModel(state_size=state_encoder.total_state_size)
+    model_path = Path(args.model_path)
+    if model_path.exists():
+        try:
+            model.load(str(model_path), device=str(device))
+            print(f"Loaded existing model weights from {model_path}")
+        except Exception as exc:
+            print(f"Could not load existing model weights from {model_path}: {exc}")
+            print("Starting from a new model with the current architecture.")
     
     # Initialize trainer
     trainer = PolicyValueTrainer(

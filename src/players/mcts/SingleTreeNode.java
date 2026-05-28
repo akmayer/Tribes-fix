@@ -518,25 +518,22 @@ class SingleTreeNode
 
     int mostVisitedAction() {
         int selected = -1;
-        double bestValue = -Double.MAX_VALUE;
-        boolean allEqual = true;
-        double first = -1;
+        int bestVisits = -1;
+        int ties = 0;
 
-        for (int i=0; i<children.length; i++) {
+        for (int i = 0; i < children.length; i++) {
+            if (children[i] == null) {
+                continue;
+            }
 
-            if(children[i] != null)
-            {
-                if(first == -1)
-                    first = children[i].nVisits;
-                else if(first != children[i].nVisits)
-                {
-                    allEqual = false;
-                }
-
-                double childValue = children[i].nVisits;
-                childValue = noise(childValue, params.epsilon, this.m_rnd.nextDouble());     //break ties randomly
-                if (childValue > bestValue) {
-                    bestValue = childValue;
+            int childVisits = children[i].nVisits;
+            if (childVisits > bestVisits) {
+                bestVisits = childVisits;
+                selected = i;
+                ties = 1;
+            } else if (childVisits == bestVisits) {
+                ties++;
+                if (m_rnd.nextInt(ties) == 0) {
                     selected = i;
                 }
             }
@@ -545,10 +542,6 @@ class SingleTreeNode
         if (selected == -1)
         {
             selected = 0;
-        }else if(allEqual)
-        {
-            //If all are equal, we opt to choose for the one with the best Q.
-            selected = bestAction();
         }
 
         return selected;

@@ -224,6 +224,7 @@ class Run {
                 azParams.DIRICHLET_ALPHA = envDouble("TRIBES_AZ_DIRICHLET_ALPHA", 0.30);
                 azParams.DIRICHLET_EPSILON = envDouble("TRIBES_AZ_DIRICHLET_EPSILON", 0.25);
                 azParams.FORCE_END_TURN_IN_SEARCH = envBoolean("TRIBES_AZ_FORCE_END_TURN_IN_SEARCH", false);
+                azParams.DEBUG_DECISIONS = envBoolean("TRIBES_AZ_DEBUG_DECISIONS", false);
                 return new MCTSPlayer(agentSeed, azParams);
             case PORTFOLIO_MCTS:
                 PortfolioMCTSParams portfolioMCTSParams = new PortfolioMCTSParams();
