@@ -7,7 +7,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from action_encoding import ActionSpaceEncoder
-from model import TribesModel, StateEncoder, encode_state, TribesTransformerModel
+from model import TribesModel, StateEncoder, encode_state, TribesTransformerModel, env_bool
 
 app = FastAPI()
 
@@ -23,6 +23,8 @@ SAVE_INFERENCE_REQUESTS = os.environ.get("TRIBES_SAVE_INFERENCE", "0").strip().l
 INFERENCE_DIR = Path(os.environ.get("TRIBES_INFERENCE_DIR", "inference"))
 if SAVE_INFERENCE_REQUESTS:
     INFERENCE_DIR.mkdir(parents=True, exist_ok=True)
+
+MASK_SEND_STARS = env_bool("TRIBES_MASK_SEND_STARS", False)
 
 # Load the action space encoder
 encoder = ActionSpaceEncoder()
@@ -41,7 +43,10 @@ device = torch.device(
 torch.backends.cudnn.benchmark = True
 
 
-model = TribesTransformerModel(state_size=state_encoder.total_state_size).to(device)
+model = TribesTransformerModel(
+    state_size=state_encoder.total_state_size,
+    mask_send_stars=MASK_SEND_STARS,
+).to(device)
 
 model.eval()
 
@@ -60,6 +65,16 @@ else:
     print(f"No model weights found at {MODEL_PATH}, using untrained model")
 
 model = model.to(device)
+
+
+def effective_available_actions(available_actions):
+    if not MASK_SEND_STARS:
+        return available_actions
+    return [
+        action
+        for action in available_actions
+        if action.get("action_type") != "SEND_STARS"
+    ]
 
 
 def write_json_atomic(output_path: Path, payload: dict) -> None:
@@ -141,11 +156,11 @@ async def query(req: Request):
 
     # Extract game state
     available_actions = payload.get("available_actions", [])
-    active_tribe_id = payload.get("active_tribe_id", 0)
+    policy_available_actions = effective_available_actions(available_actions)
 
     # Create masks for legal actions
     try:
-        masks = encoder.mask_available_actions(available_actions)
+        masks = encoder.mask_available_actions(policy_available_actions)
         
         # Encode the state and get model predictions
         state_tensor = encode_state(payload, state_encoder)
@@ -162,12 +177,6 @@ async def query(req: Request):
             # Value is returned from the perspective of the active player.
             value = torch.tanh(value_pred.squeeze(0).squeeze(-1)).cpu().item()
         
-        # Apply masks (multiply by mask to zero out illegal actions)
-        action_type_logits = action_type_logits * masks["action_type_mask"]
-        source_logits = source_logits * masks["source_mask"]
-        target_logits = target_logits * masks["target_mask"]
-        param_logits = param_logits * masks["param_mask"]
-
         # Compute masked softmax probabilities (post-softmax masked entries will be 0)
         def masked_softmax(logits, mask):
             # logits and mask are numpy arrays
@@ -188,18 +197,22 @@ async def query(req: Request):
         source_probs = masked_softmax(source_logits, masks["source_mask"])
         target_probs = masked_softmax(target_logits, masks["target_mask"])
         param_probs = masked_softmax(param_logits, masks["param_mask"])
+
+        def json_safe_logits(logits):
+            return np.nan_to_num(logits, neginf=-1e9, posinf=1e9).tolist()
         
         policy_response = {
             "status": "success",
             "policy_type": "neural_network",
             "value": float(value),
-            "action_type_logits": action_type_logits.tolist(),
+            "mask_send_stars": MASK_SEND_STARS,
+            "action_type_logits": json_safe_logits(action_type_logits),
             "action_type_probs": action_type_probs.tolist(),
-            "source_logits": source_logits.tolist(),
+            "source_logits": json_safe_logits(source_logits),
             "source_probs": source_probs.tolist(),
-            "target_logits": target_logits.tolist(),
+            "target_logits": json_safe_logits(target_logits),
             "target_probs": target_probs.tolist(),
-            "param_logits": param_logits.tolist(),
+            "param_logits": json_safe_logits(param_logits),
             "param_probs": param_probs.tolist(),
             "masks": {
                 "action_type_mask": masks["action_type_mask"].tolist(),

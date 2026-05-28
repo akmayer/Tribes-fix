@@ -23,7 +23,7 @@ from datetime import datetime
 import argparse
 import torch.nn.functional as F
 
-from model import TribesModel, StateEncoder, encode_state, TribesTransformerModel
+from model import TribesModel, StateEncoder, encode_state, TribesTransformerModel, env_bool
 from action_encoding import ActionSpaceEncoder
 
 torch.backends.cudnn.benchmark = True
@@ -82,10 +82,12 @@ class GameCaptureDataset(Dataset):
         capture_dir: Path = Path("captures"),
         max_samples: Optional[int] = None,
         mcts_only: bool = True,
+        mask_send_stars: bool = False,
     ):
         self.capture_dir = Path(capture_dir)
         self.state_encoder = StateEncoder()
         self.action_encoder = ActionSpaceEncoder()
+        self.mask_send_stars = mask_send_stars
         self.samples = []
         self.results = self._load_results(self.capture_dir.parent / "results")
         self.mcts_samples = 0
@@ -119,12 +121,11 @@ class GameCaptureDataset(Dataset):
         # Encode state
         state = encode_state(payload, self.state_encoder)
         
-        available_actions = payload.get("available_actions", [])
+        all_available_actions = payload.get("available_actions", [])
+        visit_counts = payload.get("mcts", {}).get("visit_counts")
+        available_actions, visit_counts = self._effective_actions_and_visits(all_available_actions, visit_counts)
         masks = self.action_encoder.mask_available_actions(available_actions)
         
-        mcts_policy = payload.get("mcts", {})
-        visit_counts = mcts_policy.get("visit_counts")
-
         if visit_counts:
             target_action_type_policy, target_source_policy, target_target_policy, target_param_policy = (
                 self._policy_from_visit_counts(visit_counts, available_actions, masks)
@@ -150,6 +151,21 @@ class GameCaptureDataset(Dataset):
 
     def _has_mcts_policy(self, payload: Dict) -> bool:
         return bool(payload.get("mcts", {}).get("visit_counts"))
+
+    def _effective_actions_and_visits(self, available_actions, visit_counts):
+        if not self.mask_send_stars:
+            return available_actions, visit_counts
+
+        filtered_actions = []
+        filtered_visits = [] if visit_counts is not None else None
+        for idx, action in enumerate(available_actions):
+            if action.get("action_type") == "SEND_STARS":
+                continue
+            filtered_actions.append(action)
+            if filtered_visits is not None and idx < len(visit_counts):
+                filtered_visits.append(visit_counts[idx])
+
+        return filtered_actions, filtered_visits
 
     def _uniform_masked_policy(self, mask):
         mask_array = np.array(mask, dtype=np.float32)
@@ -430,6 +446,8 @@ def main():
     
     print(f"Device: {device}")
     print(f"Loading data from: {args.capture_dir}")
+    mask_send_stars = env_bool("TRIBES_MASK_SEND_STARS", False)
+    print(f"Mask SEND_STARS policy head: {mask_send_stars}")
 
     deleted = prune_capture_files(Path(args.capture_dir), max_files=args.max_captures)
     if deleted > 0:
@@ -440,6 +458,7 @@ def main():
         capture_dir=args.capture_dir,
         max_samples=args.max_samples,
         mcts_only=not args.include_unlabeled,
+        mask_send_stars=mask_send_stars,
     )
     
     if len(dataset) == 0:
@@ -458,7 +477,10 @@ def main():
     # Resume from the current self-play model so each loop continues training
     # instead of starting from a fresh random initialization.
     state_encoder = StateEncoder()
-    model = TribesTransformerModel(state_size=state_encoder.total_state_size)
+    model = TribesTransformerModel(
+        state_size=state_encoder.total_state_size,
+        mask_send_stars=mask_send_stars,
+    )
     model_path = Path(args.model_path)
     if model_path.exists():
         try:

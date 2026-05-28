@@ -48,6 +48,7 @@ AZ_DIRICHLET_ALPHA = 0.30
 AZ_DIRICHLET_EPSILON = 0.25
 AZ_FORCE_END_TURN_IN_SEARCH = False
 AZ_DEBUG_DECISIONS = False
+MASK_SEND_STARS = True
 
 # If Ctrl+C interrupts a self-play game, any MCTS captures from that unfinished
 # game will lack final value targets. The dataloader can skip value loss for
@@ -96,7 +97,8 @@ def print_config():
         f"cpuct={AZ_MCTS_CPUCT}, "
         f"uniform_prior={AZ_UNIFORM_PRIOR_WEIGHT}, "
         f"dirichlet_alpha={AZ_DIRICHLET_ALPHA}, "
-        f"dirichlet_epsilon={AZ_DIRICHLET_EPSILON}"
+        f"dirichlet_epsilon={AZ_DIRICHLET_EPSILON}, "
+        f"mask_send_stars={MASK_SEND_STARS}"
     )
     print(f"Drop orphan captures before training: {DROP_ORPHAN_CAPTURES_BEFORE_TRAIN}")
     print(f"Checkpoint interval: {CHECKPOINT_INTERVAL_SECONDS // 60} minutes")
@@ -163,6 +165,7 @@ class FastAPIServer:
                 "warning",
             ],
             cwd=PY_API,
+            env=python_training_env(),
             stdout=self.log_file,
             stderr=subprocess.STDOUT,
             start_new_session=True,
@@ -372,8 +375,19 @@ def train_model(loop_idx):
             'cuda' if torch.cuda.is_available() else 'cpu',
         ],
         cwd=PY_API,
+        env=python_training_env(),
         log_name=f"train_loop{loop_idx}.log",
     )
+
+
+def python_training_env():
+    env = os.environ.copy()
+    env.update(
+        {
+            "TRIBES_MASK_SEND_STARS": str(MASK_SEND_STARS).lower(),
+        }
+    )
+    return env
 
 
 def java_training_env():

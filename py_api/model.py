@@ -18,6 +18,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import json
 import numpy as np
+import os
 from typing import Dict, Tuple, Optional
 from pathlib import Path
 
@@ -28,6 +29,13 @@ DEFAULT_ACTION_SIZES = {
     "target_actor": 284,
     "param": 80,
 }
+
+
+def env_bool(name: str, default: bool = False) -> bool:
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
 def load_action_space_sizes(schema_path: Optional[Path] = None) -> Dict[str, int]:
@@ -49,6 +57,20 @@ def load_action_space_sizes(schema_path: Optional[Path] = None) -> Dict[str, int
         }
     except Exception:
         return DEFAULT_ACTION_SIZES.copy()
+
+
+def load_action_type_index(action_type: str, default: int) -> int:
+    schema_path = Path(__file__).parent / "action_space_schema.json"
+    if not schema_path.exists():
+        return default
+
+    try:
+        with schema_path.open("r", encoding="utf-8") as handle:
+            schema = json.load(handle)
+        index_map = schema.get("components", {}).get("action_type", {}).get("index_map", {})
+        return int(index_map.get(action_type, default))
+    except Exception:
+        return default
 
 
 class StateEncoder:
@@ -314,7 +336,7 @@ class TribesModel(nn.Module):
     - value: (batch_size, 1)
     """
     
-    def __init__(self, state_size: int = None):
+    def __init__(self, state_size: int = None, mask_send_stars: bool = False):
         super().__init__()
         
         # If state_size not provided, use encoder's calculated size
@@ -330,6 +352,8 @@ class TribesModel(nn.Module):
         self.source_actor_size = action_sizes["source_actor"]
         self.target_actor_size = action_sizes["target_actor"]
         self.param_size = action_sizes["param"]
+        self.mask_send_stars = mask_send_stars
+        self.send_stars_action_type_index = load_action_type_index("SEND_STARS", 14)
 
         # Shared trunk: process state to hidden representation
         self.trunk = nn.Sequential(
@@ -367,6 +391,9 @@ class TribesModel(nn.Module):
         hidden = self.trunk(state)
         
         action_type_logits = self.action_type_head(hidden)
+        if self.mask_send_stars and 0 <= self.send_stars_action_type_index < action_type_logits.shape[-1]:
+            action_type_logits = action_type_logits.clone()
+            action_type_logits[:, self.send_stars_action_type_index] = float("-inf")
         source_logits = self.source_head(hidden)
         target_logits = self.target_head(hidden)
         param_logits = self.param_head(hidden)
@@ -388,7 +415,7 @@ class TribesModel(nn.Module):
     @staticmethod
     def create_or_load(model_path: Optional[str] = None, device: str = "cpu") -> "TribesModel":
         """Factory method to create or load model."""
-        model = TribesModel()
+        model = TribesModel(mask_send_stars=env_bool("TRIBES_MASK_SEND_STARS", False))
         if model_path and Path(model_path).exists():
             model.load(model_path, device=device)
         return model.to(device)
@@ -399,7 +426,14 @@ class TribesTransformerModel(nn.Module):
     Keeps identical input/output interface.
     """
 
-    def __init__(self, state_size: int = None, d_model: int = 128, n_heads: int = 4, n_layers: int = 3):
+    def __init__(
+        self,
+        state_size: int = None,
+        d_model: int = 128,
+        n_heads: int = 4,
+        n_layers: int = 3,
+        mask_send_stars: bool = False,
+    ):
         super().__init__()
 
         if state_size is None:
@@ -413,6 +447,8 @@ class TribesTransformerModel(nn.Module):
         self.source_size = action_sizes["source_actor"]
         self.target_size = action_sizes["target_actor"]
         self.param_size = action_sizes["param"]
+        self.mask_send_stars = mask_send_stars
+        self.send_stars_action_type_index = load_action_type_index("SEND_STARS", 14)
 
         # -------------------------
         # TOKEN SIZES (fixed layout from encoder)
@@ -564,6 +600,9 @@ class TribesTransformerModel(nn.Module):
         # =========================================================
 
         action_type_logits = self.action_type_head(global_vec)
+        if self.mask_send_stars and 0 <= self.send_stars_action_type_index < action_type_logits.shape[-1]:
+            action_type_logits = action_type_logits.clone()
+            action_type_logits[:, self.send_stars_action_type_index] = float("-inf")
         source_logits = self.source_head(global_vec)
         target_logits = self.target_head(global_vec)
         param_logits = self.param_head(global_vec)
@@ -604,7 +643,7 @@ class TribesTransformerModel(nn.Module):
         device: str = "cpu"
     ) -> "TribesTransformerModel":
         """Factory method to create or load model."""
-        model = TribesTransformerModel()
+        model = TribesTransformerModel(mask_send_stars=env_bool("TRIBES_MASK_SEND_STARS", False))
 
         if model_path and Path(model_path).exists():
             model.load(model_path, device=device)
