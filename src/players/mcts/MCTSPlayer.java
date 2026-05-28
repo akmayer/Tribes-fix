@@ -2,6 +2,8 @@ package players.mcts;
 
 import core.actions.Action;
 import core.actions.tribeactions.EndTurn;
+import core.actions.tribeactions.SendStars;
+import core.actors.Tribe;
 import core.game.Game;
 import core.game.GameState;
 import core.Types;
@@ -76,7 +78,8 @@ public class MCTSPlayer extends Agent {
                 System.out.println(
                     (isChosen ? ">> " : "   ") +
                     "[" + i + "] " + a +
-                    " | visits=" + v
+                    " | visits=" + v +
+                    actionDeltaSummary(gs, a)
                 );
             }
 
@@ -86,6 +89,44 @@ public class MCTSPlayer extends Agent {
         return chosen;
 
 
+    }
+
+    private String actionDeltaSummary(GameState gs, Action action) {
+        try {
+            int activeTribeID = gs.getActiveTribeID();
+            Tribe beforeActive = gs.getTribe(activeTribeID);
+            int beforeActiveScore = beforeActive.getScore();
+            int beforeActiveStars = beforeActive.getStars();
+
+            Integer targetTribeID = null;
+            int beforeTargetScore = 0;
+            int beforeTargetStars = 0;
+            if (action instanceof SendStars) {
+                targetTribeID = ((SendStars) action).getTargetID();
+                Tribe beforeTarget = gs.getTribe(targetTribeID);
+                beforeTargetScore = beforeTarget.getScore();
+                beforeTargetStars = beforeTarget.getStars();
+            }
+
+            GameState next = gs.copy();
+            next.advance(action, false);
+
+            Tribe afterActive = next.getTribe(activeTribeID);
+            String summary = " | p" + activeTribeID
+                    + " score " + beforeActiveScore + "->" + afterActive.getScore()
+                    + ", stars " + beforeActiveStars + "->" + afterActive.getStars();
+
+            if (targetTribeID != null) {
+                Tribe afterTarget = next.getTribe(targetTribeID);
+                summary += " | target p" + targetTribeID
+                        + " score " + beforeTargetScore + "->" + afterTarget.getScore()
+                        + ", stars " + beforeTargetStars + "->" + afterTarget.getStars();
+            }
+
+            return summary;
+        } catch (Exception e) {
+            return " | delta unavailable: " + e.getMessage();
+        }
     }
 
 
