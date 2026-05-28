@@ -24,7 +24,7 @@ INFERENCE_DIR = Path(os.environ.get("TRIBES_INFERENCE_DIR", "inference"))
 if SAVE_INFERENCE_REQUESTS:
     INFERENCE_DIR.mkdir(parents=True, exist_ok=True)
 
-MASK_SEND_STARS = env_bool("TRIBES_MASK_SEND_STARS", False)
+MASK_SEND_STARS = env_bool("TRIBES_MASK_SEND_STARS", True)
 
 # Load the action space encoder
 encoder = ActionSpaceEncoder()

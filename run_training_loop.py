@@ -401,6 +401,7 @@ def java_training_env():
             "TRIBES_AZ_DIRICHLET_EPSILON": str(AZ_DIRICHLET_EPSILON),
             "TRIBES_AZ_FORCE_END_TURN_IN_SEARCH": str(AZ_FORCE_END_TURN_IN_SEARCH).lower(),
             "TRIBES_AZ_DEBUG_DECISIONS": str(AZ_DEBUG_DECISIONS).lower(),
+            "TRIBES_MASK_SEND_STARS": str(MASK_SEND_STARS).lower(),
         }
     )
     return env

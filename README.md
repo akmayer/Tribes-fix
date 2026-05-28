@@ -150,3 +150,17 @@ And it should just start working. You can analyze games and the bots choices in 
 
 If running on a cpu or want to see quick results, games can simulate much faster if you go into `run_training_loop.py` and reduce `AZ_MCTS_SIMULATIONS = 128` to something like 10 or 20.
 
+### SEND_STARS masking
+
+The AlphaZero training loop masks `SEND_STARS` by default because repeated one-star transfers tend to dominate self-play and produce uninteresting policies. The root switch is:
+
+```python
+MASK_SEND_STARS = True
+```
+
+in `run_training_loop.py`. When enabled, the flag is passed to both Python and Java as `TRIBES_MASK_SEND_STARS=true`:
+
+* Python masks the `SEND_STARS` action-type logit to negative infinity and removes it from training policy targets.
+* Java MCTS removes `SEND_STARS` from search node action lists, so uniform prior mixing and root Dirichlet noise are distributed only over the remaining legal actions.
+
+Set `MASK_SEND_STARS = False`, or run with `TRIBES_MASK_SEND_STARS=false`, to evaluate or train a model with `SEND_STARS` available.

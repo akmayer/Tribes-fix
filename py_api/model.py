@@ -336,7 +336,7 @@ class TribesModel(nn.Module):
     - value: (batch_size, 1)
     """
     
-    def __init__(self, state_size: int = None, mask_send_stars: bool = False):
+    def __init__(self, state_size: int = None, mask_send_stars: bool = True):
         super().__init__()
         
         # If state_size not provided, use encoder's calculated size
@@ -415,7 +415,7 @@ class TribesModel(nn.Module):
     @staticmethod
     def create_or_load(model_path: Optional[str] = None, device: str = "cpu") -> "TribesModel":
         """Factory method to create or load model."""
-        model = TribesModel(mask_send_stars=env_bool("TRIBES_MASK_SEND_STARS", False))
+        model = TribesModel(mask_send_stars=env_bool("TRIBES_MASK_SEND_STARS", True))
         if model_path and Path(model_path).exists():
             model.load(model_path, device=device)
         return model.to(device)
@@ -432,7 +432,7 @@ class TribesTransformerModel(nn.Module):
         d_model: int = 128,
         n_heads: int = 4,
         n_layers: int = 3,
-        mask_send_stars: bool = False,
+        mask_send_stars: bool = True,
     ):
         super().__init__()
 
@@ -643,7 +643,7 @@ class TribesTransformerModel(nn.Module):
         device: str = "cpu"
     ) -> "TribesTransformerModel":
         """Factory method to create or load model."""
-        model = TribesTransformerModel(mask_send_stars=env_bool("TRIBES_MASK_SEND_STARS", False))
+        model = TribesTransformerModel(mask_send_stars=env_bool("TRIBES_MASK_SEND_STARS", True))
 
         if model_path and Path(model_path).exists():
             model.load(model_path, device=device)

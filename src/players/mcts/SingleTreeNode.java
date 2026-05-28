@@ -205,7 +205,7 @@ class SingleTreeNode
     {
         gs.advance(act, computeActions);
         root.fmCallsCount++;
-        return gs.getAllAvailableActions();
+        return availableActionsForState(gs);
     }
 
     private int selectPuctAction(ArrayList<Action> availableActions) {
@@ -371,7 +371,7 @@ class SingleTreeNode
             GameState rolloutState = state.copy();
             int thisDepth = this.m_depth;
             while (!finishRollout(rolloutState, thisDepth)) {
-                ArrayList<Action> rolloutActions = rolloutState.getAllAvailableActions();
+                ArrayList<Action> rolloutActions = availableActionsForState(rolloutState);
                 int bestAction = forcedEndTurnActionForRollout(rolloutState, rolloutActions, thisDepth);
                 Action next = (bestAction != -1) ? rolloutActions.get(bestAction) : rolloutActions.get(m_rnd.nextInt(rolloutActions.size()));
                 advance(rolloutState, next, true);
@@ -387,7 +387,23 @@ class SingleTreeNode
         if (actions != null) {
             return actions;
         }
-        return state.getAllAvailableActions();
+        return availableActionsForState(state);
+    }
+
+    private ArrayList<Action> availableActionsForState(GameState gs) {
+        ArrayList<Action> availableActions = gs.getAllAvailableActions();
+        if (!params.MASK_SEND_STARS || availableActions == null || availableActions.isEmpty()) {
+            return availableActions;
+        }
+
+        ArrayList<Action> filtered = new ArrayList<>();
+        for (Action action : availableActions) {
+            if (action.getActionType() != SEND_STARS) {
+                filtered.add(action);
+            }
+        }
+
+        return filtered.isEmpty() ? availableActions : filtered;
     }
 
     private int forcedEndTurnActionForRollout(GameState rolloutState, ArrayList<Action> availableActions, int depth) {

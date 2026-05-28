@@ -28,6 +28,7 @@ public class MCTSParams extends AlgParams {
     public double DIRICHLET_ALPHA = 0.30;
     public double DIRICHLET_EPSILON = 0.25;
     public boolean FORCE_END_TURN_IN_SEARCH = false;
+    public boolean MASK_SEND_STARS = true;
 
     public void setParameterValue(String param, Object value) {
         switch(param) {
@@ -44,6 +45,7 @@ public class MCTSParams extends AlgParams {
             case "DIRICHLET_EPSILON": DIRICHLET_EPSILON = (double) value; break;
             case "FORCE_END_TURN_IN_SEARCH": FORCE_END_TURN_IN_SEARCH = (boolean) value; break;
             case "DEBUG_DECISIONS": DEBUG_DECISIONS = (boolean) value; break;
+            case "MASK_SEND_STARS": MASK_SEND_STARS = (boolean) value; break;
         }
     }
 
@@ -62,6 +64,7 @@ public class MCTSParams extends AlgParams {
             case "DIRICHLET_EPSILON": return DIRICHLET_EPSILON;
             case "FORCE_END_TURN_IN_SEARCH": return FORCE_END_TURN_IN_SEARCH;
             case "DEBUG_DECISIONS": return DEBUG_DECISIONS;
+            case "MASK_SEND_STARS": return MASK_SEND_STARS;
         }
         return null;
     }
@@ -82,6 +85,7 @@ public class MCTSParams extends AlgParams {
         paramList.add("DIRICHLET_EPSILON");
         paramList.add("FORCE_END_TURN_IN_SEARCH");
         paramList.add("DEBUG_DECISIONS");
+        paramList.add("MASK_SEND_STARS");
         return paramList;
     }
 
@@ -100,6 +104,7 @@ public class MCTSParams extends AlgParams {
         parameterValues.put("DIRICHLET_EPSILON", new Double[]{0.0, 0.10, 0.25});
         parameterValues.put("FORCE_END_TURN_IN_SEARCH", new Boolean[]{false, true});
         parameterValues.put("DEBUG_DECISIONS", new Boolean[]{false, true});
+        parameterValues.put("MASK_SEND_STARS", new Boolean[]{false, true});
         return parameterValues;
     }
 

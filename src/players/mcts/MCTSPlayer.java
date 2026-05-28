@@ -41,6 +41,7 @@ public class MCTSPlayer extends Agent {
         ArrayList<Action> rootActions = params.PRIORITIZE_ROOT ? determineActionGroup(gs, m_rnd) : allActions;
         if(rootActions == null)
             return new EndTurn();
+        rootActions = maskSendStars(rootActions);
 
         SingleTreeNode m_root = new SingleTreeNode(params, m_rnd, rootActions.size(), rootActions, this.playerID);
         m_root.setRootGameState(m_root, gs, allPlayerIDs);
@@ -166,6 +167,27 @@ public class MCTSPlayer extends Agent {
         }
 
         return aligned;
+    }
+
+    private ArrayList<Action> maskSendStars(ArrayList<Action> actions) {
+        if (!params.MASK_SEND_STARS || actions == null) {
+            return actions;
+        }
+
+        // This is intentionally an action-space mask, not just a neural-logit
+        // mask. If SendStars stayed in the Java action list, uniform prior
+        // mixing and root Dirichlet noise could still give it search mass.
+        // Set TRIBES_MASK_SEND_STARS=false to evaluate/train with SendStars.
+        ArrayList<Action> filtered = new ArrayList<>();
+        for (Action action : actions) {
+            if (!(action instanceof SendStars)) {
+                filtered.add(action);
+            }
+        }
+
+        // The game normally always has EndTurn, but keep a fallback so MCTS
+        // remains valid if a custom state ever exposes only SendStars actions.
+        return filtered.isEmpty() ? actions : filtered;
     }
 
 }

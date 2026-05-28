@@ -82,7 +82,7 @@ class GameCaptureDataset(Dataset):
         capture_dir: Path = Path("captures"),
         max_samples: Optional[int] = None,
         mcts_only: bool = True,
-        mask_send_stars: bool = False,
+        mask_send_stars: bool = True,
     ):
         self.capture_dir = Path(capture_dir)
         self.state_encoder = StateEncoder()
@@ -446,7 +446,7 @@ def main():
     
     print(f"Device: {device}")
     print(f"Loading data from: {args.capture_dir}")
-    mask_send_stars = env_bool("TRIBES_MASK_SEND_STARS", False)
+    mask_send_stars = env_bool("TRIBES_MASK_SEND_STARS", True)
     print(f"Mask SEND_STARS policy head: {mask_send_stars}")
 
     deleted = prune_capture_files(Path(args.capture_dir), max_files=args.max_captures)
