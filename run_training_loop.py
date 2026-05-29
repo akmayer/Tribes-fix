@@ -28,7 +28,7 @@ FASTAPI_PORT = 8000
 # With roughly 600+ captured states per game, 50k captures is about 80 games at
 # the current game length. If games get longer, increase MAX_CAPTURES before
 # increasing TRAIN_EPOCHS, otherwise the model will overfit stale recent games.
-SELFPLAY_GAMES_PER_LOOP = 2
+SELFPLAY_GAMES_PER_LOOP = 5
 MAX_CAPTURES = 50000
 NUM_LOOPS = 1000  # effectively overnight/until stopped
 
@@ -41,13 +41,13 @@ VALUE_LOSS_WEIGHT = 0.25
 # MCTS budget. With 20-60 legal actions, 100 visits is only a rough bootstrap
 # policy. 128 is still cheap enough to iterate, while giving PUCT more than one
 # look at high-prior moves. Raise this as the value net becomes useful.
-AZ_MCTS_SIMULATIONS = 32
+AZ_MCTS_SIMULATIONS = 128
 AZ_MCTS_CPUCT = 1.5
 AZ_UNIFORM_PRIOR_WEIGHT = 0.10
 AZ_DIRICHLET_ALPHA = 0.30
 AZ_DIRICHLET_EPSILON = 0.25
 AZ_FORCE_END_TURN_IN_SEARCH = False
-AZ_DEBUG_DECISIONS = False
+AZ_DEBUG_DECISIONS = True
 MASK_SEND_STARS = True
 
 # If Ctrl+C interrupts a self-play game, any MCTS captures from that unfinished
