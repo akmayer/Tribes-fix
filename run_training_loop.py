@@ -69,12 +69,14 @@ AZ_DIRICHLET_ALPHA = 0.30
 AZ_DIRICHLET_EPSILON = 0.25
 AZ_FORCE_END_TURN_IN_SEARCH = False
 AZ_DEBUG_DECISIONS = True
+AZ_SELECT_MOST_VISITED_ACTION = False
 MASK_SEND_STARS = True
 PLAY_WITH_FULL_OBS = True
 
 EVALUATION_GAMES = 10
 EVALUATION_WIN_THRESHOLD = 0.60
-EVALUATION_AZ_MCTS_SIMULATIONS = 32
+EVALUATION_AZ_MCTS_SIMULATIONS = 128
+EVALUATION_SELECT_MOST_VISITED_ACTION = True
 EVALUATION_OLD_PORT = 8001
 EVALUATION_NEW_PORT = 8002
 
@@ -130,6 +132,7 @@ def print_config():
         f"cpuct={AZ_MCTS_CPUCT}, "
         f"dirichlet_alpha={AZ_DIRICHLET_ALPHA}, "
         f"dirichlet_epsilon={AZ_DIRICHLET_EPSILON}, "
+        f"select_most_visited={AZ_SELECT_MOST_VISITED_ACTION}, "
         f"mask_send_stars={MASK_SEND_STARS}, "
         f"full_observability={PLAY_WITH_FULL_OBS}"
     )
@@ -139,6 +142,7 @@ def print_config():
         f"win_threshold={EVALUATION_WIN_THRESHOLD:.0%}, "
         f"agent=az_mcts, "
         f"sims={EVALUATION_AZ_MCTS_SIMULATIONS}, "
+        f"select_most_visited={EVALUATION_SELECT_MOST_VISITED_ACTION}, "
         "paired_seeds=5"
     )
     print(f"Drop orphan captures before training: {DROP_ORPHAN_CAPTURES_BEFORE_TRAIN}")
@@ -394,8 +398,10 @@ def training_parameter_snapshot():
             * INFERENCE_THREADS_PER_QUERY
         ),
         "az_mcts_simulations": AZ_MCTS_SIMULATIONS,
+        "az_select_most_visited_action": AZ_SELECT_MOST_VISITED_ACTION,
         "evaluation_games": EVALUATION_GAMES,
         "evaluation_az_mcts_simulations": EVALUATION_AZ_MCTS_SIMULATIONS,
+        "evaluation_select_most_visited_action": EVALUATION_SELECT_MOST_VISITED_ACTION,
         "mask_send_stars": MASK_SEND_STARS,
         "play_with_full_obs": PLAY_WITH_FULL_OBS,
         "capture_rate_log_interval_seconds": CAPTURE_RATE_LOG_INTERVAL_SECONDS,
@@ -727,6 +733,7 @@ def java_training_env():
             "TRIBES_AZ_DIRICHLET_EPSILON": str(AZ_DIRICHLET_EPSILON),
             "TRIBES_AZ_FORCE_END_TURN_IN_SEARCH": str(AZ_FORCE_END_TURN_IN_SEARCH).lower(),
             "TRIBES_AZ_DEBUG_DECISIONS": str(AZ_DEBUG_DECISIONS).lower(),
+            "TRIBES_AZ_SELECT_MOST_VISITED_ACTION": str(AZ_SELECT_MOST_VISITED_ACTION).lower(),
             "TRIBES_MASK_SEND_STARS": str(MASK_SEND_STARS).lower(),
             "TRIBES_PLAY_WITH_FULL_OBS": str(PLAY_WITH_FULL_OBS).lower(),
             "TRIBES_POLICY_URL": f"http://{FASTAPI_HOST}:{FASTAPI_PORT}/query",
@@ -864,6 +871,7 @@ def run_arena_game(loop_idx, game_idx, new_as_player_zero):
             "TRIBES_AZ_CAPTURE_MCTS": "false",
             "TRIBES_AZ_DIRICHLET_ROOT_NOISE": "false",
             "TRIBES_AZ_DEBUG_DECISIONS": "false",
+            "TRIBES_AZ_SELECT_MOST_VISITED_ACTION": str(EVALUATION_SELECT_MOST_VISITED_ACTION).lower(),
             "TRIBES_POLICY_URL_PLAYER_0": new_url if new_as_player_zero else old_url,
             "TRIBES_POLICY_URL_PLAYER_1": old_url if new_as_player_zero else new_url,
             "TRIBES_EVAL_RESULT_FILE": str(result_file),

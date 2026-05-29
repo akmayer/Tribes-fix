@@ -56,7 +56,10 @@ public class MCTSPlayer extends Agent {
             int[] visitCounts = alignVisitCounts(allActions, rootActions, rootVisits);
             PythonBridge.captureMctsSample(gs, allActions, visitCounts, m_root.getRootValue(), playerID);
         }
-        Action chosen = rootActions.get(m_root.sampleVisitCountAction());
+        int selectedAction = params.SELECT_MOST_VISITED_ACTION
+                ? m_root.mostVisitedAction()
+                : m_root.sampleVisitCountAction();
+        Action chosen = rootActions.get(selectedAction);
 
         if (params.DEBUG_DECISIONS) {
             System.out.println("\n===== MCTS DECISION =====");

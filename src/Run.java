@@ -226,6 +226,7 @@ class Run {
                 azParams.FORCE_END_TURN_IN_SEARCH = envBoolean("TRIBES_AZ_FORCE_END_TURN_IN_SEARCH", false);
                 azParams.DEBUG_DECISIONS = envBoolean("TRIBES_AZ_DEBUG_DECISIONS", false);
                 azParams.MASK_SEND_STARS = envBoolean("TRIBES_MASK_SEND_STARS", true);
+                azParams.SELECT_MOST_VISITED_ACTION = envBoolean("TRIBES_AZ_SELECT_MOST_VISITED_ACTION", false);
                 return new MCTSPlayer(agentSeed, azParams);
             case PORTFOLIO_MCTS:
                 PortfolioMCTSParams portfolioMCTSParams = new PortfolioMCTSParams();

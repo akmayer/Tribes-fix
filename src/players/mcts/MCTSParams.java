@@ -26,6 +26,7 @@ public class MCTSParams extends AlgParams {
     public double DIRICHLET_EPSILON = 0.25;
     public boolean FORCE_END_TURN_IN_SEARCH = false;
     public boolean MASK_SEND_STARS = true;
+    public boolean SELECT_MOST_VISITED_ACTION = false;
 
     public void setParameterValue(String param, Object value) {
         switch(param) {
@@ -41,6 +42,7 @@ public class MCTSParams extends AlgParams {
             case "FORCE_END_TURN_IN_SEARCH": FORCE_END_TURN_IN_SEARCH = (boolean) value; break;
             case "DEBUG_DECISIONS": DEBUG_DECISIONS = (boolean) value; break;
             case "MASK_SEND_STARS": MASK_SEND_STARS = (boolean) value; break;
+            case "SELECT_MOST_VISITED_ACTION": SELECT_MOST_VISITED_ACTION = (boolean) value; break;
         }
     }
 
@@ -58,6 +60,7 @@ public class MCTSParams extends AlgParams {
             case "FORCE_END_TURN_IN_SEARCH": return FORCE_END_TURN_IN_SEARCH;
             case "DEBUG_DECISIONS": return DEBUG_DECISIONS;
             case "MASK_SEND_STARS": return MASK_SEND_STARS;
+            case "SELECT_MOST_VISITED_ACTION": return SELECT_MOST_VISITED_ACTION;
         }
         return null;
     }
@@ -77,6 +80,7 @@ public class MCTSParams extends AlgParams {
         paramList.add("FORCE_END_TURN_IN_SEARCH");
         paramList.add("DEBUG_DECISIONS");
         paramList.add("MASK_SEND_STARS");
+        paramList.add("SELECT_MOST_VISITED_ACTION");
         return paramList;
     }
 
@@ -94,6 +98,7 @@ public class MCTSParams extends AlgParams {
         parameterValues.put("FORCE_END_TURN_IN_SEARCH", new Boolean[]{false, true});
         parameterValues.put("DEBUG_DECISIONS", new Boolean[]{false, true});
         parameterValues.put("MASK_SEND_STARS", new Boolean[]{false, true});
+        parameterValues.put("SELECT_MOST_VISITED_ACTION", new Boolean[]{false, true});
         return parameterValues;
     }
 
