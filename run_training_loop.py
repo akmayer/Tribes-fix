@@ -43,12 +43,16 @@ VALUE_LOSS_WEIGHT = 0.25
 # look at high-prior moves. Raise this as the value net becomes useful.
 AZ_MCTS_SIMULATIONS = 128
 AZ_MCTS_CPUCT = 1.5
-AZ_UNIFORM_PRIOR_WEIGHT = 0.10
 AZ_DIRICHLET_ALPHA = 0.30
 AZ_DIRICHLET_EPSILON = 0.25
 AZ_FORCE_END_TURN_IN_SEARCH = False
 AZ_DEBUG_DECISIONS = True
 MASK_SEND_STARS = True
+
+EVALUATION_GAMES = 100
+EVALUATION_WIN_THRESHOLD = 0.55
+EVALUATION_OLD_PORT = 8001
+EVALUATION_NEW_PORT = 8002
 
 # If Ctrl+C interrupts a self-play game, any MCTS captures from that unfinished
 # game will lack final value targets. The dataloader can skip value loss for
@@ -95,10 +99,15 @@ def print_config():
         "AZ MCTS config: "
         f"sims={AZ_MCTS_SIMULATIONS}, "
         f"cpuct={AZ_MCTS_CPUCT}, "
-        f"uniform_prior={AZ_UNIFORM_PRIOR_WEIGHT}, "
         f"dirichlet_alpha={AZ_DIRICHLET_ALPHA}, "
         f"dirichlet_epsilon={AZ_DIRICHLET_EPSILON}, "
         f"mask_send_stars={MASK_SEND_STARS}"
+    )
+    print(
+        "Arena config: "
+        f"games={EVALUATION_GAMES}, "
+        f"win_threshold={EVALUATION_WIN_THRESHOLD:.0%}, "
+        "agent=policy_only_sampling"
     )
     print(f"Drop orphan captures before training: {DROP_ORPHAN_CAPTURES_BEFORE_TRAIN}")
     print(f"Checkpoint interval: {CHECKPOINT_INTERVAL_SECONDS // 60} minutes")
@@ -135,17 +144,20 @@ def terminate_process(proc, name, timeout=5):
 
 
 class FastAPIServer:
-    def __init__(self):
+    def __init__(self, port=FASTAPI_PORT, model_path=MODEL_PATH, name="fastapi"):
         self.proc = None
         self.log_file = None
+        self.port = port
+        self.model_path = Path(model_path)
+        self.name = name
 
     def start(self):
-        kill_port(FASTAPI_PORT)
+        kill_port(self.port)
         time.sleep(1)
-        print("\n=== STARTING FASTAPI SERVER ===")
+        print(f"\n=== STARTING FASTAPI SERVER ({self.name}, port {self.port}) ===")
 
         self.log_file = open(
-            LOG_DIR / f"fastapi_errors_{timestamp()}.log",
+            LOG_DIR / f"{self.name}_errors_{timestamp()}.log",
             "a",
             buffering=1,
         )
@@ -159,13 +171,13 @@ class FastAPIServer:
                 "--host",
                 FASTAPI_HOST,
                 "--port",
-                str(FASTAPI_PORT),
+                str(self.port),
                 "--no-access-log",
                 "--log-level",
                 "warning",
             ],
             cwd=PY_API,
-            env=python_training_env(),
+            env=python_training_env(model_path=self.model_path),
             stdout=self.log_file,
             stderr=subprocess.STDOUT,
             start_new_session=True,
@@ -174,17 +186,17 @@ class FastAPIServer:
         time.sleep(SLEEP_AFTER_SERVER_START)
 
         if self.proc.poll() is not None:
-            raise RuntimeError("FastAPI server failed to start")
+            raise RuntimeError(f"FastAPI server failed to start: {self.name}")
 
-        print(f"FastAPI running (PID={self.proc.pid})")
+        print(f"FastAPI running ({self.name}, PID={self.proc.pid}, model={self.model_path})")
 
     def stop(self):
         if self.proc is None:
             return
 
-        print("\n=== STOPPING FASTAPI SERVER ===")
+        print(f"\n=== STOPPING FASTAPI SERVER ({self.name}) ===")
 
-        terminate_process(self.proc, "FastAPI", timeout=5)
+        terminate_process(self.proc, f"FastAPI {self.name}", timeout=5)
 
         if self.log_file is not None:
             self.log_file.close()
@@ -380,13 +392,15 @@ def train_model(loop_idx):
     )
 
 
-def python_training_env():
+def python_training_env(model_path=None):
     env = os.environ.copy()
     env.update(
         {
             "TRIBES_MASK_SEND_STARS": str(MASK_SEND_STARS).lower(),
         }
     )
+    if model_path is not None:
+        env["TRIBES_MODEL_PATH"] = str(Path(model_path))
     return env
 
 
@@ -396,7 +410,6 @@ def java_training_env():
         {
             "TRIBES_AZ_MCTS_SIMULATIONS": str(AZ_MCTS_SIMULATIONS),
             "TRIBES_AZ_MCTS_CPUCT": str(AZ_MCTS_CPUCT),
-            "TRIBES_AZ_UNIFORM_PRIOR_WEIGHT": str(AZ_UNIFORM_PRIOR_WEIGHT),
             "TRIBES_AZ_DIRICHLET_ALPHA": str(AZ_DIRICHLET_ALPHA),
             "TRIBES_AZ_DIRICHLET_EPSILON": str(AZ_DIRICHLET_EPSILON),
             "TRIBES_AZ_FORCE_END_TURN_IN_SEARCH": str(AZ_FORCE_END_TURN_IN_SEARCH).lower(),
@@ -458,6 +471,144 @@ def print_status():
     print(f"MCTS captures: {count_capture_files()}")
     print(f"Result files:  {count_result_files()}")
 
+
+def copy_model_snapshot(label, loop_idx):
+    CHECKPOINT_DIR.mkdir(parents=True, exist_ok=True)
+    output_path = CHECKPOINT_DIR / f"arena_{label}_loop{loop_idx}_{timestamp()}.pth"
+    temp_path = output_path.with_suffix(output_path.suffix + ".tmp")
+    shutil.copy2(MODEL_PATH, temp_path)
+    temp_path.replace(output_path)
+    return output_path
+
+
+def write_json_atomic(path, payload):
+    temp_path = path.with_suffix(path.suffix + ".tmp")
+    with temp_path.open("w", encoding="utf-8") as handle:
+        json.dump(payload, handle, indent=2)
+    temp_path.replace(path)
+
+
+def arena_play_config(game_seed, level_seed):
+    play_config_path = ROOT / "play.json"
+    with play_config_path.open("r", encoding="utf-8") as handle:
+        config = json.load(handle)
+
+    config.update(
+        {
+            "Run Mode": "PlayLG",
+            "Players": ["POLICY", "POLICY"],
+            "Tribes": ["Xin Xi", "Imperius"],
+            "Verbose": False,
+            "Game Seed": str(game_seed),
+            "Agents Seed": str(game_seed + 17),
+            "Level Seed": str(level_seed),
+        }
+    )
+    return config
+
+
+def read_arena_result(result_file, candidate_player_id):
+    results = []
+    if not result_file.exists():
+        raise RuntimeError(f"Arena result file was not created: {result_file}")
+
+    with result_file.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if line:
+                results.append(json.loads(line))
+
+    if len(results) < 2:
+        raise RuntimeError(f"Arena result file is incomplete: {result_file}")
+
+    candidate = None
+    for result in results:
+        if int(result.get("player_id", -1)) == candidate_player_id:
+            candidate = result
+            break
+
+    if candidate is None:
+        raise RuntimeError(f"Missing candidate result in {result_file}")
+
+    return candidate.get("winner") == "WIN"
+
+
+def run_arena_game(loop_idx, game_idx, new_as_player_zero):
+    game_seed = 900000000 + loop_idx * 10000 + game_idx
+    level_seed = 910000000 + loop_idx * 10000 + ((game_idx + 1) // 2)
+    result_file = LOG_DIR / f"arena_loop{loop_idx}_game{game_idx}.jsonl"
+    result_file.unlink(missing_ok=True)
+
+    candidate_player_id = 0 if new_as_player_zero else 1
+    old_url = f"http://{FASTAPI_HOST}:{EVALUATION_OLD_PORT}/query"
+    new_url = f"http://{FASTAPI_HOST}:{EVALUATION_NEW_PORT}/query"
+
+    env = java_training_env()
+    env.update(
+        {
+            "TRIBES_POLICY_URL_PLAYER_0": new_url if new_as_player_zero else old_url,
+            "TRIBES_POLICY_URL_PLAYER_1": old_url if new_as_player_zero else new_url,
+            "TRIBES_EVAL_RESULT_FILE": str(result_file),
+        }
+    )
+
+    play_config_path = ROOT / "play.json"
+    with play_config_path.open("r", encoding="utf-8") as handle:
+        original_config = json.load(handle)
+
+    try:
+        write_json_atomic(play_config_path, arena_play_config(game_seed, level_seed))
+        run_command(
+            ["java", "-Djava.awt.headless=true", "-cp", ".:src:lib/json.jar", "Play"],
+            cwd=ROOT,
+            env=env,
+            log_name=f"arena_loop{loop_idx}_game{game_idx}.log",
+        )
+    finally:
+        write_json_atomic(play_config_path, original_config)
+
+    return read_arena_result(result_file, candidate_player_id)
+
+
+def evaluate_candidate(old_model_path, new_model_path, loop_idx):
+    print(f"\n=== POLICY-ONLY ARENA EVALUATION (LOOP {loop_idx}) ===")
+    old_server = FastAPIServer(
+        port=EVALUATION_OLD_PORT,
+        model_path=old_model_path,
+        name=f"arena_old_loop{loop_idx}",
+    )
+    new_server = FastAPIServer(
+        port=EVALUATION_NEW_PORT,
+        model_path=new_model_path,
+        name=f"arena_new_loop{loop_idx}",
+    )
+
+    wins = 0
+    try:
+        old_server.start()
+        new_server.start()
+
+        for game_idx in range(1, EVALUATION_GAMES + 1):
+            new_as_player_zero = game_idx % 2 == 1
+            if run_arena_game(loop_idx, game_idx, new_as_player_zero):
+                wins += 1
+            print(
+                f"Arena game {game_idx}/{EVALUATION_GAMES}: "
+                f"candidate_wins={wins}, win_rate={wins / game_idx:.1%}"
+            )
+    finally:
+        new_server.stop()
+        old_server.stop()
+
+    win_rate = wins / EVALUATION_GAMES
+    accepted = win_rate >= EVALUATION_WIN_THRESHOLD
+    print(
+        f"Arena result: candidate_wins={wins}/{EVALUATION_GAMES} "
+        f"({win_rate:.1%}), accepted={accepted}"
+    )
+    return accepted, win_rate
+
+
 def kill_port(port):
     try:
         result = subprocess.check_output(["lsof", "-t", f"-i:{port}"]).decode().strip()
@@ -503,14 +654,26 @@ def main():
             # --------------------------------------------------
             # TRAIN
             # --------------------------------------------------
+            old_model_path = copy_model_snapshot("old", loop_idx)
             train_model(loop_idx)
+            candidate_model_path = copy_model_snapshot("candidate", loop_idx)
             checkpoint_manager.maybe_save("after training")
 
             # --------------------------------------------------
-            # RESTART SERVER TO LOAD NEW WEIGHTS
+            # POLICY-ONLY ARENA GATE
             # --------------------------------------------------
-            server.restart()
-            checkpoint_manager.maybe_save("after server restart")
+            server.stop()
+            accepted, _win_rate = evaluate_candidate(old_model_path, candidate_model_path, loop_idx)
+            if accepted:
+                print("Candidate model accepted.")
+            else:
+                print(f"Candidate model rejected; restoring previous weights from {old_model_path}")
+                temp_path = MODEL_PATH.with_suffix(MODEL_PATH.suffix + ".tmp")
+                shutil.copy2(old_model_path, temp_path)
+                temp_path.replace(MODEL_PATH)
+
+            server.start()
+            checkpoint_manager.maybe_save("after arena gate")
 
             print(f"\nLOOP {loop_idx} COMPLETE")
 

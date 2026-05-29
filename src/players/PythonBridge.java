@@ -35,8 +35,17 @@ public class PythonBridge {
         return postJson(payload.toString());
     }
 
+    public static String queryPolicy(GameState gs, ArrayList<Action> allActions, String urlString) throws IOException {
+        JSONObject payload = buildPayload(gs, allActions);
+        return postJson(payload.toString(), urlString);
+    }
+
     public static JSONObject queryPolicyJson(GameState gs, ArrayList<Action> allActions) throws IOException {
         return new JSONObject(queryPolicy(gs, allActions));
+    }
+
+    public static JSONObject queryPolicyJson(GameState gs, ArrayList<Action> allActions, String urlString) throws IOException {
+        return new JSONObject(queryPolicy(gs, allActions, urlString));
     }
 
     /**

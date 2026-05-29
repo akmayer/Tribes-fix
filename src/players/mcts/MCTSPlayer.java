@@ -53,7 +53,7 @@ public class MCTSPlayer extends Agent {
             int[] visitCounts = alignVisitCounts(allActions, rootActions, rootVisits);
             PythonBridge.captureMctsSample(gs, allActions, visitCounts, m_root.getRootValue(), playerID);
         }
-        Action chosen = rootActions.get(m_root.mostVisitedAction());
+        Action chosen = rootActions.get(m_root.sampleVisitCountAction());
 
         if (params.DEBUG_DECISIONS) {
             System.out.println("\n===== MCTS DECISION =====");
@@ -175,8 +175,8 @@ public class MCTSPlayer extends Agent {
         }
 
         // This is intentionally an action-space mask, not just a neural-logit
-        // mask. If SendStars stayed in the Java action list, uniform prior
-        // mixing and root Dirichlet noise could still give it search mass.
+        // mask. If SendStars stayed in the Java action list, root Dirichlet
+        // noise could still give it search mass.
         // Set TRIBES_MASK_SEND_STARS=false to evaluate/train with SendStars.
         ArrayList<Action> filtered = new ArrayList<>();
         for (Action action : actions) {

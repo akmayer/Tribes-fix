@@ -68,6 +68,7 @@ class Run {
         OSLA,
         MC,
         SIMPLE,
+        POLICY,
         MCTS,
         AZ_MCTS,
         RHEA,
@@ -98,6 +99,8 @@ class Run {
             case "Do Nothing": return Run.PlayerType.DONOTHING;
             case "Random": return Run.PlayerType.RANDOM;
             case "Rule Based": return Run.PlayerType.SIMPLE;
+            case "Policy":
+            case "POLICY": return Run.PlayerType.POLICY;
             case "OSLA": return Run.PlayerType.OSLA;
             case "MC": return Run.PlayerType.MC;
             case "MCTS": return Run.PlayerType.MCTS;
@@ -181,6 +184,7 @@ class Run {
             case DONOTHING: return new DoNothingAgent(agentSeed);
             case RANDOM: return new BridgeAgentAttempt(agentSeed);
             case SIMPLE: return new SimpleAgent(agentSeed);
+            case POLICY: return new NeuralPolicyAgent(agentSeed);
             case OSLA:
                 OSLAParams oslaParams = new OSLAParams();
                 oslaParams.stop_type = oslaParams.STOP_FMCALLS; //Upper bound
@@ -216,10 +220,6 @@ class Run {
                 azParams.NEURAL_VALUE = true;
                 azParams.num_iterations = envInt("TRIBES_AZ_MCTS_SIMULATIONS", 128);
                 azParams.CPUCT = envDouble("TRIBES_AZ_MCTS_CPUCT", 1.5);
-                // Early-training smoothing. The Java bridge composes logits over legal actions,
-                // so random weights no longer structurally favor END_TURN.
-                azParams.USE_UNIFORM_PRIORS = true;
-                azParams.UNIFORM_PRIOR_WEIGHT = envDouble("TRIBES_AZ_UNIFORM_PRIOR_WEIGHT", 0.10);
                 azParams.DIRICHLET_ROOT_NOISE = true;
                 azParams.DIRICHLET_ALPHA = envDouble("TRIBES_AZ_DIRICHLET_ALPHA", 0.30);
                 azParams.DIRICHLET_EPSILON = envDouble("TRIBES_AZ_DIRICHLET_EPSILON", 0.25);

@@ -448,8 +448,6 @@ class SingleTreeNode
             if (params.NEURAL_PRIORS) {
                 nnPriors = PythonBridge.actionPriorsFromPolicy(availableActions, state, resp);
 
-                nnPriors = applyPriorSchedule(nnPriors);
-
                 if (params.DIRICHLET_ROOT_NOISE && m_depth == 0 && !rootNoiseApplied) {
                     nnPriors = applyRootDirichlet(nnPriors);
                     rootNoiseApplied = true;
@@ -472,38 +470,6 @@ class SingleTreeNode
             nnEvaluated = true;
         }
     }
-    private double[] applyPriorSchedule(double[] priors) {
-
-        if (priors == null) return null;
-
-        if (params.USE_UNIFORM_PRIORS) {
-            // Mix NN priors with a uniform prior:
-            //   out = (1-w) * priors + w * uniform
-            // where w in [0, 1].
-            double w = params.UNIFORM_PRIOR_WEIGHT;
-            if (Double.isNaN(w) || Double.isInfinite(w)) {
-                w = 0.0;
-            }
-            if (w <= 0.0) {
-                return priors;
-            }
-            if (w >= 1.0) {
-                w = 1.0;
-            }
-
-            double[] out = new double[priors.length];
-            double uniform = 1.0 / priors.length;
-
-            double inv = 1.0 - w;
-            for (int i = 0; i < priors.length; i++) {
-                out[i] = inv * priors[i] + w * uniform;
-            }
-            return out;
-        }
-
-        return priors;
-    }
-
     private boolean finishRollout(GameState rollerState, int depth)
     {
         if (depth >= params.ROLLOUT_LENGTH)      //rollout end condition.
@@ -561,6 +527,34 @@ class SingleTreeNode
         }
 
         return selected;
+    }
+
+    int sampleVisitCountAction() {
+        int totalVisits = 0;
+        for (SingleTreeNode child : children) {
+            if (child != null && child.nVisits > 0) {
+                totalVisits += child.nVisits;
+            }
+        }
+
+        if (totalVisits <= 0) {
+            return mostVisitedAction();
+        }
+
+        int threshold = m_rnd.nextInt(totalVisits);
+        int cumulative = 0;
+        for (int i = 0; i < children.length; i++) {
+            SingleTreeNode child = children[i];
+            if (child == null || child.nVisits <= 0) {
+                continue;
+            }
+            cumulative += child.nVisits;
+            if (threshold < cumulative) {
+                return i;
+            }
+        }
+
+        return mostVisitedAction();
     }
 
     private int bestAction()

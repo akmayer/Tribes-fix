@@ -21,9 +21,6 @@ public class MCTSParams extends AlgParams {
     public boolean NEURAL_VALUE = false;
     public double CPUCT = 1.5;
 
-    public boolean USE_UNIFORM_PRIORS = true;
-    public double UNIFORM_PRIOR_WEIGHT = 0.10;
-
     public boolean DIRICHLET_ROOT_NOISE = true;
     public double DIRICHLET_ALPHA = 0.30;
     public double DIRICHLET_EPSILON = 0.25;
@@ -38,8 +35,6 @@ public class MCTSParams extends AlgParams {
             case "NEURAL_PRIORS": NEURAL_PRIORS = (boolean) value; break;
             case "NEURAL_VALUE": NEURAL_VALUE = (boolean) value; break;
             case "CPUCT": CPUCT = (double) value; break;
-            case "USE_UNIFORM_PRIORS": USE_UNIFORM_PRIORS = (boolean) value; break;
-            case "UNIFORM_PRIOR_WEIGHT": UNIFORM_PRIOR_WEIGHT = (double) value; break;
             case "DIRICHLET_ROOT_NOISE": DIRICHLET_ROOT_NOISE = (boolean) value; break;
             case "DIRICHLET_ALPHA": DIRICHLET_ALPHA = (double) value; break;
             case "DIRICHLET_EPSILON": DIRICHLET_EPSILON = (double) value; break;
@@ -57,8 +52,6 @@ public class MCTSParams extends AlgParams {
             case "NEURAL_PRIORS": return NEURAL_PRIORS;
             case "NEURAL_VALUE": return NEURAL_VALUE;
             case "CPUCT": return CPUCT;
-            case "USE_UNIFORM_PRIORS": return USE_UNIFORM_PRIORS;
-            case "UNIFORM_PRIOR_WEIGHT": return UNIFORM_PRIOR_WEIGHT;
             case "DIRICHLET_ROOT_NOISE": return DIRICHLET_ROOT_NOISE;
             case "DIRICHLET_ALPHA": return DIRICHLET_ALPHA;
             case "DIRICHLET_EPSILON": return DIRICHLET_EPSILON;
@@ -78,8 +71,6 @@ public class MCTSParams extends AlgParams {
         paramList.add("NEURAL_PRIORS");
         paramList.add("NEURAL_VALUE");
         paramList.add("CPUCT");
-        paramList.add("USE_UNIFORM_PRIORS");
-        paramList.add("UNIFORM_PRIOR_WEIGHT");
         paramList.add("DIRICHLET_ROOT_NOISE");
         paramList.add("DIRICHLET_ALPHA");
         paramList.add("DIRICHLET_EPSILON");
@@ -97,8 +88,6 @@ public class MCTSParams extends AlgParams {
         parameterValues.put("NEURAL_PRIORS", new Boolean[]{false, true});
         parameterValues.put("NEURAL_VALUE", new Boolean[]{false, true});
         parameterValues.put("CPUCT", new Double[]{0.5, 1.0, 1.5, 2.0});
-        parameterValues.put("USE_UNIFORM_PRIORS", new Boolean[]{false, true});
-        parameterValues.put("UNIFORM_PRIOR_WEIGHT", new Double[]{0.0, 0.10, 0.25, 0.50});
         parameterValues.put("DIRICHLET_ROOT_NOISE", new Boolean[]{false, true});
         parameterValues.put("DIRICHLET_ALPHA", new Double[]{0.03, 0.15, 0.30, 1.0});
         parameterValues.put("DIRICHLET_EPSILON", new Double[]{0.0, 0.10, 0.25});

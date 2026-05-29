@@ -53,7 +53,7 @@ model.eval()
 
 
 # Try to load model weights if they exist
-MODEL_PATH = Path("model_weights.pth")
+MODEL_PATH = Path(os.environ.get("TRIBES_MODEL_PATH", "model_weights.pth"))
 if MODEL_PATH.exists():
     try:
         model.load(str(MODEL_PATH), device=str(device))
