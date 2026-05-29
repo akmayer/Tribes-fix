@@ -1,5 +1,7 @@
+import asyncio
 import json
 import os
+import uuid
 import numpy as np
 import torch
 from datetime import datetime, timezone
@@ -10,6 +12,21 @@ from action_encoding import ActionSpaceEncoder
 from model import TribesModel, StateEncoder, encode_state, TribesTransformerModel, env_bool
 
 app = FastAPI()
+
+
+def env_int(name: str, default: int) -> int:
+    value = os.environ.get(name)
+    if value is None or value == "":
+        return default
+    try:
+        return int(value)
+    except ValueError:
+        print(f"Invalid integer env {name}={value}; using {default}")
+        return default
+
+
+INFERENCE_CONCURRENCY = max(1, env_int("TRIBES_INFERENCE_CONCURRENCY", 1))
+QUERY_SEMAPHORE = asyncio.Semaphore(INFERENCE_CONCURRENCY)
 
 CAPTURE_DIR = Path("captures")
 CAPTURE_DIR.mkdir(parents=True, exist_ok=True)
@@ -39,6 +56,14 @@ state_encoder = StateEncoder()
 device = torch.device(
     "cuda" if torch.cuda.is_available() else "cpu"
 )
+
+TORCH_THREADS = env_int("TRIBES_TORCH_THREADS", 0)
+if TORCH_THREADS > 0:
+    torch.set_num_threads(TORCH_THREADS)
+    try:
+        torch.set_num_interop_threads(max(1, min(2, TORCH_THREADS)))
+    except RuntimeError as exc:
+        print(f"Could not set Torch interop threads: {exc}")
 
 torch.backends.cudnn.benchmark = True
 
@@ -97,7 +122,10 @@ async def capture(req: Request):
     tick = payload.get("tick", "unknown")
     action_count = payload.get("available_action_count", "na")
     policy_type = payload.get("policy_type", "capture")
-    filename = f"{policy_type}_tick{tick}_actions{action_count}_{timestamp}.json"
+    filename = (
+        f"{policy_type}_tick{tick}_actions{action_count}_"
+        f"{timestamp}_{uuid.uuid4().hex[:8]}.json"
+    )
     output_path = CAPTURE_DIR / filename
 
     write_json_atomic(output_path, payload)
@@ -117,7 +145,10 @@ async def result(req: Request):
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
     game_seed = payload.get("game_seed", "unknown")
     player_id = payload.get("player_id", "na")
-    filename = f"result_game{game_seed}_player{player_id}_{timestamp}.json"
+    filename = (
+        f"result_game{game_seed}_player{player_id}_"
+        f"{timestamp}_{uuid.uuid4().hex[:8]}.json"
+    )
     output_path = RESULTS_DIR / filename
 
     write_json_atomic(output_path, payload)
@@ -141,7 +172,11 @@ async def query(req: Request):
     redacted payloads.
     """
     payload = await req.json()
+    async with QUERY_SEMAPHORE:
+        return await asyncio.to_thread(build_policy_response, payload)
 
+
+def build_policy_response(payload):
     tick = payload.get("tick", "unknown")
     action_count = payload.get("available_action_count", "na")
 
@@ -149,7 +184,10 @@ async def query(req: Request):
     if SAVE_INFERENCE_REQUESTS:
         # Save the request for analysis (kept separate from training captures)
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
-        filename = f"inference_tick{tick}_actions{action_count}_{timestamp}.json"
+        filename = (
+            f"inference_tick{tick}_actions{action_count}_"
+            f"{timestamp}_{uuid.uuid4().hex[:8]}.json"
+        )
         output_path = INFERENCE_DIR / filename
         with output_path.open("w", encoding="utf-8") as file_handle:
             json.dump(payload, file_handle, indent=2, sort_keys=True)

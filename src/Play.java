@@ -38,7 +38,17 @@ public class Play {
     public static void main(String[] args) {
 
         try {
-            JSONObject config = new IO().readJSON("play.json");
+            String configPath = "play.json";
+            if (args.length > 0 && args[0] != null && !args[0].isEmpty()) {
+                configPath = args[0];
+            } else {
+                String envConfigPath = System.getenv("TRIBES_PLAY_CONFIG");
+                if (envConfigPath != null && !envConfigPath.isEmpty()) {
+                    configPath = envConfigPath;
+                }
+            }
+
+            JSONObject config = new IO().readJSON(configPath);
 
             if (config != null && !config.isEmpty()) {
                 String runMode = config.getString("Run Mode");
@@ -100,7 +110,7 @@ public class Play {
                 }
 
             } else {
-                System.out.println("ERROR: Couldn't find 'play.json'");
+                System.out.println("ERROR: Couldn't find '" + configPath + "'");
             }
         }catch(Exception e)
         {

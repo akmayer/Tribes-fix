@@ -5,10 +5,23 @@ import os
 import sys
 import json
 import shutil
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from datetime import datetime, timezone
 
 import torch
+
+
+def env_int(name, default_value):
+    value = os.environ.get(name)
+    if value is None or value == "":
+        return default_value
+    try:
+        return int(value)
+    except ValueError:
+        print(f"Invalid integer env {name}={value}; using {default_value}")
+        return default_value
 
 ROOT = Path(__file__).resolve().parent
 PY_API = ROOT / "py_api"
@@ -16,6 +29,12 @@ VENV_PYTHON = PY_API / ".venv/bin/python"
 
 FASTAPI_HOST = "127.0.0.1"
 FASTAPI_PORT = 8000
+PARALLEL_JOBS = max(1, env_int("TRIBES_PARALLEL_JOBS", 10))
+INFERENCE_THREADS_PER_QUERY = max(1, env_int("TRIBES_INFERENCE_THREADS_PER_QUERY", 1))
+SELFPLAY_SEED_BASE = env_int(
+    "TRIBES_SELFPLAY_SEED_BASE",
+    int(time.time() * 1000) % 9_000_000_000_000,
+)
 
 # Training loop knobs. These are intentionally hardcoded here instead of hidden
 # in Run.java/train.py defaults, so an overnight run is reproducible from this file.
@@ -28,7 +47,7 @@ FASTAPI_PORT = 8000
 # With roughly 600+ captured states per game, 50k captures is about 80 games at
 # the current game length. If games get longer, increase MAX_CAPTURES before
 # increasing TRAIN_EPOCHS, otherwise the model will overfit stale recent games.
-SELFPLAY_GAMES_PER_LOOP = 5
+SELFPLAY_GAMES_PER_LOOP = 10
 MAX_CAPTURES = 50000
 NUM_LOOPS = 1000  # effectively overnight/until stopped
 
@@ -67,9 +86,13 @@ SLEEP_AFTER_SERVER_START = 5
 
 LOG_DIR = ROOT / "training_logs"
 LOG_DIR.mkdir(exist_ok=True)
+RUNTIME_CONFIG_DIR = LOG_DIR / "runtime_play_configs"
 
 MODEL_PATH = PY_API / "model_weights.pth"
 CHECKPOINT_DIR = PY_API / "checkpoints"
+
+_ACTIVE_COMMANDS = {}
+_ACTIVE_COMMANDS_LOCK = threading.Lock()
 
 
 def validate_paths():
@@ -92,6 +115,7 @@ def print_config():
     print(
         "Loop config: "
         f"games={SELFPLAY_GAMES_PER_LOOP}, "
+        f"parallel_jobs={PARALLEL_JOBS}, "
         f"captures={MAX_CAPTURES}, "
         f"epochs={TRAIN_EPOCHS}, "
         f"batch={TRAIN_BATCH_SIZE}, "
@@ -116,6 +140,12 @@ def print_config():
     )
     print(f"Drop orphan captures before training: {DROP_ORPHAN_CAPTURES_BEFORE_TRAIN}")
     print(f"Checkpoint interval: {CHECKPOINT_INTERVAL_SECONDS // 60} minutes")
+    print(
+        "Parallel config: "
+        f"jobs={PARALLEL_JOBS}, "
+        f"inference_threads_per_query={INFERENCE_THREADS_PER_QUERY}, "
+        f"selfplay_seed_base={SELFPLAY_SEED_BASE}"
+    )
 
 
 def terminate_process(proc, name, timeout=5):
@@ -146,6 +176,30 @@ def terminate_process(proc, name, timeout=5):
     except ProcessLookupError:
         return
     proc.wait()
+
+
+def register_active_command(proc, name):
+    with _ACTIVE_COMMANDS_LOCK:
+        _ACTIVE_COMMANDS[proc] = name
+
+
+def unregister_active_command(proc):
+    if proc is None:
+        return
+    with _ACTIVE_COMMANDS_LOCK:
+        _ACTIVE_COMMANDS.pop(proc, None)
+
+
+def terminate_active_commands(reason, timeout=3):
+    with _ACTIVE_COMMANDS_LOCK:
+        active = list(_ACTIVE_COMMANDS.items())
+
+    if not active:
+        return
+
+    print(f"Stopping {len(active)} active command(s) ({reason})...")
+    for proc, name in active:
+        terminate_process(proc, name, timeout=timeout)
 
 
 class FastAPIServer:
@@ -182,7 +236,7 @@ class FastAPIServer:
                 "warning",
             ],
             cwd=PY_API,
-            env=python_training_env(model_path=self.model_path),
+            env=python_training_env(model_path=self.model_path, inference_server=True),
             stdout=self.log_file,
             stderr=subprocess.STDOUT,
             start_new_session=True,
@@ -307,8 +361,9 @@ def unique_checkpoint_path():
         idx += 1
 
 
-def run_command(cmd, cwd=None, env=None, log_name=None):
-    print(f"\nRUNNING: {' '.join(cmd)}")
+def run_command(cmd, cwd=None, env=None, log_name=None, command_name=None):
+    display_name = command_name or " ".join(cmd)
+    print(f"\nRUNNING: {display_name}")
 
     stdout = None
 
@@ -326,17 +381,19 @@ def run_command(cmd, cwd=None, env=None, log_name=None):
             stderr=subprocess.STDOUT,
             start_new_session=True,
         )
+        register_active_command(proc, display_name)
         result = proc.wait()
     except KeyboardInterrupt:
-        terminate_process(proc, "active command", timeout=3)
+        terminate_process(proc, display_name, timeout=3)
         raise
     finally:
+        unregister_active_command(proc)
         if stdout is not None:
             stdout.close()
 
     if result is not None and result != 0:
         raise RuntimeError(
-            f"Command failed with code {result}: {' '.join(cmd)}"
+            f"Command failed with code {result}: {display_name}"
         )
 
 
@@ -354,14 +411,118 @@ def compile_java():
     )
 
 
+def read_base_play_config():
+    with (ROOT / "play.json").open("r", encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def selfplay_play_config(loop_idx, game_idx):
+    game_seed = SELFPLAY_SEED_BASE + loop_idx * 100_000 + game_idx * 100
+    config = read_base_play_config()
+    config.update(
+        {
+            "Game Seed": str(game_seed),
+            "Agents Seed": str(game_seed + 17),
+            "Level Seed": str(game_seed + 33),
+        }
+    )
+    return config
+
+
+def run_java_game_with_config(config, env, log_name, config_label):
+    RUNTIME_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    config_path = RUNTIME_CONFIG_DIR / f"{config_label}.json"
+    write_json_atomic(config_path, config)
+
+    run_env = env.copy()
+    run_env["TRIBES_PLAY_CONFIG"] = str(config_path)
+
+    succeeded = False
+    try:
+        run_command(
+            ["java", "-Djava.awt.headless=true", "-cp", ".:src:lib/json.jar", "Play"],
+            cwd=ROOT,
+            env=run_env,
+            log_name=log_name,
+            command_name=config_label,
+        )
+        succeeded = True
+    finally:
+        if succeeded:
+            config_path.unlink(missing_ok=True)
+
+
 def run_selfplay_game(game_idx, loop_idx):
     print(f"\n=== SELF-PLAY GAME {game_idx} (LOOP {loop_idx}) ===")
 
-    run_command(
-        ["java", "-Djava.awt.headless=true", "-cp", ".:src:lib/json.jar", "Play"],
-        cwd=ROOT,
+    config = selfplay_play_config(loop_idx, game_idx)
+    run_java_game_with_config(
+        config,
         env=java_training_env(),
         log_name=f"selfplay_loop{loop_idx}_game{game_idx}.log",
+        config_label=f"selfplay_loop{loop_idx}_game{game_idx}",
+    )
+    return {
+        "game_idx": game_idx,
+        "game_seed": int(config["Game Seed"]),
+    }
+
+
+def run_parallel_jobs(jobs, description, on_complete=None):
+    if not jobs:
+        return []
+
+    workers = min(PARALLEL_JOBS, len(jobs))
+    print(f"\n=== {description.upper()} ({len(jobs)} total, {workers} parallel jobs) ===")
+
+    executor = ThreadPoolExecutor(
+        max_workers=workers,
+        thread_name_prefix=description.lower().replace(" ", "_"),
+    )
+    future_to_label = {
+        executor.submit(job_fn): label
+        for label, job_fn in jobs
+    }
+    results = []
+    completed = 0
+
+    try:
+        for future in as_completed(future_to_label):
+            label = future_to_label[future]
+            try:
+                result = future.result()
+            except Exception as exc:
+                print(f"{description} failed ({label}): {exc}")
+                raise
+
+            completed += 1
+            results.append(result)
+            if on_complete is not None:
+                on_complete(result)
+            print(f"{description}: {completed}/{len(jobs)} complete ({label})")
+    except BaseException:
+        for future in future_to_label:
+            future.cancel()
+        terminate_active_commands(f"{description} shutdown", timeout=3)
+        executor.shutdown(wait=False, cancel_futures=True)
+        raise
+
+    executor.shutdown(wait=True)
+    return results
+
+
+def run_selfplay_games(loop_idx, checkpoint_manager):
+    jobs = [
+        (
+            f"selfplay loop {loop_idx} game {game_idx}",
+            lambda game_idx=game_idx: run_selfplay_game(game_idx, loop_idx),
+        )
+        for game_idx in range(1, SELFPLAY_GAMES_PER_LOOP + 1)
+    ]
+    return run_parallel_jobs(
+        jobs,
+        "Self-play games",
+        on_complete=lambda _result: checkpoint_manager.maybe_save("after self-play game"),
     )
 
 
@@ -397,7 +558,20 @@ def train_model(loop_idx):
     )
 
 
-def python_training_env(model_path=None):
+def apply_thread_limits(env, threads):
+    thread_count = str(max(1, threads))
+    for name in (
+        "OMP_NUM_THREADS",
+        "OPENBLAS_NUM_THREADS",
+        "MKL_NUM_THREADS",
+        "VECLIB_MAXIMUM_THREADS",
+        "NUMEXPR_NUM_THREADS",
+    ):
+        env[name] = thread_count
+    env["TRIBES_TORCH_THREADS"] = thread_count
+
+
+def python_training_env(model_path=None, inference_server=False):
     env = os.environ.copy()
     env.update(
         {
@@ -408,6 +582,9 @@ def python_training_env(model_path=None):
     )
     if model_path is not None:
         env["TRIBES_MODEL_PATH"] = str(Path(model_path))
+    if inference_server:
+        apply_thread_limits(env, INFERENCE_THREADS_PER_QUERY)
+        env["TRIBES_INFERENCE_CONCURRENCY"] = str(PARALLEL_JOBS)
     return env
 
 
@@ -423,6 +600,7 @@ def java_training_env():
             "TRIBES_AZ_DEBUG_DECISIONS": str(AZ_DEBUG_DECISIONS).lower(),
             "TRIBES_MASK_SEND_STARS": str(MASK_SEND_STARS).lower(),
             "TRIBES_PLAY_WITH_FULL_OBS": str(PLAY_WITH_FULL_OBS).lower(),
+            "TRIBES_POLICY_URL": f"http://{FASTAPI_HOST}:{FASTAPI_PORT}/query",
         }
     )
     return env
@@ -497,9 +675,7 @@ def write_json_atomic(path, payload):
 
 
 def arena_play_config(game_seed, level_seed):
-    play_config_path = ROOT / "play.json"
-    with play_config_path.open("r", encoding="utf-8") as handle:
-        config = json.load(handle)
+    config = read_base_play_config()
 
     config.update(
         {
@@ -565,22 +741,17 @@ def run_arena_game(loop_idx, game_idx, new_as_player_zero):
         }
     )
 
-    play_config_path = ROOT / "play.json"
-    with play_config_path.open("r", encoding="utf-8") as handle:
-        original_config = json.load(handle)
+    run_java_game_with_config(
+        arena_play_config(game_seed, level_seed),
+        env=env,
+        log_name=f"arena_loop{loop_idx}_game{game_idx}.log",
+        config_label=f"arena_loop{loop_idx}_game{game_idx}",
+    )
 
-    try:
-        write_json_atomic(play_config_path, arena_play_config(game_seed, level_seed))
-        run_command(
-            ["java", "-Djava.awt.headless=true", "-cp", ".:src:lib/json.jar", "Play"],
-            cwd=ROOT,
-            env=env,
-            log_name=f"arena_loop{loop_idx}_game{game_idx}.log",
-        )
-    finally:
-        write_json_atomic(play_config_path, original_config)
-
-    return read_arena_result(result_file, candidate_player_id)
+    return {
+        "game_idx": game_idx,
+        "candidate_won": read_arena_result(result_file, candidate_player_id),
+    }
 
 
 def evaluate_candidate(old_model_path, new_model_path, loop_idx):
@@ -601,14 +772,30 @@ def evaluate_candidate(old_model_path, new_model_path, loop_idx):
         old_server.start()
         new_server.start()
 
-        for game_idx in range(1, EVALUATION_GAMES + 1):
-            new_as_player_zero = game_idx % 2 == 1
-            if run_arena_game(loop_idx, game_idx, new_as_player_zero):
+        completed = 0
+
+        def record_arena_result(result):
+            nonlocal wins, completed
+            completed += 1
+            if result["candidate_won"]:
                 wins += 1
             print(
-                f"Arena game {game_idx}/{EVALUATION_GAMES}: "
-                f"candidate_wins={wins}, win_rate={wins / game_idx:.1%}"
+                f"Arena game {result['game_idx']}/{EVALUATION_GAMES} complete: "
+                f"candidate_wins={wins}, win_rate={wins / completed:.1%}"
             )
+
+        jobs = [
+            (
+                f"arena loop {loop_idx} game {game_idx}",
+                lambda game_idx=game_idx: run_arena_game(
+                    loop_idx,
+                    game_idx,
+                    game_idx % 2 == 1,
+                ),
+            )
+            for game_idx in range(1, EVALUATION_GAMES + 1)
+        ]
+        run_parallel_jobs(jobs, "Arena games", on_complete=record_arena_result)
     finally:
         new_server.stop()
         old_server.stop()
@@ -658,9 +845,7 @@ def main():
             # --------------------------------------------------
             # SELF-PLAY
             # --------------------------------------------------
-            for game_idx in range(1, SELFPLAY_GAMES_PER_LOOP + 1):
-                run_selfplay_game(game_idx, loop_idx)
-                checkpoint_manager.maybe_save("after self-play game")
+            run_selfplay_games(loop_idx, checkpoint_manager)
 
             print_status()
 
