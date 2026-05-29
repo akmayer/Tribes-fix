@@ -150,6 +150,75 @@ And it should just start working. You can analyze games and the bots choices in 
 
 If running on a cpu or want to see quick results, games can simulate much faster if you go into `run_training_loop.py` and reduce `AZ_MCTS_SIMULATIONS = 128` to something like 10 or 20.
 
+### Training parallelism and throughput tuning
+
+The training loop parallelizes at the whole-game level. Each self-play game is
+launched as an isolated Java process with its own temporary `play.json` copy and
+its own seeds. This avoids sharing mutable Java game state across threads.
+
+The main knobs are environment variables read by `run_training_loop.py`:
+
+```bash
+TRIBES_PARALLEL_JOBS=10 \
+TRIBES_FASTAPI_WORKERS=4 \
+TRIBES_INFERENCE_CONCURRENCY_PER_WORKER=1 \
+TRIBES_INFERENCE_THREADS_PER_QUERY=1 \
+python run_training_loop.py
+```
+
+Parameter meanings:
+
+* `TRIBES_PARALLEL_JOBS` controls how many Java game processes run at once. This is the main CPU-side game parallelism knob. Default: `10`.
+* `TRIBES_FASTAPI_WORKERS` controls how many Uvicorn worker processes serve each policy model. Each worker loads its own copy of the model onto the GPU. Default: `1`.
+* `TRIBES_INFERENCE_CONCURRENCY_PER_WORKER` controls how many `/query` requests each worker allows at once. Keep this at `1` first; increase only if workers are clearly waiting on I/O rather than tensor/model work. Default: `1`.
+* `TRIBES_INFERENCE_THREADS_PER_QUERY` sets Torch/BLAS CPU threads per worker process. For GPU inference, keep this at `1` while experimenting. Default: `1`.
+* `TRIBES_CAPTURE_RATE_LOG_INTERVAL_SECONDS` controls how often throughput is sampled. Default: `10`.
+
+CPU thread budget rule of thumb for self-play:
+
+```text
+approx_active_cpu_threads =
+  TRIBES_PARALLEL_JOBS
+  + (TRIBES_FASTAPI_WORKERS
+     * TRIBES_INFERENCE_CONCURRENCY_PER_WORKER
+     * TRIBES_INFERENCE_THREADS_PER_QUERY)
+```
+
+On a 16-thread machine, a reasonable first GPU-serving experiment is:
+
+```bash
+TRIBES_PARALLEL_JOBS=10 \
+TRIBES_FASTAPI_WORKERS=4 \
+TRIBES_INFERENCE_CONCURRENCY_PER_WORKER=1 \
+TRIBES_INFERENCE_THREADS_PER_QUERY=1 \
+python run_training_loop.py
+```
+
+This is roughly 14 active CPU threads during self-play: 10 Java game processes
+plus 4 single-threaded model-serving workers. If CPU utilization is still low
+and GPU memory allows it, try increasing `TRIBES_FASTAPI_WORKERS` before
+increasing `TRIBES_PARALLEL_JOBS`. During arena evaluation there are two policy
+servers, so model copies and policy-server CPU pressure are doubled.
+
+Low CPU utilization across all Java jobs and low GPU utilization usually means
+the bottleneck is the policy-service path: Java waits on HTTP, Python parses
+JSON, encodes state, builds tensors, transfers to GPU, runs a small inference,
+and serializes the response. True request batching would reduce that overhead,
+but it is a larger architectural change. Multiple Uvicorn workers are the
+simpler approach here: they create multiple model-serving processes that can
+consume the queue of Java MCTS policy requests concurrently.
+
+The training loop writes throughput samples to:
+
+```text
+training_logs/capture_rate_*.jsonl
+```
+
+Each JSONL row includes the active phase, total files in `py_api/captures`, new
+captures since the previous sample, captures per minute, and the parallelism
+parameters for that run. Use `captures_per_minute` as the main comparison metric
+when trying different values.
+
 The AlphaZero loop runs in full-observability mode by default through:
 
 ```python

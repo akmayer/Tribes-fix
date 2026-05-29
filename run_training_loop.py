@@ -30,7 +30,10 @@ VENV_PYTHON = PY_API / ".venv/bin/python"
 FASTAPI_HOST = "127.0.0.1"
 FASTAPI_PORT = 8000
 PARALLEL_JOBS = max(1, env_int("TRIBES_PARALLEL_JOBS", 10))
+FASTAPI_WORKERS = max(1, env_int("TRIBES_FASTAPI_WORKERS", 1))
+INFERENCE_CONCURRENCY_PER_WORKER = max(1, env_int("TRIBES_INFERENCE_CONCURRENCY_PER_WORKER", 1))
 INFERENCE_THREADS_PER_QUERY = max(1, env_int("TRIBES_INFERENCE_THREADS_PER_QUERY", 1))
+CAPTURE_RATE_LOG_INTERVAL_SECONDS = max(1, env_int("TRIBES_CAPTURE_RATE_LOG_INTERVAL_SECONDS", 10))
 SELFPLAY_SEED_BASE = env_int(
     "TRIBES_SELFPLAY_SEED_BASE",
     int(time.time() * 1000) % 9_000_000_000_000,
@@ -143,7 +146,11 @@ def print_config():
     print(
         "Parallel config: "
         f"jobs={PARALLEL_JOBS}, "
+        f"fastapi_workers={FASTAPI_WORKERS}, "
+        f"inference_concurrency_per_worker={INFERENCE_CONCURRENCY_PER_WORKER}, "
         f"inference_threads_per_query={INFERENCE_THREADS_PER_QUERY}, "
+        f"policy_request_slots_per_server={FASTAPI_WORKERS * INFERENCE_CONCURRENCY_PER_WORKER}, "
+        f"capture_rate_log_interval={CAPTURE_RATE_LOG_INTERVAL_SECONDS}s, "
         f"selfplay_seed_base={SELFPLAY_SEED_BASE}"
     )
 
@@ -203,12 +210,13 @@ def terminate_active_commands(reason, timeout=3):
 
 
 class FastAPIServer:
-    def __init__(self, port=FASTAPI_PORT, model_path=MODEL_PATH, name="fastapi"):
+    def __init__(self, port=FASTAPI_PORT, model_path=MODEL_PATH, name="fastapi", workers=FASTAPI_WORKERS):
         self.proc = None
         self.log_file = None
         self.port = port
         self.model_path = Path(model_path)
         self.name = name
+        self.workers = max(1, workers)
 
     def start(self):
         kill_port(self.port)
@@ -221,20 +229,24 @@ class FastAPIServer:
             buffering=1,
         )
 
+        cmd = [
+            str(VENV_PYTHON),
+            "-m",
+            "uvicorn",
+            "app:app",
+            "--host",
+            FASTAPI_HOST,
+            "--port",
+            str(self.port),
+            "--workers",
+            str(self.workers),
+            "--no-access-log",
+            "--log-level",
+            "warning",
+        ]
+
         self.proc = subprocess.Popen(
-            [
-                str(VENV_PYTHON),
-                "-m",
-                "uvicorn",
-                "app:app",
-                "--host",
-                FASTAPI_HOST,
-                "--port",
-                str(self.port),
-                "--no-access-log",
-                "--log-level",
-                "warning",
-            ],
+            cmd,
             cwd=PY_API,
             env=python_training_env(model_path=self.model_path, inference_server=True),
             stdout=self.log_file,
@@ -247,7 +259,10 @@ class FastAPIServer:
         if self.proc.poll() is not None:
             raise RuntimeError(f"FastAPI server failed to start: {self.name}")
 
-        print(f"FastAPI running ({self.name}, PID={self.proc.pid}, model={self.model_path})")
+        print(
+            f"FastAPI running ({self.name}, PID={self.proc.pid}, "
+            f"workers={self.workers}, model={self.model_path})"
+        )
 
     def stop(self):
         if self.proc is None:
@@ -359,6 +374,120 @@ def unique_checkpoint_path():
         if not candidate.exists():
             return candidate
         idx += 1
+
+
+def training_parameter_snapshot():
+    return {
+        "parallel_jobs": PARALLEL_JOBS,
+        "selfplay_games_per_loop": SELFPLAY_GAMES_PER_LOOP,
+        "fastapi_workers_per_server": FASTAPI_WORKERS,
+        "inference_concurrency_per_worker": INFERENCE_CONCURRENCY_PER_WORKER,
+        "inference_threads_per_query": INFERENCE_THREADS_PER_QUERY,
+        "policy_request_slots_per_server": FASTAPI_WORKERS * INFERENCE_CONCURRENCY_PER_WORKER,
+        "selfplay_policy_model_copies": FASTAPI_WORKERS,
+        "arena_policy_model_copies": 2 * FASTAPI_WORKERS,
+        "torch_threads_per_policy_server": FASTAPI_WORKERS * INFERENCE_THREADS_PER_QUERY,
+        "approx_selfplay_cpu_threads": (
+            PARALLEL_JOBS
+            + FASTAPI_WORKERS
+            * INFERENCE_CONCURRENCY_PER_WORKER
+            * INFERENCE_THREADS_PER_QUERY
+        ),
+        "az_mcts_simulations": AZ_MCTS_SIMULATIONS,
+        "evaluation_games": EVALUATION_GAMES,
+        "evaluation_az_mcts_simulations": EVALUATION_AZ_MCTS_SIMULATIONS,
+        "mask_send_stars": MASK_SEND_STARS,
+        "play_with_full_obs": PLAY_WITH_FULL_OBS,
+        "capture_rate_log_interval_seconds": CAPTURE_RATE_LOG_INTERVAL_SECONDS,
+        "selfplay_seed_base": SELFPLAY_SEED_BASE,
+    }
+
+
+def count_capture_json_files():
+    captures_dir = PY_API / "captures"
+    return len(list(captures_dir.glob("*.json")))
+
+
+class CaptureRateLogger:
+    def __init__(self, interval_seconds):
+        self.interval_seconds = interval_seconds
+        self.path = LOG_DIR / f"capture_rate_{timestamp()}.jsonl"
+        self.stop_event = threading.Event()
+        self.thread = None
+        self.state_lock = threading.Lock()
+        self.phase = "startup"
+        self.loop_idx = None
+        self.last_monotonic = None
+        self.last_count = None
+
+    def start(self):
+        self._write(
+            {
+                "type": "config",
+                "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+                "parameters": training_parameter_snapshot(),
+            }
+        )
+        print(f"Capture-rate log: {self.path}")
+        self.thread = threading.Thread(target=self._run, name="capture_rate_logger", daemon=True)
+        self.thread.start()
+
+    def stop(self):
+        self.stop_event.set()
+        if self.thread is not None:
+            self.thread.join(timeout=self.interval_seconds + 1)
+            self.thread = None
+        self.sample()
+
+    def set_phase(self, phase, loop_idx=None):
+        with self.state_lock:
+            self.phase = phase
+            self.loop_idx = loop_idx
+
+    def _run(self):
+        while not self.stop_event.wait(self.interval_seconds):
+            self.sample()
+
+    def sample(self):
+        now = time.monotonic()
+        capture_count = count_capture_json_files()
+        mcts_count = count_capture_files()
+
+        if self.last_monotonic is None:
+            elapsed = 0.0
+            delta = 0
+            captures_per_minute = 0.0
+        else:
+            elapsed = max(0.0, now - self.last_monotonic)
+            delta = capture_count - self.last_count
+            captures_per_minute = (delta / elapsed * 60.0) if elapsed > 0 else 0.0
+
+        self.last_monotonic = now
+        self.last_count = capture_count
+
+        with self.state_lock:
+            phase = self.phase
+            loop_idx = self.loop_idx
+
+        self._write(
+            {
+                "type": "capture_rate",
+                "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+                "phase": phase,
+                "loop": loop_idx,
+                "captures_total": capture_count,
+                "mcts_captures_total": mcts_count,
+                "delta_captures": delta,
+                "interval_seconds": elapsed,
+                "captures_per_minute": captures_per_minute,
+                "parameters": training_parameter_snapshot(),
+            }
+        )
+
+    def _write(self, payload):
+        with self.path.open("a", encoding="utf-8") as handle:
+            json.dump(payload, handle, sort_keys=True)
+            handle.write("\n")
 
 
 def run_command(cmd, cwd=None, env=None, log_name=None, command_name=None):
@@ -584,7 +713,7 @@ def python_training_env(model_path=None, inference_server=False):
         env["TRIBES_MODEL_PATH"] = str(Path(model_path))
     if inference_server:
         apply_thread_limits(env, INFERENCE_THREADS_PER_QUERY)
-        env["TRIBES_INFERENCE_CONCURRENCY"] = str(PARALLEL_JOBS)
+        env["TRIBES_INFERENCE_CONCURRENCY"] = str(INFERENCE_CONCURRENCY_PER_WORKER)
     return env
 
 
@@ -829,12 +958,17 @@ def main():
 
     server = FastAPIServer()
     checkpoint_manager = CheckpointManager(CHECKPOINT_INTERVAL_SECONDS)
+    capture_rate_logger = CaptureRateLogger(CAPTURE_RATE_LOG_INTERVAL_SECONDS)
+    capture_rate_logger.start()
 
     try:
+        capture_rate_logger.set_phase("compile")
         compile_java()
 
+        capture_rate_logger.set_phase("ensure_initial_weights")
         ensure_initial_weights()
 
+        capture_rate_logger.set_phase("start_policy_server")
         server.start()
 
         for loop_idx in range(1, NUM_LOOPS + 1):
@@ -845,6 +979,7 @@ def main():
             # --------------------------------------------------
             # SELF-PLAY
             # --------------------------------------------------
+            capture_rate_logger.set_phase("selfplay", loop_idx)
             run_selfplay_games(loop_idx, checkpoint_manager)
 
             print_status()
@@ -852,6 +987,7 @@ def main():
             # --------------------------------------------------
             # TRAIN
             # --------------------------------------------------
+            capture_rate_logger.set_phase("train", loop_idx)
             old_model_path = copy_model_snapshot("old", loop_idx)
             train_model(loop_idx)
             candidate_model_path = copy_model_snapshot("candidate", loop_idx)
@@ -860,6 +996,7 @@ def main():
             # --------------------------------------------------
             # MCTS ARENA GATE
             # --------------------------------------------------
+            capture_rate_logger.set_phase("arena", loop_idx)
             server.stop()
             accepted, _win_rate = evaluate_candidate(old_model_path, candidate_model_path, loop_idx)
             if accepted:
@@ -870,6 +1007,7 @@ def main():
                 shutil.copy2(old_model_path, temp_path)
                 temp_path.replace(MODEL_PATH)
 
+            capture_rate_logger.set_phase("restart_policy_server", loop_idx)
             server.start()
             checkpoint_manager.maybe_save("after arena gate")
 
@@ -884,7 +1022,9 @@ def main():
         raise
 
     finally:
+        capture_rate_logger.set_phase("shutdown")
         server.stop()
+        capture_rate_logger.stop()
 
 
 if __name__ == "__main__":
