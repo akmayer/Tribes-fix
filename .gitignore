@@ -20,3 +20,6 @@ py_api/.venv/
 
 training_logs/*
 py_api/results/*
+training_logs*
+py_api/captures*
+py_api/results*
