@@ -62,6 +62,7 @@ public class MCTSPlayer extends Agent {
             System.out.println("\n===== MCTS DECISION =====");
             System.out.println("Player: " + playerID);
             System.out.println("Available actions: " + rootActions.size());
+            System.out.println("Tick: " + gs.getTick());
             System.out.println("Chosen action: " + chosen);
 
             int[] rootVisits = m_root.getVisitCounts();
