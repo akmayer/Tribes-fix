@@ -215,12 +215,12 @@ class Run {
                 azParams.ROLLOUT_LENGTH = MAX_LENGTH;
                 azParams.FORCE_TURN_END = FORCE_TURN_END ? 5 : azParams.ROLLOUT_LENGTH + 1;
                 azParams.ROLOUTS_ENABLED = false;
-                azParams.CAPTURE_MCTS = true;
+                azParams.CAPTURE_MCTS = envBoolean("TRIBES_AZ_CAPTURE_MCTS", true);
                 azParams.NEURAL_PRIORS = true;
                 azParams.NEURAL_VALUE = true;
                 azParams.num_iterations = envInt("TRIBES_AZ_MCTS_SIMULATIONS", 128);
                 azParams.CPUCT = envDouble("TRIBES_AZ_MCTS_CPUCT", 1.5);
-                azParams.DIRICHLET_ROOT_NOISE = true;
+                azParams.DIRICHLET_ROOT_NOISE = envBoolean("TRIBES_AZ_DIRICHLET_ROOT_NOISE", true);
                 azParams.DIRICHLET_ALPHA = envDouble("TRIBES_AZ_DIRICHLET_ALPHA", 0.30);
                 azParams.DIRICHLET_EPSILON = envDouble("TRIBES_AZ_DIRICHLET_EPSILON", 0.25);
                 azParams.FORCE_END_TURN_IN_SEARCH = envBoolean("TRIBES_AZ_FORCE_END_TURN_IN_SEARCH", false);

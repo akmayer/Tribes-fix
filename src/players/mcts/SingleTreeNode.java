@@ -436,7 +436,7 @@ class SingleTreeNode
         }
 
         try {
-            JSONObject resp = PythonBridge.queryPolicyJson(state, availableActions);
+            JSONObject resp = PythonBridge.queryPolicyJson(state, availableActions, PythonBridge.policyUrl(playerID));
             if (!"success".equals(resp.optString("status", "error"))) {
                 System.out.println("[MCTS] NN query failed: " + resp.optString("error", "unknown"));
                 nnPriors = null;

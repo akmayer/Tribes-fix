@@ -1,5 +1,6 @@
 package players;
 
+import core.Constants;
 import core.TechnologyTree;
 import core.Types;
 import core.actions.Action;
@@ -46,6 +47,18 @@ public class PythonBridge {
 
     public static JSONObject queryPolicyJson(GameState gs, ArrayList<Action> allActions, String urlString) throws IOException {
         return new JSONObject(queryPolicy(gs, allActions, urlString));
+    }
+
+    public static String policyUrl(int playerID) {
+        String playerSpecific = System.getenv("TRIBES_POLICY_URL_PLAYER_" + playerID);
+        if (playerSpecific != null && !playerSpecific.isEmpty()) {
+            return playerSpecific;
+        }
+        String shared = System.getenv("TRIBES_POLICY_URL");
+        if (shared != null && !shared.isEmpty()) {
+            return shared;
+        }
+        return DEFAULT_URL;
     }
 
     /**
@@ -397,21 +410,23 @@ public class PythonBridge {
         JSONObject payload = new JSONObject();
         Board board = gs.getBoard();
         
-        // Extract observability grid for FOW filtering
         Tribe activeTribe = gs.getActiveTribe();
-        boolean[][] obsGrid = activeTribe != null ? activeTribe.getObsGrid() : null;
+        boolean fullObservability = Constants.PLAY_WITH_FULL_OBS;
+        boolean[][] obsGrid = fullObservability || activeTribe == null ? null : activeTribe.getObsGrid();
         int activeTribeID = gs.getActiveTribeID();
 
         payload.put("schema_version", 1);
+        payload.put("full_observability", fullObservability);
+        payload.put("observability", fullObservability ? "FULL" : "PARTIAL");
         payload.put("tick", gs.getTick());
         payload.put("active_tribe_id", activeTribeID);
         payload.put("game_mode", gs.getGameMode().name());
         payload.put("is_game_over", gs.isGameOver());
         payload.put("available_action_count", allActions.size());
         payload.put("available_actions", serializeActions(allActions, gs));
-        payload.put("visibility", serializeVisibility(obsGrid));
+        payload.put("visibility", serializeVisibility(obsGrid, board.getSize()));
         payload.put("board", serializeBoard(board, obsGrid, activeTribeID));
-        payload.put("tribes", serializeTribes(board, obsGrid, activeTribeID));
+        payload.put("tribes", serializeTribes(board, obsGrid, activeTribeID, fullObservability));
 
         return payload;
     }
@@ -475,9 +490,16 @@ public class PythonBridge {
         return capitalIds;
     }
 
-    private static JSONArray serializeVisibility(boolean[][] obsGrid) {
+    private static JSONArray serializeVisibility(boolean[][] obsGrid, int boardSize) {
         JSONArray rows = new JSONArray();
         if (obsGrid == null) {
+            for (int x = 0; x < boardSize; x++) {
+                JSONArray row = new JSONArray();
+                for (int y = 0; y < boardSize; y++) {
+                    row.put(true);
+                }
+                rows.put(row);
+            }
             return rows;
         }
 
@@ -491,45 +513,46 @@ public class PythonBridge {
         return rows;
     }
 
-    private static JSONArray serializeTribes(Board board, boolean[][] obsGrid, int activeTribeID) {
+    private static JSONArray serializeTribes(Board board, boolean[][] obsGrid, int activeTribeID, boolean fullObservability) {
         JSONArray tribes = new JSONArray();
         for (Tribe tribe : board.getTribes()) {
             boolean isActiveTribe = tribe.getTribeId() == activeTribeID;
+            boolean includePrivateInfo = fullObservability || isActiveTribe;
             JSONObject t = new JSONObject();
             t.put("tribe_id", tribe.getTribeId());
             t.put("relation", isActiveTribe ? "SELF" : "OPPONENT");
             t.put("is_active_tribe", isActiveTribe);
             t.put("type", enumName(tribe.getType()));
             t.put("name", tribe.getName());
-            t.put("stars_known", isActiveTribe);
-            t.put("stars", isActiveTribe ? tribe.getStars() : 0);
+            t.put("stars_known", includePrivateInfo);
+            t.put("stars", includePrivateInfo ? tribe.getStars() : 0);
             t.put("score", tribe.getScore());
             t.put("winner", enumName(tribe.getWinner()));
-            t.put("capital_id", isActiveTribe ? tribe.getCapitalID() : -1);
-            t.put("cities", serializeCities(board, tribe, obsGrid, activeTribeID));
-            t.put("units", serializeTribeUnits(board, tribe, obsGrid, activeTribeID));
+            t.put("capital_id", includePrivateInfo ? tribe.getCapitalID() : -1);
+            t.put("cities", serializeCities(board, tribe, obsGrid, activeTribeID, fullObservability));
+            t.put("units", serializeTribeUnits(board, tribe, obsGrid, activeTribeID, fullObservability));
             t.put("extra_units", serializeUnitIds(board, tribe.getExtraUnits(), obsGrid, activeTribeID, tribe.getTribeId()));
-            t.put("connected_cities", isActiveTribe ? toIntArray(tribe.getConnectedCities()) : new JSONArray());
-            t.put("tribes_met", isActiveTribe ? toIntArray(tribe.getTribesMet()) : new JSONArray());
-            t.put("n_kills", isActiveTribe ? tribe.getnKills() : 0);
-            t.put("n_pacifist_count", isActiveTribe ? tribe.getnPacifistCount() : 0);
-            t.put("stars_sent", isActiveTribe ? tribe.getStarsSent() : 0);
-            t.put("has_declared_war", isActiveTribe && tribe.getHasDeclaredWar());
-            t.put("n_wars_declared", isActiveTribe ? tribe.getnWarsDeclared() : 0);
-            t.put("n_stars_sent", isActiveTribe ? tribe.getnStarsSent() : 0);
-            t.put("technology", isActiveTribe ? serializeTechnologyTree(tribe.getTechTree()) : serializeHiddenTechnologyTree());
-            t.put("monuments", isActiveTribe ? serializeMonuments(tribe) : new JSONObject());
+            t.put("connected_cities", includePrivateInfo ? toIntArray(tribe.getConnectedCities()) : new JSONArray());
+            t.put("tribes_met", includePrivateInfo ? toIntArray(tribe.getTribesMet()) : new JSONArray());
+            t.put("n_kills", includePrivateInfo ? tribe.getnKills() : 0);
+            t.put("n_pacifist_count", includePrivateInfo ? tribe.getnPacifistCount() : 0);
+            t.put("stars_sent", includePrivateInfo ? tribe.getStarsSent() : 0);
+            t.put("has_declared_war", includePrivateInfo && tribe.getHasDeclaredWar());
+            t.put("n_wars_declared", includePrivateInfo ? tribe.getnWarsDeclared() : 0);
+            t.put("n_stars_sent", includePrivateInfo ? tribe.getnStarsSent() : 0);
+            t.put("technology", includePrivateInfo ? serializeTechnologyTree(tribe.getTechTree()) : serializeHiddenTechnologyTree());
+            t.put("monuments", includePrivateInfo ? serializeMonuments(tribe) : new JSONObject());
             tribes.put(t);
         }
         return tribes;
     }
 
-    private static JSONArray serializeTribeUnits(Board board, Tribe tribe, boolean[][] obsGrid, int activeTribeID) {
+    private static JSONArray serializeTribeUnits(Board board, Tribe tribe, boolean[][] obsGrid, int activeTribeID, boolean fullObservability) {
         JSONArray units = new JSONArray();
         Set<Integer> seen = new HashSet<>();
 
-        // If this is the active tribe, include all units (no FOW for self)
-        if (tribe.getTribeId() == activeTribeID) {
+        // In full-observability mode every tribe's unit list is available.
+        if (fullObservability || tribe.getTribeId() == activeTribeID) {
             for (Integer cityId : tribe.getCitiesID()) {
                 City city = (City) board.getActor(cityId);
                 if (city == null) {
@@ -591,7 +614,7 @@ public class PythonBridge {
         return units;
     }
 
-    private static JSONArray serializeCities(Board board, Tribe tribe, boolean[][] obsGrid, int activeTribeID) {
+    private static JSONArray serializeCities(Board board, Tribe tribe, boolean[][] obsGrid, int activeTribeID, boolean fullObservability) {
         JSONArray cities = new JSONArray();
         for (Integer cityId : tribe.getCitiesID()) {
             City city = (City) board.getActor(cityId);
@@ -599,9 +622,8 @@ public class PythonBridge {
                 continue;
             }
             
-            // FOW CHECK: Only include city if visible (or if it's our tribe)
-            if (tribe.getTribeId() != activeTribeID) {
-                // Enemy city - check visibility
+            // In partial-observability mode, only include enemy cities that are visible.
+            if (!fullObservability && tribe.getTribeId() != activeTribeID) {
                 if (!isPositionVisible(obsGrid, city.getPosition().x, city.getPosition().y)) {
                     continue;  // Skip this hidden city
                 }
@@ -621,7 +643,7 @@ public class PythonBridge {
             c.put("bound", city.getBound());
             c.put("points_worth", city.getPointsWorth());
             c.put("unit_ids", serializeVisibleUnitIds(board, city.getUnitsID(), obsGrid, activeTribeID, tribe.getTribeId()));
-            c.put("buildings", serializeBuildings(city, obsGrid, tribe.getTribeId() == activeTribeID));
+            c.put("buildings", serializeBuildings(city, obsGrid, fullObservability || tribe.getTribeId() == activeTribeID));
             cities.put(c);
         }
         return cities;

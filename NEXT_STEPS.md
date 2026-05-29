@@ -174,7 +174,7 @@ done
 
 ⚠️ **Model Initialization:** If no weights exist, FastAPI starts with random weights.
 
-⚠️ **FOW Filtering:** Is now active. Only visible enemy units/cities in captures. This is correct behavior.
+⚠️ **Observability:** AlphaZero training now uses full-observability captures. Partial-observation experiments should set `TRIBES_PLAY_WITH_FULL_OBS=false`.
 
 ⚠️ **Inference logging:** `/query` can be called extremely frequently by MCTS. By default it does **not** dump per-query JSON files.
 Enable request logging only when debugging payload contents:
@@ -277,4 +277,3 @@ After training, model should be better than random:
 ### Python training (`py_api/train.py`)
 - `--epochs` (default 10), `--batch-size` (default 32), `--learning-rate` (default 1e-3)
 - `--max-captures` (default 10000) prunes oldest `capture_*.json` + `mcts_*.json`
-

@@ -31,7 +31,7 @@ Responsibilities:
 Core API (Java ↔ FastAPI)
 -------------------------
 Endpoint: POST /query
-Payload: same JSON used by existing `PythonBridge` (contains fog-of-war filtered state)
+Payload: same JSON used by existing `PythonBridge` (full-observability during AlphaZero training)
 Response (JSON):
 - action_type_logits: [32]
 - source_logits: [151]
@@ -72,7 +72,7 @@ Store one JSON object per move (append to file or separate file per game). Examp
   "game_id": "uuid",
   "move_index": 12,
   "player_id": 1,
-  "state": { ... },        // same JSON as /query uses (FOW filtered)
+  "state": { ... },        // same JSON as /query uses (full-observability for AlphaZero)
   "root_children": [
     {"action": [type, source, target, param], "visits": 123},
     {"action": [type, source, target, param], "visits": 45},
@@ -142,7 +142,7 @@ Operational & performance tips
 
 Testing checklist
 -----------------
-- [ ] `PythonBridge` serializes FOW properly (unit test for visibility)
+- [ ] `PythonBridge` serializes full-observability payloads for AlphaZero training
 - [ ] Action encoding round-trip (`encode_action_tuple` ↔ `decode_action_tuple`)
 - [ ] Small MCTS smoke test: run 1 game with 10 sims per move and verify captures are written
 - [ ] Training pipeline end-to-end on small dataset (10–100 moves)

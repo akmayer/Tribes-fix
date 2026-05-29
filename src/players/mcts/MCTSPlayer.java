@@ -9,7 +9,10 @@ import core.Types;
 import players.Agent;
 import players.PythonBridge;
 import utils.ElapsedCpuTimer;
+import org.json.JSONObject;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.Random;
@@ -134,16 +137,39 @@ public class MCTSPlayer extends Agent {
 
     @Override
     public void result(GameState gs, double reward) {
-        if (!params.CAPTURE_MCTS) {
-            return;
-        }
         Types.RESULT winner = Types.RESULT.INCOMPLETE;
         try {
             winner = gs.getTribe(playerID).getWinner();
         } catch (Exception ignored) {
             // keep default
         }
-        PythonBridge.reportGameResult(gs, playerID, reward, winner);
+
+        writeEvalResult(gs, reward, winner);
+
+        if (params.CAPTURE_MCTS) {
+            PythonBridge.reportGameResult(gs, playerID, reward, winner);
+        }
+    }
+
+    private void writeEvalResult(GameState gs, double reward, Types.RESULT winner) {
+        String resultFile = System.getenv("TRIBES_EVAL_RESULT_FILE");
+        if (resultFile == null || resultFile.isEmpty()) {
+            return;
+        }
+
+        JSONObject payload = new JSONObject();
+        payload.put("player_id", playerID);
+        payload.put("winner", winner.name());
+        payload.put("reward", reward);
+        payload.put("game_seed", gs.getGameSeed());
+        payload.put("tick", gs.getTick());
+
+        try (FileWriter writer = new FileWriter(resultFile, true)) {
+            writer.write(payload.toString());
+            writer.write(System.lineSeparator());
+        } catch (IOException e) {
+            System.out.println("[MCTSPlayer] could not write eval result: " + e.getMessage());
+        }
     }
 
     private int[] alignVisitCounts(ArrayList<Action> allActions, ArrayList<Action> rootActions, int[] rootVisits) {

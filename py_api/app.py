@@ -136,9 +136,9 @@ async def query(req: Request):
     Receive game state and available actions from Java.
     Return a policy (action logits) over available actions using the trained model.
     
-    ⚠️ IMPORTANT: This endpoint assumes fog-of-war is correctly enforced in the payload.
-    If PythonBridge.java sends unfiltered enemy unit/city data, the model will learn
-    from perfect information instead of partial observability.
+    The model encodes the state exactly as Java sends it. AlphaZero training uses
+    full-observability payloads; partial-observation experiments must send already
+    redacted payloads.
     """
     payload = await req.json()
 

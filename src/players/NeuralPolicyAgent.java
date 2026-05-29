@@ -86,15 +86,7 @@ public class NeuralPolicyAgent extends Agent {
     }
 
     private String policyUrl() {
-        String playerSpecific = System.getenv("TRIBES_POLICY_URL_PLAYER_" + playerID);
-        if (playerSpecific != null && !playerSpecific.isEmpty()) {
-            return playerSpecific;
-        }
-        String shared = System.getenv("TRIBES_POLICY_URL");
-        if (shared != null && !shared.isEmpty()) {
-            return shared;
-        }
-        return "http://127.0.0.1:8000/query";
+        return PythonBridge.policyUrl(playerID);
     }
 
     private int sampleFromDistribution(double[] probs) {

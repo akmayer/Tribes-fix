@@ -61,7 +61,7 @@ Other intersting variables in the `core.Constants.java` class for running games 
     static final int MAX_TURNS = 30;  // Maximum number of turns when playing in Score mode
     static final int MAX_TURNS_CAPITALS = 50; // Maximum number of turns when playing in Capitals mode
     public static final boolean PLAY_WITH_FULL_OBS = true; // If false, agents receive game states with information hidden for areas covered by fog of war
-    public static boolean GUI_FORCE_FULL_OBS = false; // If true, display still shows full observable game states even if players play with partial observability
+    public static final boolean GUI_FORCE_FULL_OBS = true; // If true, display still shows full observable game states even if players play with partial observability
     public static boolean WRITE_SAVEGAMES = false;  // If true, all games played are saved to files
     public static boolean DISABLE_NON_HUMAN_ACTION_HIGHLIGHT = true;  // If true, human observing/playing doesn't have access to actions of non-human players
     public static int FRAME_DELAY = 500; // The display delay between frames
@@ -149,6 +149,14 @@ python run_training_loop.py
 And it should just start working. You can analyze games and the bots choices in progress in the `training_logs/` or `py_api/captures` directories. At the end of each game, you can see the game and player results in the `py_api/results` directory.
 
 If running on a cpu or want to see quick results, games can simulate much faster if you go into `run_training_loop.py` and reduce `AZ_MCTS_SIMULATIONS = 128` to something like 10 or 20.
+
+The AlphaZero loop runs in full-observability mode by default through:
+
+```python
+PLAY_WITH_FULL_OBS = True
+```
+
+in `run_training_loop.py`. This is passed to Java as `TRIBES_PLAY_WITH_FULL_OBS=true`, so self-play, MCTS model queries, captures, and arena evaluations expose the full board and all tribe stats to the model.
 
 ### SEND_STARS masking
 

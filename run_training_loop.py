@@ -48,9 +48,11 @@ AZ_DIRICHLET_EPSILON = 0.25
 AZ_FORCE_END_TURN_IN_SEARCH = False
 AZ_DEBUG_DECISIONS = True
 MASK_SEND_STARS = True
+PLAY_WITH_FULL_OBS = True
 
-EVALUATION_GAMES = 100
-EVALUATION_WIN_THRESHOLD = 0.55
+EVALUATION_GAMES = 10
+EVALUATION_WIN_THRESHOLD = 0.60
+EVALUATION_AZ_MCTS_SIMULATIONS = 32
 EVALUATION_OLD_PORT = 8001
 EVALUATION_NEW_PORT = 8002
 
@@ -101,13 +103,16 @@ def print_config():
         f"cpuct={AZ_MCTS_CPUCT}, "
         f"dirichlet_alpha={AZ_DIRICHLET_ALPHA}, "
         f"dirichlet_epsilon={AZ_DIRICHLET_EPSILON}, "
-        f"mask_send_stars={MASK_SEND_STARS}"
+        f"mask_send_stars={MASK_SEND_STARS}, "
+        f"full_observability={PLAY_WITH_FULL_OBS}"
     )
     print(
         "Arena config: "
         f"games={EVALUATION_GAMES}, "
         f"win_threshold={EVALUATION_WIN_THRESHOLD:.0%}, "
-        "agent=policy_only_sampling"
+        f"agent=az_mcts, "
+        f"sims={EVALUATION_AZ_MCTS_SIMULATIONS}, "
+        "paired_seeds=5"
     )
     print(f"Drop orphan captures before training: {DROP_ORPHAN_CAPTURES_BEFORE_TRAIN}")
     print(f"Checkpoint interval: {CHECKPOINT_INTERVAL_SECONDS // 60} minutes")
@@ -397,6 +402,8 @@ def python_training_env(model_path=None):
     env.update(
         {
             "TRIBES_MASK_SEND_STARS": str(MASK_SEND_STARS).lower(),
+            "TRIBES_PLAY_WITH_FULL_OBS": str(PLAY_WITH_FULL_OBS).lower(),
+            "TRIBES_REQUIRE_FULL_OBS_CAPTURES": str(PLAY_WITH_FULL_OBS).lower(),
         }
     )
     if model_path is not None:
@@ -415,6 +422,7 @@ def java_training_env():
             "TRIBES_AZ_FORCE_END_TURN_IN_SEARCH": str(AZ_FORCE_END_TURN_IN_SEARCH).lower(),
             "TRIBES_AZ_DEBUG_DECISIONS": str(AZ_DEBUG_DECISIONS).lower(),
             "TRIBES_MASK_SEND_STARS": str(MASK_SEND_STARS).lower(),
+            "TRIBES_PLAY_WITH_FULL_OBS": str(PLAY_WITH_FULL_OBS).lower(),
         }
     )
     return env
@@ -496,7 +504,7 @@ def arena_play_config(game_seed, level_seed):
     config.update(
         {
             "Run Mode": "PlayLG",
-            "Players": ["POLICY", "POLICY"],
+            "Players": ["AZ_MCTS", "AZ_MCTS"],
             "Tribes": ["Xin Xi", "Imperius"],
             "Verbose": False,
             "Game Seed": str(game_seed),
@@ -534,8 +542,9 @@ def read_arena_result(result_file, candidate_player_id):
 
 
 def run_arena_game(loop_idx, game_idx, new_as_player_zero):
-    game_seed = 900000000 + loop_idx * 10000 + game_idx
-    level_seed = 910000000 + loop_idx * 10000 + ((game_idx + 1) // 2)
+    seed_pair_idx = (game_idx - 1) // 2
+    game_seed = 900000000 + loop_idx * 10000 + seed_pair_idx
+    level_seed = 910000000 + loop_idx * 10000 + seed_pair_idx
     result_file = LOG_DIR / f"arena_loop{loop_idx}_game{game_idx}.jsonl"
     result_file.unlink(missing_ok=True)
 
@@ -546,6 +555,10 @@ def run_arena_game(loop_idx, game_idx, new_as_player_zero):
     env = java_training_env()
     env.update(
         {
+            "TRIBES_AZ_MCTS_SIMULATIONS": str(EVALUATION_AZ_MCTS_SIMULATIONS),
+            "TRIBES_AZ_CAPTURE_MCTS": "false",
+            "TRIBES_AZ_DIRICHLET_ROOT_NOISE": "false",
+            "TRIBES_AZ_DEBUG_DECISIONS": "false",
             "TRIBES_POLICY_URL_PLAYER_0": new_url if new_as_player_zero else old_url,
             "TRIBES_POLICY_URL_PLAYER_1": old_url if new_as_player_zero else new_url,
             "TRIBES_EVAL_RESULT_FILE": str(result_file),
@@ -571,7 +584,7 @@ def run_arena_game(loop_idx, game_idx, new_as_player_zero):
 
 
 def evaluate_candidate(old_model_path, new_model_path, loop_idx):
-    print(f"\n=== POLICY-ONLY ARENA EVALUATION (LOOP {loop_idx}) ===")
+    print(f"\n=== AZ MCTS ARENA EVALUATION (LOOP {loop_idx}) ===")
     old_server = FastAPIServer(
         port=EVALUATION_OLD_PORT,
         model_path=old_model_path,
@@ -660,7 +673,7 @@ def main():
             checkpoint_manager.maybe_save("after training")
 
             # --------------------------------------------------
-            # POLICY-ONLY ARENA GATE
+            # MCTS ARENA GATE
             # --------------------------------------------------
             server.stop()
             accepted, _win_rate = evaluate_candidate(old_model_path, candidate_model_path, loop_idx)

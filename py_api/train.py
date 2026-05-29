@@ -83,16 +83,19 @@ class GameCaptureDataset(Dataset):
         max_samples: Optional[int] = None,
         mcts_only: bool = True,
         mask_send_stars: bool = True,
+        require_full_observability: bool = False,
     ):
         self.capture_dir = Path(capture_dir)
         self.state_encoder = StateEncoder()
         self.action_encoder = ActionSpaceEncoder()
         self.mask_send_stars = mask_send_stars
+        self.require_full_observability = require_full_observability
         self.samples = []
         self.results = self._load_results(self.capture_dir.parent / "results")
         self.mcts_samples = 0
         self.value_samples = 0
         self.mcts_only = mcts_only
+        skipped_observability = 0
         
         # Load all capture files
         if self.capture_dir.exists():
@@ -104,11 +107,16 @@ class GameCaptureDataset(Dataset):
                         payload = json.load(f)
                     if self.mcts_only and not self._has_mcts_policy(payload):
                         continue
+                    if self.require_full_observability and not payload.get("full_observability", False):
+                        skipped_observability += 1
+                        continue
                     self.samples.append(payload)
                 except Exception as e:
                     print(f"Failed to load {capture_file}: {e}")
         
         print(f"Loaded {len(self.samples)} captures from {self.capture_dir}")
+        if skipped_observability:
+            print(f"Skipped {skipped_observability} captures that were not marked full-observability.")
         self.mcts_samples = sum(1 for sample in self.samples if self._has_mcts_policy(sample))
         self.value_samples = sum(1 for sample in self.samples if self._value_target(sample)[1])
     
@@ -447,7 +455,10 @@ def main():
     print(f"Device: {device}")
     print(f"Loading data from: {args.capture_dir}")
     mask_send_stars = env_bool("TRIBES_MASK_SEND_STARS", True)
+    play_with_full_obs = env_bool("TRIBES_PLAY_WITH_FULL_OBS", True)
+    require_full_obs_captures = env_bool("TRIBES_REQUIRE_FULL_OBS_CAPTURES", play_with_full_obs)
     print(f"Mask SEND_STARS policy head: {mask_send_stars}")
+    print(f"Require full-observability captures: {require_full_obs_captures}")
 
     deleted = prune_capture_files(Path(args.capture_dir), max_files=args.max_captures)
     if deleted > 0:
@@ -459,6 +470,7 @@ def main():
         max_samples=args.max_samples,
         mcts_only=not args.include_unlabeled,
         mask_send_stars=mask_send_stars,
+        require_full_observability=require_full_obs_captures,
     )
     
     if len(dataset) == 0:
@@ -535,7 +547,7 @@ def main():
         print("\nUsing MCTS visit counts for policy targets when available.")
     if dataset.value_samples == 0:
         print("No completed-game value targets were found; value loss was skipped.")
-    print("Ensure fog-of-war is enforced in PythonBridge.java for valid data.")
+    print("Ensure capture observability matches TRIBES_PLAY_WITH_FULL_OBS for valid data.")
 
 
 if __name__ == "__main__":

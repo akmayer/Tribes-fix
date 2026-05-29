@@ -7,10 +7,10 @@ The model takes a game state (JSON payload from Java bridge) and outputs:
 
 State Representation:
 - Board: 11x11 grid encoding terrain, resources, buildings, unit presence
-- Units: Feature vectors for each active tribe unit
-- Cities: Feature vectors for each active tribe city
-- Tech tree: One-hot encoded researched technologies
-- Tribe stats: Stars, score, population, etc.
+- Units: Feature vectors for all units exposed by the Java payload
+- Cities: Feature vectors for all cities exposed by the Java payload
+- Tech tree: Per-tribe researched technologies
+- Tribe stats: Per-tribe stars, score, production, and combat/economy counters
 """
 
 import torch
@@ -76,20 +76,29 @@ def load_action_type_index(action_type: str, default: int) -> int:
 class StateEncoder:
     """Encodes game state JSON payload to tensors suitable for NN input."""
     
-    def __init__(self, board_size: int = 11, max_units: int = 100, max_cities: int = 50):
+    def __init__(
+        self,
+        board_size: int = 11,
+        max_units: int = 100,
+        max_cities: int = 50,
+        max_tribes: int = 12,
+    ):
         self.board_size = board_size
         self.max_units = max_units
         self.max_cities = max_cities
+        self.max_tribes = max_tribes
         
         # Feature dimensions (will be flattened into state vector)
-        # Board: 11x11 with visible terrain plus public/visible occupancy channels.
+        # Board: 11x11 with terrain plus occupancy channels from the provided payload.
         # For simplicity, we'll flatten the board and unit/city features
         self.board_channels = 16
         self.board_features = board_size * board_size * self.board_channels
         self.unit_features = max_units * 16
         self.city_features = max_cities * 10
-        self.tech_features = 50  # Technology tree (one-hot over ~50 techs)
-        self.tribe_features = 10  # Tribe stats (stars, score, population, etc.)
+        self.tech_features_per_tribe = 50
+        self.tech_features = max_tribes * self.tech_features_per_tribe
+        self.tribe_features_per_tribe = 12
+        self.tribe_features = max_tribes * self.tribe_features_per_tribe
         
         self.total_state_size = (
             self.board_features + 
@@ -242,64 +251,64 @@ class StateEncoder:
         return city_tensor
     
     def encode_tech_and_tribe(self, active_tribe_id: int, tribes_list: list) -> np.ndarray:
-        """Encode technology tree and tribe stats."""
+        """Encode per-tribe technology and economy/military stats."""
         features = np.zeros(self.tech_features + self.tribe_features, dtype=np.float32)
+        try:
+            active_tribe_idx = int(active_tribe_id)
+        except (TypeError, ValueError):
+            active_tribe_idx = -1
         
         for tribe_dict in tribes_list:
-            if tribe_dict.get("tribe_id") != active_tribe_id:
+            tribe_id = tribe_dict.get("tribe_id")
+            if tribe_id is None:
                 continue
-            
-            # Tech tree (simplified: just use first 50 elements if available)
+
+            try:
+                tribe_idx = int(tribe_id)
+            except (TypeError, ValueError):
+                continue
+
+            if tribe_idx < 0 or tribe_idx >= self.max_tribes:
+                continue
+
+            # Tech tree for every exposed tribe. Hidden opponent tech remains all-zero
+            # when Java is configured for partial observability.
             tech_data = tribe_dict.get("technology", {})
             researched_flags = []
             if isinstance(tech_data, dict):
                 researched_flags = tech_data.get("researched_flags", tech_data.get("researched_techs", []))
             if researched_flags:
-                # Binary encoding of researched techs. Java sends researched_flags.
-                for i, tech_researched in enumerate(researched_flags[:self.tech_features]):
-                    features[i] = 1.0 if tech_researched else 0.0
-            
-            # Active-tribe private stats. Enemy star counts and tech are intentionally
-            # hidden by the Java payload and should stay zero here.
-            stars = min(tribe_dict.get("stars", 0) / 100.0, 1.0)
-            score = min(tribe_dict.get("score", 0) / 1000.0, 1.0)
-            
-            features[self.tech_features + 0] = stars
-            features[self.tech_features + 1] = score
-            features[self.tech_features + 2] = min(tribe_dict.get("stars_sent", 0) / 30.0, 1.0)
-            features[self.tech_features + 3] = min(tribe_dict.get("n_kills", 0) / 20.0, 1.0)
-            features[self.tech_features + 4] = float(active_tribe_id or 0) / 12.0
-            
-            break
+                tech_offset = tribe_idx * self.tech_features_per_tribe
+                for i, tech_researched in enumerate(researched_flags[:self.tech_features_per_tribe]):
+                    features[tech_offset + i] = 1.0 if tech_researched else 0.0
 
-        self_units = 0
-        enemy_units = 0
-        self_cities = 0
-        enemy_cities = 0
-        for tribe_dict in tribes_list:
-            if tribe_dict.get("tribe_id") == active_tribe_id:
-                self_units += len(tribe_dict.get("units", []))
-                self_cities += len(tribe_dict.get("cities", []))
-            else:
-                enemy_units += len(tribe_dict.get("units", []))
-                enemy_cities += len(tribe_dict.get("cities", []))
+            cities = tribe_dict.get("cities", [])
+            units = tribe_dict.get("units", [])
+            production = sum((city.get("production", 0) or 0) for city in cities if isinstance(city, dict))
 
-        features[self.tech_features + 5] = min(self_units / max(self.max_units, 1), 1.0)
-        features[self.tech_features + 6] = min(enemy_units / max(self.max_units, 1), 1.0)
-        features[self.tech_features + 7] = min(self_cities / max(self.max_cities, 1), 1.0)
-        features[self.tech_features + 8] = min(enemy_cities / max(self.max_cities, 1), 1.0)
-        features[self.tech_features + 9] = 1.0 if enemy_units > 0 or enemy_cities > 0 else 0.0
+            offset = self.tech_features + tribe_idx * self.tribe_features_per_tribe
+            features[offset + 0] = 1.0
+            features[offset + 1] = 1.0 if tribe_idx == active_tribe_idx else 0.0
+            features[offset + 2] = min(tribe_dict.get("stars", 0) / 100.0, 1.0)
+            features[offset + 3] = min(tribe_dict.get("score", 0) / 1000.0, 1.0)
+            features[offset + 4] = min(tribe_dict.get("stars_sent", 0) / 30.0, 1.0)
+            features[offset + 5] = min(tribe_dict.get("n_kills", 0) / 20.0, 1.0)
+            features[offset + 6] = min(tribe_dict.get("n_wars_declared", 0) / 10.0, 1.0)
+            features[offset + 7] = min(tribe_dict.get("n_stars_sent", 0) / 20.0, 1.0)
+            features[offset + 8] = min(len(cities) / max(self.max_cities, 1), 1.0)
+            features[offset + 9] = min(len(units) / max(self.max_units, 1), 1.0)
+            features[offset + 10] = min(production / 50.0, 1.0)
+            features[offset + 11] = 1.0 if tribe_dict.get("capital_id", -1) >= 0 else 0.0
         
         return features
     
     def encode(self, payload: Dict) -> torch.Tensor:
         """
-        Encode full game state payload to a single state tensor.
-        
-        ⚠️ WARNING: This encoder does NOT enforce fog-of-war filtering.
-        It encodes the full board as provided in the payload.
-        The payload from PythonBridge MUST filter enemy units/cities
-        by observability grid before sending here.
+        Encode the game state payload to a single state tensor.
+
+        This encoder intentionally trusts the Java payload's observability mode.
+        Full-observation training should send full board, unit, city, tech, and
+        tribe-stat data; partial-observation runs should send already-redacted data.
         
         Args:
             payload: JSON payload from Java PythonBridge
@@ -436,8 +445,9 @@ class TribesTransformerModel(nn.Module):
     ):
         super().__init__()
 
+        encoder_layout = StateEncoder()
         if state_size is None:
-            state_size = StateEncoder().total_state_size
+            state_size = encoder_layout.total_state_size
 
         self.state_size = state_size
         self.d_model = d_model
@@ -453,17 +463,17 @@ class TribesTransformerModel(nn.Module):
         # -------------------------
         # TOKEN SIZES (fixed layout from encoder)
         # -------------------------
-        self.num_tiles = 11 * 11
-        self.tile_dim = StateEncoder().board_channels
+        self.num_tiles = encoder_layout.board_size * encoder_layout.board_size
+        self.tile_dim = encoder_layout.board_channels
 
-        self.num_units = 100
+        self.num_units = encoder_layout.max_units
         self.unit_dim = 16
 
-        self.num_cities = 50
+        self.num_cities = encoder_layout.max_cities
         self.city_dim = 10
 
-        self.tech_dim = 50
-        self.tribe_dim = 10
+        self.tech_dim = encoder_layout.tech_features
+        self.tribe_dim = encoder_layout.tribe_features
 
         # -------------------------
         # EMBEDDINGS

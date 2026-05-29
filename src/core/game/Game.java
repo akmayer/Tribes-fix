@@ -553,6 +553,9 @@ public class Game {
      * @return the game state.
      */
     private GameState getGameState(int playerIdx) {
+        if (playerIdx == -1 || Constants.PLAY_WITH_FULL_OBS) {
+            return gs.copy();
+        }
         return gs.copy(playerIdx);
     }
 
